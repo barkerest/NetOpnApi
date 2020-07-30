@@ -131,41 +131,10 @@ namespace NetOpnApi
         {
             if (!command.SupportsParameterSet()) throw new ArgumentException("Command does not support a request value.");
 
-            var prop = command.GetType().GetProperty("RequestValue", BindingFlags.Instance | BindingFlags.Public);
-            if (prop is null) throw new ArgumentException("Command does not implement \"RequestValue\" property publicly.");
+            var prop = command.GetType().GetProperty("ParameterSet", BindingFlags.Instance | BindingFlags.Public);
+            if (prop is null) throw new ArgumentException("Command does not implement \"ParameterSet\" property publicly.");
 
             return (IParameterSet) prop.GetValue(command);
-        }
-
-        /// <summary>
-        /// Set the parameter set.
-        /// </summary>
-        /// <param name="command"></param>
-        /// <param name="value">The value for the parameter set (must be of the correct type).</param>
-        /// <exception cref="ArgumentException"></exception>
-        public static void SetParameterSet(this ICommand command, IParameterSet value)
-        {
-            if (!command.SupportsParameterSet()) throw new ArgumentException("Command does not support a request value.");
-
-            var prop = command.GetType().GetProperty("RequestValue", BindingFlags.Instance | BindingFlags.Public);
-            if (prop is null) throw new ArgumentException("Command does not implement \"RequestValue\" property publicly.");
-            if (!prop.CanWrite) throw new ArgumentException("Command does not implement writable \"RequestValue\" property publicly.");
-
-            var t = command.GetParameterSetType();
-            if (t is null) throw new ArgumentException("Command does not provide parameter set type.");
-            if (t.IsValueType &&
-                value is null) throw new ArgumentException($"Value cannot be null for {t} parameter set.");
-            if (value != null)
-            {
-                var vt = value.GetType();
-                if (vt != t &&
-                    !t.IsAssignableFrom(vt))
-                {
-                    throw new ArgumentException($"Value of type {vt} cannot be assigned to {t} parameter set.");
-                }
-            }
-
-            prop.SetValue(command, value);
         }
 
         #endregion
@@ -211,7 +180,7 @@ namespace NetOpnApi
         {
             if (string.IsNullOrEmpty(self.ResponseRootElementName))
             {
-                if (jsonDocument.RootElement.ValueKind == self.ResponseRootElementValueKind)
+                if (jsonDocument.RootElement.ValueKind != self.ResponseRootElementValueKind)
                 {
                     throw new NetOpnApiInvalidResponseException(
                         ErrorCode.InvalidResponseRootObject,
@@ -248,66 +217,105 @@ namespace NetOpnApi
         private static void AppendCommandParametersToUrl<T>(this ICommandWithParameterSet<T> self, StringBuilder builder)
             where T : IParameterSet
         {
-            var parameters = self?.ParameterSet?.GetUrlParameters();
-            if (parameters is null ||
-                parameters.Count == 0) return;
+            if (self is null) return;
+            if (self.ParameterSet is null) return;
 
-            foreach (var parameter in parameters)
+            var parameters = self.ParameterSet.GetUrlParameters();
+            if (parameters != null &&
+                parameters.Count > 0)
             {
-                builder.Append('/').Append(HttpUtility.UrlEncode(parameter));
+                foreach (var parameter in parameters)
+                {
+                    builder.Append('/').Append(HttpUtility.UrlEncode(parameter));
+                }
+            }
+
+            var query = self.ParameterSet.GetQueryParameters();
+            if (query != null &&
+                query.Count > 0)
+            {
+                var first = true;
+                foreach (var param in query)
+                {
+                    builder.Append(first ? '?' : '&');
+                    first = false;
+                    builder.Append(HttpUtility.UrlEncode(param.Key)).Append('=').Append(HttpUtility.UrlEncode(param.Value));
+                }
             }
         }
 
         private static void AppendCommandParametersToUrl(this ICommand self, StringBuilder builder)
         {
+            if (self is null) return;
             if (!self.SupportsParameterSet()) return;
 
-            var set        = self.GetParameterSet();
-            var parameters = set.GetUrlParameters();
-            if (parameters is null ||
-                parameters.Count == 0) return;
+            var set = self.GetParameterSet();
+            if (set is null) return;
 
-            foreach (var parameter in parameters)
+            var parameters = set.GetUrlParameters();
+            if (parameters != null &&
+                parameters.Count > 0)
             {
-                builder.Append('/').Append(HttpUtility.UrlEncode(parameter));
+                foreach (var parameter in parameters)
+                {
+                    builder.Append('/').Append(HttpUtility.UrlEncode(parameter));
+                }
+            }
+
+            var query = set.GetQueryParameters();
+            if (query != null &&
+                query.Count > 0)
+            {
+                var first = true;
+                foreach (var param in query)
+                {
+                    builder.Append(first ? '?' : '&');
+                    first = false;
+                    builder.Append(HttpUtility.UrlEncode(param.Key)).Append('=').Append(HttpUtility.UrlEncode(param.Value));
+                }
             }
         }
 
-        private static StringBuilder CreateRequestUrlCommon(string host, ushort port, string apiPath)
+        private static StringBuilder CreateRequestUrlCommon(this ICommand self)
         {
-            if (string.IsNullOrWhiteSpace(host)) throw new ArgumentException("Config is invalid: host is blank.");
+            var cfg = self.Config ?? throw new ArgumentNullException(nameof(self.Config));
+            if (string.IsNullOrWhiteSpace(cfg.Host)) throw new ArgumentException("Config is invalid: host is blank.");
             var sb = new StringBuilder("https://");
-            sb.Append(HttpUtility.UrlEncode(host));
-            if (port != 0 &&
-                port != 443)
+            sb.Append(HttpUtility.UrlEncode(cfg.Host));
+            if (cfg.Port != 0 &&
+                cfg.Port != 443)
             {
-                sb.Append(':').Append(port);
+                sb.Append(':').Append(cfg.Port);
             }
 
             sb.Append('/');
 
-            apiPath = apiPath?.Trim('/') ?? "";
+            var apiPath = cfg.ApiPath?.Trim('/') ?? "";
             if (apiPath != "")
             {
                 sb.Append(apiPath);
             }
 
+            sb.Append('/').Append(HttpUtility.UrlEncode(self.Module));
+            sb.Append('/').Append(HttpUtility.UrlEncode(self.Controller));
+            sb.Append('/').Append(HttpUtility.UrlEncode(self.Command));
+
             return sb;
         }
 
-        private static Uri CreateRequestUrl<T>(this ICommandWithParameterSet<T> self, string host, ushort port, string apiPath)
+        private static Uri CreateRequestUrl<T>(this ICommandWithParameterSet<T> self)
             where T : IParameterSet
         {
-            var sb = CreateRequestUrlCommon(host, port, apiPath);
+            var sb = self.CreateRequestUrlCommon();
 
             self.AppendCommandParametersToUrl(sb);
 
             return new Uri(sb.ToString());
         }
 
-        private static Uri CreateRequestUrl(this ICommand self, string host, ushort port, string apiPath)
+        private static Uri CreateRequestUrl(this ICommand self)
         {
-            var sb = CreateRequestUrlCommon(host, port, apiPath);
+            var sb = self.CreateRequestUrlCommon();
 
             self.AppendCommandParametersToUrl(sb);
 
@@ -346,7 +354,7 @@ namespace NetOpnApi
         private static HttpRequestMessage CreateRequest<T>(this ICommandWithParameterSet<T> self, IDeviceConfig cfg)
             where T : IParameterSet
             => self.CommonCreateRequest(
-                self.CreateRequestUrl(cfg.Host, cfg.Port, cfg.ApiPath),
+                self.CreateRequestUrl(),
                 cfg,
                 self.UsePost ? HttpMethod.Post : HttpMethod.Get,
                 self.UsePost ? self.CreatePostContent() : null
@@ -354,7 +362,7 @@ namespace NetOpnApi
 
         private static HttpRequestMessage CreateRequest(this ICommand self, IDeviceConfig cfg)
             => self.CommonCreateRequest(
-                self.CreateRequestUrl(cfg.Host, cfg.Port, cfg.ApiPath),
+                self.CreateRequestUrl(),
                 cfg,
                 self.UsePost ? HttpMethod.Post : HttpMethod.Get,
                 self.UsePost ? self.CreatePostContent() : null
@@ -363,6 +371,32 @@ namespace NetOpnApi
         #endregion
 
         #region Set Response
+
+        private static void SetEmptyResponse<T>(this ICommandWithResponse<T> self)
+        {
+            self.Response = default(T);
+        }
+
+        private static void SetEmptyResponse(this ICommand self)
+        {
+            if (self.SupportsResponse()) return;
+
+            var prop = self.GetType().GetProperty("Response", BindingFlags.Instance | BindingFlags.Public);
+            if (prop is null) throw new ArgumentException("Command does not implement \"Response\" property publicly.");
+            if (!prop.CanWrite) throw new ArgumentException("Command does not implement writable \"Response\" property publicly.");
+
+            var t    = self.GetResponseType();
+            var ctor = t.GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, Type.EmptyTypes, null);
+            if (t.IsValueType &&
+                ctor != null)
+            {
+                prop.SetValue(self, ctor.Invoke(null));
+            }
+            else
+            {
+                prop.SetValue(self, null);
+            }
+        }
 
         private static void SetResponse<T>(this ICommandWithResponse<T> self, JsonElement value)
         {
@@ -374,6 +408,26 @@ namespace NetOpnApi
             catch (JsonException)
             {
                 throw new ArgumentException($"Failed to decode {typeof(T)} from JSON.");
+            }
+        }
+
+        private static void SetResponse(this ICommand self, JsonElement value)
+        {
+            if (!self.SupportsResponse()) return;
+
+            var prop = self.GetType().GetProperty("Response", BindingFlags.Instance | BindingFlags.Public);
+            if (prop is null) throw new ArgumentException("Command does not implement \"Response\" property publicly.");
+            if (!prop.CanWrite) throw new ArgumentException("Command does not implement writable \"Response\" property publicly.");
+            var t = self.GetResponseType();
+
+            try
+            {
+                self.Logger?.LogDebug($"Deserializing {t} from JSON element.");
+                prop.SetValue(self, JsonSerializer.Deserialize(value.ToString(), t));
+            }
+            catch (JsonException)
+            {
+                throw new ArgumentException($"Failed to decode {t} from JSON.");
             }
         }
 
@@ -444,6 +498,7 @@ namespace NetOpnApi
                                 var root = self.GetResponseRootElement(doc);
                                 try
                                 {
+                                    self.Logger?.LogDebug("Processing response object...");
                                     setValue(root);
                                 }
                                 catch (ArgumentException e)
@@ -485,8 +540,8 @@ namespace NetOpnApi
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
-                () => { },
-                (value) => { }
+                self.SetEmptyResponse,
+                self.SetResponse
             );
 
         /// <summary>
@@ -502,7 +557,7 @@ namespace NetOpnApi
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
-                () => self.Response = default,
+                self.SetEmptyResponse,
                 self.SetResponse
             );
 
@@ -519,8 +574,8 @@ namespace NetOpnApi
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
-                () => { },
-                (value) => { }
+                self.SetEmptyResponse,
+                self.SetResponse
             );
 
         /// <summary>
@@ -537,7 +592,7 @@ namespace NetOpnApi
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
-                () => self.Response = default,
+                self.SetEmptyResponse,
                 self.SetResponse
             );
 

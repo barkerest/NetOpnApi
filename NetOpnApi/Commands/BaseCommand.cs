@@ -3,9 +3,12 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace NetOpnApi
+namespace NetOpnApi.Commands
 {
-    internal abstract class BaseCommand : ICommand
+    /// <summary>
+    /// Base command type for built-in commands.
+    /// </summary>
+    public abstract class BaseCommand : ICommand
     {
         private static string BaseTypeNamespace { get; }
 

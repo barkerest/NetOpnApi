@@ -13,6 +13,12 @@ namespace NetOpnApi
         /// </summary>
         /// <returns></returns>
         public IReadOnlyList<string> GetUrlParameters();
+
+        /// <summary>
+        /// Get a list of key/value parameters to add to the request URL.
+        /// </summary>
+        /// <returns></returns>
+        public IReadOnlyList<KeyValuePair<string, string>> GetQueryParameters();
         
         /// <summary>
         /// Get an object to pass as the request payload. 

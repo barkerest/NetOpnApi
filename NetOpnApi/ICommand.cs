@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 namespace NetOpnApi
@@ -69,9 +70,9 @@ namespace NetOpnApi
         where TParameterSet : IParameterSet
     {
         /// <summary>
-        /// Get or set the parameter set.
+        /// Get the parameter set.
         /// </summary>
-        public TParameterSet ParameterSet { get; set; }
+        public TParameterSet ParameterSet { get; }
     }
 
     /// <summary>
