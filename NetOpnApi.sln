@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetOpnApi", "NetOpnApi\NetOpnApi.csproj", "{D3A72DC6-CF33-478E-AE59-8E446EB8A007}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetOpnApi.Tests", "NetOpnApi.Tests\NetOpnApi.Tests.csproj", "{12652651-047E-4BBB-81BE-7E460AA7D283}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D3A72DC6-CF33-478E-AE59-8E446EB8A007}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3A72DC6-CF33-478E-AE59-8E446EB8A007}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3A72DC6-CF33-478E-AE59-8E446EB8A007}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3A72DC6-CF33-478E-AE59-8E446EB8A007}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12652651-047E-4BBB-81BE-7E460AA7D283}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12652651-047E-4BBB-81BE-7E460AA7D283}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12652651-047E-4BBB-81BE-7E460AA7D283}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12652651-047E-4BBB-81BE-7E460AA7D283}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
