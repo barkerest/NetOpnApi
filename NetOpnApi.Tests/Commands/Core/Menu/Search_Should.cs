@@ -40,6 +40,7 @@ namespace NetOpnApi.Tests.Commands.Core.Menu
                 new Param("dash", "Dashboard", "Lobby / Dashboard", 2, false),
                 new Param("Reboot", "Reboot", "Power / Reboot", 2, false),
                 new Param("boot", "Reboot", "Power / Reboot", 2, false),
+                new Param("zyxabc", null, null, 0, false), 
             };
 
             public IEnumerator<Param> GetEnumerator()
@@ -61,6 +62,12 @@ namespace NetOpnApi.Tests.Commands.Core.Menu
 
         protected override void CheckResponse(Param args)
         {
+            if (args.ExpectedItemId is null)
+            {
+                Assert.Empty(Command.Response);
+                return;
+            }
+            
             Assert.NotEmpty(Command.Response);
 
             var item = Command.Response.FirstOrDefault(x => x.ID.Equals(args.ExpectedItemId, StringComparison.OrdinalIgnoreCase));

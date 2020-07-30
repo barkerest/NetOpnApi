@@ -1,12 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 using NetOpnApi.JsonConverters;
 
-namespace NetOpnApi.Models.Core.System
+namespace NetOpnApi.Models.Core.System.Menu
 {
     /// <summary>
-    /// An entry in the menu tree from the device.
+    /// An entry in the menu tree from the device matching the search term.
     /// </summary>
-    public class MenuTreeEntry
+    public class SearchEntry
     {
         /// <summary>
         /// The ID of the menu entry.
@@ -53,15 +53,23 @@ namespace NetOpnApi.Models.Core.System
         public bool Selected { get; set; }
         
         /// <summary>
-        /// The child entries under this entry.
-        /// </summary>
-        public MenuTreeEntry[] Children { get; set; }
-        
-        /// <summary>
         /// True if the menu entry is currently visible.
         /// </summary>
         [JsonConverter(typeof(AlwaysBool))]
         [JsonPropertyName("isVisible")]
         public bool IsVisible { get; set; }
+        
+        /// <summary>
+        /// The breadcrumb for the menu entry (to construct a tree from the search results).
+        /// </summary>
+        [JsonPropertyName("breadcrumb")]
+        public string Breadcrumb { get; set; }
+        
+        /// <summary>
+        /// The depth of the entry in the search results (to construct a tree from the search results).
+        /// </summary>
+        [JsonPropertyName("depth")]
+        [JsonConverter(typeof(AlwaysInt))]
+        public int Depth { get; set; }
     }
 }

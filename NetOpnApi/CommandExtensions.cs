@@ -346,7 +346,9 @@ namespace NetOpnApi
                 Content = content
             };
 
-            self.Logger?.LogInformation($"{request.Method.ToString().ToUpper()}: {request.RequestUri}");
+            var contentBytes = content is null ? "" : $" ({content.Headers.ContentLength} bytes)";
+
+            self.Logger?.LogInformation($"{request.Method.ToString().ToUpper()}: {request.RequestUri}{contentBytes}");
 
             return request;
         }
@@ -403,7 +405,7 @@ namespace NetOpnApi
             try
             {
                 self.Logger?.LogDebug($"Deserializing {typeof(T)} from JSON element.");
-                self.Response = JsonSerializer.Deserialize<T>(value.ToString());
+                self.Response = JsonSerializer.Deserialize<T>(value.ToString(), new JsonSerializerOptions());
             }
             catch (JsonException)
             {
@@ -480,7 +482,7 @@ namespace NetOpnApi
                                 JsonDocument doc;
                                 try
                                 {
-                                    self.Logger?.LogDebug("Parsing JSON response...");
+                                    self.Logger?.LogDebug($"Received {json.Length} bytes, parsing JSON response...");
                                     doc = JsonDocument.Parse(json);
                                 }
                                 catch (JsonException e)

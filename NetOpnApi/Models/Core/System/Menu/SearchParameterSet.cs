@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NetOpnApi.Models.Core.System
+namespace NetOpnApi.Models.Core.System.Menu
 {
     /// <summary>
     /// The parameters for a menu search.
     /// </summary>
-    public class MenuSearchParameterSet : IParameterSet
+    public class SearchParameterSet : IParameterSet
     {
         /// <summary>
         /// Get/set the search term.

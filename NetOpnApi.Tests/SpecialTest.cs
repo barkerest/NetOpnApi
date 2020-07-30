@@ -20,6 +20,14 @@
         /// </summary>
         CoreSystemReboot,
         
+        /// <summary>
+        /// Only test Core/Firmware/Poweroff
+        /// </summary>
+        CoreFirmwarePoweroff,
         
+        /// <summary>
+        /// Only test Core/Firmware/Reboot
+        /// </summary>
+        CoreFirmwareReboot,
     }
 }
