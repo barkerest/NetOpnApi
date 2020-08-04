@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
-using NetOpnApi.Models.Core.System;
-using NetOpnApi.Models.Core.System.Menu;
+using NetOpnApi.Models.Core.Menu;
 
 namespace NetOpnApi.Commands.Core.Menu
 {

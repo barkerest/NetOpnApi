@@ -1,5 +1,5 @@
 ﻿using NetOpnApi.Models;
-using NetOpnApi.Models.Core.System.Firmware;
+using NetOpnApi.Models.Core.Firmware;
 
 namespace NetOpnApi.Commands.Core.Firmware
 {

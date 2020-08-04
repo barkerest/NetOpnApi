@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NetOpnApi.Models.Core.System.Firmware
+namespace NetOpnApi.Models.Core.Firmware
 {
     /// <summary>
     /// Parameters for setting firmware configuration.

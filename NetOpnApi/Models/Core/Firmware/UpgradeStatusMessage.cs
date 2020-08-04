@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace NetOpnApi.Models.Core.System.Firmware
+namespace NetOpnApi.Models.Core.Firmware
 {
     /// <summary>
     /// An upgrade status message.

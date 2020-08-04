@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using NetOpnApi.JsonConverters;
 
-namespace NetOpnApi.Models.Core.System.Firmware
+namespace NetOpnApi.Models.Core.Firmware
 {
     /// <summary>
     /// Firmware information from the device.

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using NetOpnApi.JsonConverters;
 
-namespace NetOpnApi.Models.Core.System.Menu
+namespace NetOpnApi.Models.Core.Menu
 {
     /// <summary>
     /// An entry in the menu tree from the device matching the search term.

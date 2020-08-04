@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NetOpnApi.Models.Core.System.Menu
+namespace NetOpnApi.Models.Core.Menu
 {
     /// <summary>
     /// The parameters for a menu search.
