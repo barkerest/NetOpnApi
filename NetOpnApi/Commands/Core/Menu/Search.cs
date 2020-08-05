@@ -6,6 +6,9 @@ namespace NetOpnApi.Commands.Core.Menu
     /// <summary>
     /// Search the menu on the device for a specific search term.
     /// </summary>
+    /// <remarks>
+    /// GET: /api/core/menu/search
+    /// </remarks>
     public class Search : BaseCommand, ICommandWithResponseAndParameterSet<SearchEntry[], SearchParameterSet>
     {
         /// <inheritdoc />

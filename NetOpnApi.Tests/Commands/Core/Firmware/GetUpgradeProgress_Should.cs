@@ -4,9 +4,9 @@ using Xunit.Abstractions;
 
 namespace NetOpnApi.Tests.Commands.Core.Firmware
 {
-    public class UpgradeStatus_Should : BaseCommandFactTest<NetOpnApi.Commands.Core.Firmware.UpgradeStatus>
+    public class GetUpgradeProgress_Should : BaseCommandFactTest<NetOpnApi.Commands.Core.Firmware.GetUpgradeProgress>
     {
-        public UpgradeStatus_Should(ITestOutputHelper output)
+        public GetUpgradeProgress_Should(ITestOutputHelper output)
             : base(output)
         {
         }

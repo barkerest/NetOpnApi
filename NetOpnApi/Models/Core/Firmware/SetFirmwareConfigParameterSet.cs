@@ -6,7 +6,7 @@ namespace NetOpnApi.Models.Core.Firmware
     /// <summary>
     /// Parameters for setting firmware configuration.
     /// </summary>
-    public class SetConfigParameterSet : Config, IParameterSet
+    public class SetFirmwareConfigParameterSet : Config, IParameterSet
     {
         IReadOnlyList<string> IParameterSet.GetUrlParameters() => null;
 

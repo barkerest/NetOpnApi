@@ -3,9 +3,9 @@ using Xunit.Abstractions;
 
 namespace NetOpnApi.Tests.Commands.Core.Firmware
 {
-    public class GetFirmwareConfig_Should : BaseCommandFactTest<NetOpnApi.Commands.Core.Firmware.GetFirmwareConfig>
+    public class GetConfig_Should : BaseCommandFactTest<NetOpnApi.Commands.Core.Firmware.GetConfig>
     {
-        public GetFirmwareConfig_Should(ITestOutputHelper output)
+        public GetConfig_Should(ITestOutputHelper output)
             : base(output)
         {
         }

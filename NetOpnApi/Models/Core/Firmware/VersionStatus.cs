@@ -7,7 +7,7 @@ namespace NetOpnApi.Models.Core.Firmware
     /// <summary>
     /// Firmware status information.
     /// </summary>
-    public class StatusInformation
+    public class VersionStatus
     {
         /// <summary>
         /// A new (or reinstall) package.

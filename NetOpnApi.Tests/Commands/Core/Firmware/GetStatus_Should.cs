@@ -3,9 +3,9 @@ using Xunit.Abstractions;
 
 namespace NetOpnApi.Tests.Commands.Core.Firmware
 {
-    public class Running_Should : BaseCommandFactTest<NetOpnApi.Commands.Core.Firmware.Running>
+    public class GetStatus_Should : BaseCommandFactTest<NetOpnApi.Commands.Core.Firmware.GetStatus>
     {
-        public Running_Should(ITestOutputHelper output)
+        public GetStatus_Should(ITestOutputHelper output)
             : base(output)
         {
         }

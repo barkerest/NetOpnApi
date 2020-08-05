@@ -6,6 +6,8 @@ namespace NetOpnApi.Commands.Core.System
     /// Reboot the device.
     /// </summary>
     /// <remarks>
+    /// GET: /api/core/system/reboot
+    /// 
     /// WARNING: Rebooting the device will make it unavailable for a short while.
     ///          There is a chance the device will not boot back up if there are hardware issues.
     /// </remarks>

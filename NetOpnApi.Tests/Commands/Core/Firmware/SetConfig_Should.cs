@@ -6,7 +6,7 @@ using NotImplementedException = System.NotImplementedException;
 
 namespace NetOpnApi.Tests.Commands.Core.Firmware
 {
-    public class SetFirmwareConfig_Should : BaseCommandTheoryTest<NetOpnApi.Commands.Core.Firmware.SetFirmwareConfig, string, SetFirmwareConfig_Should.ParamList>
+    public class SetConfig_Should : BaseCommandTheoryTest<NetOpnApi.Commands.Core.Firmware.SetConfig, string, SetConfig_Should.ParamList>
     {
         public class ParamList : IEnumerable<string>
         {
@@ -17,11 +17,11 @@ namespace NetOpnApi.Tests.Commands.Core.Firmware
             };
 
             public IEnumerator<string> GetEnumerator() => Params.GetEnumerator();
-            
+
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
-        public SetFirmwareConfig_Should(ITestOutputHelper output)
+        public SetConfig_Should(ITestOutputHelper output)
             : base(output)
         {
         }
@@ -35,6 +35,14 @@ namespace NetOpnApi.Tests.Commands.Core.Firmware
         {
             Assert.NotNull(Command.Response);
             Assert.Equal("ok", Command.Response.Status, ignoreCase: true);
+
+            var cmd = new NetOpnApi.Commands.Core.Firmware.GetConfig
+            {
+                Config = Command.Config,
+                Logger = Command.Logger
+            };
+            cmd.Execute();
+            Assert.Equal(mirror, cmd.Response.Mirror);
         }
     }
 }

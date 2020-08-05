@@ -55,7 +55,7 @@ namespace NetOpnApi.Commands
         /// </summary>
         public virtual JsonValueKind ResponseRootElementValueKind { get; } = JsonValueKind.Object;
         
-        protected BaseCommand()
+        protected BaseCommand(string commandName = null)
         {
             var typeName = GetType().FullName ?? throw new Exception("Cannot determine type name.");
             if (!typeName.StartsWith(BaseTypeNamespace)) throw new Exception($"Commands must be in the {BaseTypeNamespace} namespace.");
@@ -64,7 +64,7 @@ namespace NetOpnApi.Commands
             if (parts.Length != 3) throw new Exception($"Command names must include three parts (Module.Controller.Command).");
             Module     = parts[0].ToLower();
             Controller = parts[1].ToLower();
-            Command    = parts[2].ToLower();
+            Command    = commandName ?? parts[2].ToLower();
         }
     }
 }

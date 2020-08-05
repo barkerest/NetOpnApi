@@ -4,12 +4,14 @@ using Xunit.Abstractions;
 
 namespace NetOpnApi.Tests.Commands.Core.Firmware
 {
-    public class Info_Should : BaseCommandFactTest<NetOpnApi.Commands.Core.Firmware.Info>
+    public class GetInfo_Should : BaseCommandFactTest<NetOpnApi.Commands.Core.Firmware.GetInfo>
     {
-        public Info_Should(ITestOutputHelper output)
+        public GetInfo_Should(ITestOutputHelper output)
             : base(output)
         {
         }
+
+        protected override SpecialTest IsSpecialTest { get; } = SpecialTest.CoreFirmwareInfo;
 
         protected override void CheckResponse()
         {

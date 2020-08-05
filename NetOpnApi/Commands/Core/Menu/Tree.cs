@@ -6,6 +6,9 @@ namespace NetOpnApi.Commands.Core.Menu
     /// <summary>
     /// Get the menu tree from the device.
     /// </summary>
+    /// <remarks>
+    /// GET: /api/core/menu/tree
+    /// </remarks>
     public class Tree : BaseCommand, ICommandWithResponse<TreeEntry[]>
     {
         /// <inheritdoc />

@@ -29,5 +29,30 @@
         /// Only test Core/Firmware/Reboot
         /// </summary>
         CoreFirmwareReboot,
+        
+        /// <summary>
+        /// Only test Core/Firmware/Audit
+        /// </summary>
+        CoreFirmwareAudit,
+        
+        /// <summary>
+        /// Only test Core/Firmware/Health
+        /// </summary>
+        CoreFirmwareHealth,
+        
+        /// <summary>
+        /// Only test Core/Firmware/Info
+        /// </summary>
+        CoreFirmwareInfo,
+        
+        /// <summary>
+        /// Only test Core/Firmware/Status
+        /// </summary>
+        CoreFirmwareStatus,
+        
+        /// <summary>
+        /// Only test Core/Firmware/Upgrade
+        /// </summary>
+        CoreFirmwareUpgrade,
     }
 }

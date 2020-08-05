@@ -146,30 +146,26 @@ namespace NetOpnApi
         {
             var obj  = self?.ParameterSet?.GetRequestPayload();
             var type = self?.ParameterSet?.GetRequestPayloadDataType();
-            var body = "";
-            if (obj != null)
-            {
-                body = JsonSerializer.Serialize(obj, type);
-            }
 
-            return new StringContent(body);
+            if (obj == null) return null;
+            
+            var body = JsonSerializer.Serialize(obj, type);
+            return new StringContent(body) {Headers = {ContentType = new MediaTypeHeaderValue("application/json")}};
         }
 
         private static StringContent CreatePostContent(this ICommand self)
         {
-            var body = "";
             if (self.SupportsParameterSet() &&
                 self.GetParameterSet() is IParameterSet set)
             {
                 var obj = set.GetRequestPayload();
-                if (obj != null)
-                {
-                    var type = set.GetRequestPayloadDataType();
-                    body = JsonSerializer.Serialize(obj, type);
-                }
-            }
+                if (obj == null) return null;
+                var type = set.GetRequestPayloadDataType();
 
-            return new StringContent(body);
+                var body = JsonSerializer.Serialize(obj, type);
+                return new StringContent(body) {Headers = {ContentType = new MediaTypeHeaderValue("application/json")}};
+            }
+            return null;
         }
 
         #endregion

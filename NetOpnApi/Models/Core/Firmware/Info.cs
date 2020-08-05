@@ -6,7 +6,7 @@ namespace NetOpnApi.Models.Core.Firmware
     /// <summary>
     /// Firmware information from the device.
     /// </summary>
-    public class Information
+    public class Info
     {
         /// <summary>
         /// Information about a package or plugin.

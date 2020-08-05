@@ -5,7 +5,7 @@ namespace NetOpnApi.Models.Core.Firmware
     /// <summary>
     /// An upgrade status message.
     /// </summary>
-    public class UpgradeStatusMessage
+    public class UpgradeProgress
     {
         /// <summary>
         /// The current upgrade status.
