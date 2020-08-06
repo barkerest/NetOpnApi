@@ -132,18 +132,21 @@ namespace NetOpnApi.Models.Core.Firmware
         /// The packages available.
         /// </summary>
         [JsonPropertyName("package")]
+        [JsonConverter(typeof(AlwaysArray<PackageOrPlugin>))]
         public PackageOrPlugin[] Packages { get; set; }
         
         /// <summary>
         /// The plugins available.
         /// </summary>
         [JsonPropertyName("plugin")]
+        [JsonConverter(typeof(AlwaysArray<PackageOrPlugin>))]
         public PackageOrPlugin[] Plugins { get; set; }
         
         /// <summary>
         /// The change log.
         /// </summary>
         [JsonPropertyName("changelog")]
+        [JsonConverter(typeof(AlwaysArray<ChangeLogEntry>))]
         public ChangeLogEntry[] ChangeLog { get; set; }
     }
 }
