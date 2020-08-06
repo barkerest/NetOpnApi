@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 using NetOpnApi.JsonConverters;
 
 namespace NetOpnApi.Models.Core.Firmware
@@ -81,6 +82,13 @@ namespace NetOpnApi.Models.Core.Firmware
             /// </summary>
             [JsonPropertyName("path")]
             public string Path { get; set; }
+            
+            /// <summary>
+            /// True if the package/plugin has been configured.
+            /// </summary>
+            [JsonPropertyName("configured")]
+            [JsonConverter(typeof(AlwaysBool))]
+            public bool Configured { get; set; }
         }
 
         /// <summary>
@@ -104,7 +112,8 @@ namespace NetOpnApi.Models.Core.Firmware
             /// The date for the version.
             /// </summary>
             [JsonPropertyName("date")]
-            public string Date { get; set; }
+            [JsonConverter(typeof(AlwaysDateTime))]
+            public DateTime Date { get; set; }
         }
         
         /// <summary>

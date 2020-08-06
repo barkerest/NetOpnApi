@@ -55,6 +55,7 @@ namespace NetOpnApi.Models.Core.Menu
         /// <summary>
         /// The child entries under this entry.
         /// </summary>
+        [JsonConverter(typeof(AlwaysArray<TreeEntry>))]
         public TreeEntry[] Children { get; set; }
         
         /// <summary>

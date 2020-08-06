@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
+using NetOpnApi.JsonConverters;
 
 namespace NetOpnApi.Models
 {
@@ -17,6 +19,7 @@ namespace NetOpnApi.Models
         /// The UUID for the request.
         /// </summary>
         [JsonPropertyName("msg_uuid")]
-        public string Uuid { get; set; }
+        [JsonConverter(typeof(AlwaysGuid))]
+        public Guid Uuid { get; set; }
     }
 }

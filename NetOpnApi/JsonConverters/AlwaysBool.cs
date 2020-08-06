@@ -5,9 +5,15 @@ using System.Text.Json.Serialization;
 
 namespace NetOpnApi.JsonConverters
 {
+    /// <summary>
+    /// The value is always a boolean.  Will read from a string, number, boolean, or null.  Will always write a boolean.
+    /// </summary>
     public class AlwaysBool : JsonConverter<bool>
     {
-        private static readonly string[] TrueValues =
+        /// <summary>
+        /// The string values interpreted as true.
+        /// </summary>
+        public static readonly string[] TrueValues =
         {
             "true",
             "t",
@@ -18,7 +24,10 @@ namespace NetOpnApi.JsonConverters
             "on"
         };
 
-        private static readonly string[] FalseValues =
+        /// <summary>
+        /// The string values interpreted as false.
+        /// </summary>
+        public static readonly string[] FalseValues =
         {
             "false",
             "f",

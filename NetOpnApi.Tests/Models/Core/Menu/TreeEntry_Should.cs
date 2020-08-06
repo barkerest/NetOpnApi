@@ -8,94 +8,35 @@ namespace NetOpnApi.Tests.Models.Core.Menu
 {
     public class TreeEntry_Should : BaseModelTest<TreeEntry, TreeEntry_Should.Params>
     {
-        public class Params : IEnumerable<JParam>
+        public class Params : IEnumerable<ModelTestParam<TreeEntry>>
         {
-            private static readonly IEnumerable<JParam> ParamList = new[]
-            {
-                new JParam(
-                    "Default",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Alpha.Order = '1234'",
-                    @"{""Id"": ""Alpha"", ""Order"": ""1234"", ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Alpha.IsExternal = 'false'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": ""false"", ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Alpha.IsExternal = 'no'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": ""no"", ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Alpha.IsExternal = 0",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": 0, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Alpha.Selected = 'false'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": ""false"", ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Alpha.Selected = 'N'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": ""N"", ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Alpha.Selected = '0'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": ""0"", ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Alpha.IsVisible = 101",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": 101}"
-                ),
-                new JParam(
-                    "Alpha.IsVisible = -1",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": -1}"
-                ),
-                new JParam(
-                    "Alpha.IsVisible = 'y'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": ""y""}"
-                ),
-                new JParam(
-                    "Bravo.Selected = 'true'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": ""true"", ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Bravo.Selected = 'yes'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": ""yes"", ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Bravo.Selected = '1'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": ""1"", ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Bravo.Selected = 1",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": 1, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Charlie.IsVisible = 'F'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": ""F""}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Charlie.IsVisible = 'N/A'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": ""N/A""}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Delta.IsExternal = 1",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": 1, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-                new JParam(
-                    "Delta.IsExternal = 't'",
-                    @"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": ""t"", ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}"
-                ),
-            };
+            private static readonly IEnumerable<ModelTestParam<TreeEntry>> ParamList
+                = new ParamBuilder(@"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}")
+                  .AddTestsFor(m => m.ID)
+                  .AddTestsFor(m => m.Order)
+                  .AddTestsFor(m => m.VisibleName)
+                  .AddTestsFor(m => m.CssClass)
+                  .AddTestsFor(m => m.Url)
+                  .AddTestsFor(m => m.IsExternal)
+                  .AddTestsFor(m => m.Visibility)
+                  .AddTestsFor(m => m.Selected)
+                  .AddTestsFor(
+                      m => m.Children,
+                      new[]
+                      {
+                          new TreeEntry() {ID = "Gamma", VisibleName = "gamma"},
+                          new TreeEntry() {ID = "Theta", VisibleName = "theta"}
+                      }
+                  )
+                  .AddTestsFor(m => m.IsVisible)
+                  .ToArray();
 
-            public IEnumerator<JParam> GetEnumerator() => ParamList.GetEnumerator();
+            public IEnumerator<ModelTestParam<TreeEntry>> GetEnumerator() => ParamList.GetEnumerator();
 
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
 
-        protected override TreeEntry Expected { get; } = new TreeEntry()
+        protected override TreeEntry Expected => new TreeEntry()
         {
             ID          = "Alpha",
             Order       = 1234,

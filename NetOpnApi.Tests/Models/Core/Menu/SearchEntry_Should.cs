@@ -8,37 +8,24 @@ namespace NetOpnApi.Tests.Models.Core.Menu
 {
     public class SearchEntry_Should : BaseModelTest<SearchEntry, SearchEntry_Should.Params>
     {
-        public class Params : IEnumerable<JParam>
+        public class Params : IEnumerable<ModelTestParam<SearchEntry>>
         {
-            private static readonly IEnumerable<JParam> ParamList = new []
-            {
-                new JParam(
-                    "Default",
-                    @"{""Id"": ""Alpha"", ""Order"": 42, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": ""/path/to/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": true, ""isVisible"": true, ""breadcrumb"": ""Alpha / Alpha"", ""depth"": 2}"
-                ),
-                new JParam(
-                    "Alpha.Order = '42'",
-                    @"{""Id"": ""Alpha"", ""Order"": ""42"", ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": ""/path/to/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": true, ""isVisible"": true, ""breadcrumb"": ""Alpha / Alpha"", ""depth"": 2}"
-                ),
-                new JParam(
-                    "Alpha.IsExternal = 'yes'",
-                    @"{""Id"": ""Alpha"", ""Order"": 42, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": ""/path/to/something"", ""IsExternal"": ""yes"", ""Visibility"": ""all"", ""Selected"": true, ""isVisible"": true, ""breadcrumb"": ""Alpha / Alpha"", ""depth"": 2}"
-                ),
-                new JParam(
-                    "Alpha.Selected = 'yes'",
-                    @"{""Id"": ""Alpha"", ""Order"": 42, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": ""/path/to/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": ""yes"", ""isVisible"": true, ""breadcrumb"": ""Alpha / Alpha"", ""depth"": 2}"
-                ),
-                new JParam(
-                    "Alpha.IsVisible = 'yes'",
-                    @"{""Id"": ""Alpha"", ""Order"": 42, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": ""/path/to/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": true, ""isVisible"": ""yes"", ""breadcrumb"": ""Alpha / Alpha"", ""depth"": 2}"
-                ),
-                new JParam(
-                    "Alpha.Depth = '2'",
-                    @"{""Id"": ""Alpha"", ""Order"": 42, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": ""/path/to/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": true, ""isVisible"": true, ""breadcrumb"": ""Alpha / Alpha"", ""depth"": ""2""}"
-                ),
-            };
+            private static readonly IEnumerable<ModelTestParam<SearchEntry>> ParamList
+                = new ParamBuilder(@"{""Id"": ""Alpha"", ""Order"": 42, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": ""/path/to/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": true, ""isVisible"": true, ""breadcrumb"": ""Alpha / Alpha"", ""depth"": 2}")
+                  .AddTestsFor(m => m.ID)
+                  .AddTestsFor(m => m.Order)
+                  .AddTestsFor(m => m.VisibleName)
+                  .AddTestsFor(m => m.CssClass)
+                  .AddTestsFor(m => m.Url)
+                  .AddTestsFor(m => m.IsExternal)
+                  .AddTestsFor(m => m.Visibility)
+                  .AddTestsFor(m => m.Selected)
+                  .AddTestsFor(m => m.IsVisible)
+                  .AddTestsFor(m => m.Breadcrumb)
+                  .AddTestsFor(m => m.Depth)
+                  .ToArray();
 
-            public IEnumerator<JParam> GetEnumerator() => ParamList.GetEnumerator();
+            public IEnumerator<ModelTestParam<SearchEntry>> GetEnumerator() => ParamList.GetEnumerator();
 
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         }
@@ -64,19 +51,19 @@ namespace NetOpnApi.Tests.Models.Core.Menu
             Assert.Equal(expected.Depth, actual.Depth);
         }
 
-        protected override SearchEntry Expected { get; } = new SearchEntry()
+        protected override SearchEntry Expected => new SearchEntry()
         {
-            ID = "Alpha",
-            Order = 42,
+            ID          = "Alpha",
+            Order       = 42,
             VisibleName = "Alpha",
-            CssClass = "something",
-            Url = "/path/to/something",
-            IsExternal = true,
-            Visibility = "all",
-            Selected = true,
-            IsVisible = true,
-            Breadcrumb = "Alpha / Alpha",
-            Depth = 2
+            CssClass    = "something",
+            Url         = "/path/to/something",
+            IsExternal  = true,
+            Visibility  = "all",
+            Selected    = true,
+            IsVisible   = true,
+            Breadcrumb  = "Alpha / Alpha",
+            Depth       = 2
         };
     }
 }

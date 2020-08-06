@@ -192,7 +192,7 @@ namespace NetOpnApi.Models.Core.Firmware
         /// All packages that have changes to be made.
         /// </summary>
         [JsonPropertyName("all_packages")]
-        [JsonConverter(typeof(PhpDictionary<ChangePackage>))]
+        [JsonConverter(typeof(AlwaysDictionary<ChangePackage>))]
         public Dictionary<string, ChangePackage> AllPackages { get; set; }
     }
 }

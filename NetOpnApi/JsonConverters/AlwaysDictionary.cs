@@ -5,7 +5,11 @@ using System.Text.Json.Serialization;
 
 namespace NetOpnApi.JsonConverters
 {
-    public class PhpDictionary<T> : JsonConverter<Dictionary<string, T>>
+    /// <summary>
+    /// The value is always a dictionary.  Will read from JSON objects, empty arrays, empty strings, and null.  Will write JSON objects.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class AlwaysDictionary<T> : JsonConverter<Dictionary<string, T>>
     {
         public override Dictionary<string, T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
