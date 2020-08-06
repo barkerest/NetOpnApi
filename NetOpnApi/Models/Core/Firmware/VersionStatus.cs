@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using NetOpnApi.JsonConverters;
 
@@ -88,7 +89,8 @@ namespace NetOpnApi.Models.Core.Firmware
         /// The last date/time a check was performed.
         /// </summary>
         [JsonPropertyName("last_check")]
-        public string LastCheck { get; set; }
+        [JsonConverter(typeof(AlwaysDateTime))]
+        public DateTime LastCheck { get; set; }
         
         /// <summary>
         /// The version of the underlying operating system.
@@ -162,30 +164,35 @@ namespace NetOpnApi.Models.Core.Firmware
         /// New packages to install.
         /// </summary>
         [JsonPropertyName("new_packages")]
+        [JsonConverter(typeof(AlwaysArray<NewPackage>))]
         public NewPackage[] NewPackages { get; set; }
         
         /// <summary>
         /// Existing packages to reinstall.
         /// </summary>
         [JsonPropertyName("reinstall_packages")]
+        [JsonConverter(typeof(AlwaysArray<NewPackage>))]
         public NewPackage[] ReinstallPackages { get; set; }
         
         /// <summary>
         /// Existing packages to remove.
         /// </summary>
         [JsonPropertyName("remove_packages")]
+        [JsonConverter(typeof(AlwaysArray<NewPackage>))]
         public NewPackage[] RemovePackages { get; set; }
         
         /// <summary>
         /// Packages to upgrade.
         /// </summary>
         [JsonPropertyName("upgrade_packages")]
+        [JsonConverter(typeof(AlwaysArray<UpgradePackage>))]
         public UpgradePackage[] UpgradePackages { get; set; }
         
         /// <summary>
         /// Packages to downgrade.
         /// </summary>
         [JsonPropertyName("downgrade_packages")]
+        [JsonConverter(typeof(AlwaysArray<UpgradePackage>))]
         public UpgradePackage[] DowngradePackages { get; set; }
         
         /// <summary>
