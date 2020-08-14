@@ -6,9 +6,11 @@ using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Web;
 using Microsoft.Extensions.Logging;
 using NetOpnApi.Errors;
+using NetOpnApi.Models;
 
 namespace NetOpnApi
 {
@@ -707,6 +709,68 @@ namespace NetOpnApi
             {
                 errorCode = e.Code;
                 return false;
+            }
+        }
+
+        #endregion
+
+        #region ExecuteAndWait
+
+        /// <summary>
+        /// Execute the command and wait for completion.
+        /// </summary>
+        /// <param name="self"></param>
+        /// <returns></returns>
+        public static StatusWithUuidAndLog ExecuteAndWait(this ICommandWithResponse<StatusWithUuid> self)
+        {
+            self.Execute();
+            if (self.Response?.Status != "ok")
+            {
+                return new StatusWithUuidAndLog()
+                {
+                    Status = self.Response?.Status,
+                    Uuid = self.Response?.Uuid ?? Guid.Empty
+                };
+            }
+
+            var ret = new StatusWithUuidAndLog()
+            {
+                Status = "running",
+                Uuid = self.Response.Uuid
+            };
+            
+            var progressCommand = new Commands.Core.Firmware.GetUpgradeProgress()
+            {
+                Config = self.Config,
+                Logger = self.Logger
+            };
+
+            while (true)
+            {
+                progressCommand.Execute();
+
+                if (progressCommand.Response is null) throw new NetOpnApiInvalidResponseException(ErrorCode.MissingResponse, "Failed to determine status of running command.");
+
+                switch (progressCommand.Response.Status)
+                {
+                    case "done":
+                    case "reboot":
+                        ret.Status = progressCommand.Response.Status;
+                        ret.Log    = progressCommand.Response.Log;
+                        return ret;
+                    
+                    case "error":
+                        ret.Status = "error";
+                        ret.Log    = "There is no command running.";
+                        return ret;
+                    
+                    case "running":
+                        Thread.Sleep(250);
+                        break;
+                    
+                    default:
+                        throw new NetOpnApiInvalidResponseException(ErrorCode.InvalidStatus, $"The status \"{progressCommand.Response.Status}\" is not valid.");
+                }
             }
         }
 

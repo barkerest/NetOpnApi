@@ -50,6 +50,14 @@
         /// </summary>
         NotAuthorizedForCommand,
         
+        /// <summary>
+        /// The response is missing for the command.
+        /// </summary>
+        MissingResponse,
         
+        /// <summary>
+        /// The response contains an invalid status code. 
+        /// </summary>
+        InvalidStatus,
     }
 }

@@ -43,8 +43,8 @@ namespace NetOpnApi.Tests
 
                 Assert.Equal("running", cmd.Response.Status);
 
-                this.LogDebug($"waiting 5 seconds for {cmdName}...");
-                Thread.Sleep(5000);
+                this.LogDebug($"waiting 1 seconds for {cmdName}...");
+                Thread.Sleep(1000);
                 cmd.Execute();
                 Assert.NotNull(cmd.Response);
             }
