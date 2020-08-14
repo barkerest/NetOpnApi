@@ -9,10 +9,10 @@ namespace NetOpnApi.Commands.Core.Firmware
     /// <remarks>
     /// POST: /api/core/firmware/details/$package
     /// </remarks>
-    public class GetPackageDetails : BaseCommand, ICommandWithResponseAndParameterSet<StatusWithUuid, PackageParameterSet>
+    public class GetPackageDetails : BaseCommand, ICommandWithResponseAndParameterSet<PackageDetails, PackageParameterSet>
     {
         /// <inheritdoc />
-        public StatusWithUuid      Response     { get; set; }
+        public PackageDetails Response { get; set; }
 
         /// <inheritdoc />
         public PackageParameterSet ParameterSet { get; } = new PackageParameterSet();
@@ -23,7 +23,6 @@ namespace NetOpnApi.Commands.Core.Firmware
         public GetPackageDetails()
             : base("details")
         {
-            
         }
     }
 }

@@ -9,10 +9,10 @@ namespace NetOpnApi.Commands.Core.Firmware
     /// <remarks>
     /// POST: /api/core/firmware/license/$package
     /// </remarks>
-    public class GetPackageLicense : BaseCommand, ICommandWithResponseAndParameterSet<StatusWithUuid, PackageParameterSet>
+    public class GetPackageLicense : BaseCommand, ICommandWithResponseAndParameterSet<PackageLicense, PackageParameterSet>
     {
         /// <inheritdoc />
-        public StatusWithUuid      Response     { get; set; }
+        public PackageLicense Response { get; set; }
 
         /// <inheritdoc />
         public PackageParameterSet ParameterSet { get; } = new PackageParameterSet();
@@ -23,7 +23,6 @@ namespace NetOpnApi.Commands.Core.Firmware
         public GetPackageLicense()
             : base("license")
         {
-            
         }
     }
 }
