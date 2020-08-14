@@ -9,20 +9,16 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 {
     public class Info_Should : BaseModelTest<Info, Info_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<Info>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<Info>> ParamList
-                = new ParamBuilder(@"{""product_name"": ""opnsense"",""product_version"": ""20.7"",""package"": [{""name"": ""acme"",""version"": ""1.2.3"",""comment"": ""ACME protocol""}],""plugin"": [{""name"": ""os-acme-client"",""version"": ""1.23"",""comment"": ""ACME client""}],""changelog"": [{""series"": ""20.7"",""version"": ""20.7"",""date"": ""2020-07-30""},{""series"": ""20.1"",""version"": ""20.1.9"",""date"": ""2020-07-23""}]}")
-                  .AddTestsFor(m => m.ProductName)
-                  .AddTestsFor(m => m.ProductVersion)
-                  .AddTestsFor(m => m.Packages, new[] {new Info.PackageOrPlugin() {Name   = "Alpha", Version = "0.1", Comment = "The test item"},})
-                  .AddTestsFor(m => m.Plugins, new[] {new Info.PackageOrPlugin() {Name    = "Alpha", Version = "0.1", Comment = "The test item"},})
-                  .AddTestsFor(m => m.ChangeLog, new[] {new Info.ChangeLogEntry() {Series = "1", Version     = "1.0", Date    = DateTime.UtcNow.Date},})
-                  .ToArray();
-
-            public IEnumerator<ModelTestParam<Info>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<Info>> GetList()
+                => new ParamBuilder(@"{""product_name"": ""opnsense"",""product_version"": ""20.7"",""package"": [{""name"": ""acme"",""version"": ""1.2.3"",""comment"": ""ACME protocol""}],""plugin"": [{""name"": ""os-acme-client"",""version"": ""1.23"",""comment"": ""ACME client""}],""changelog"": [{""series"": ""20.7"",""version"": ""20.7"",""date"": ""2020-07-30""},{""series"": ""20.1"",""version"": ""20.1.9"",""date"": ""2020-07-23""}]}")
+                   .AddTestsFor(m => m.ProductName)
+                   .AddTestsFor(m => m.ProductVersion)
+                   .AddTestsFor(m => m.Packages, new[] {new Info.PackageOrPlugin() {Name   = "Alpha", Version = "0.1", Comment = "The test item"},})
+                   .AddTestsFor(m => m.Plugins, new[] {new Info.PackageOrPlugin() {Name    = "Alpha", Version = "0.1", Comment = "The test item"},})
+                   .AddTestsFor(m => m.ChangeLog, new[] {new Info.ChangeLogEntry() {Series = "1", Version     = "1.0", Date    = DateTime.UtcNow.Date},})
+                   .ToArray();
         }
 
         public Info_Should(ITestOutputHelper output)
@@ -53,6 +49,7 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
                     Assert.Equal(a.Comment, b.Comment);
                 }
             }
+
             if (expected.Plugins is null)
             {
                 Assert.Null(actual.Plugins);

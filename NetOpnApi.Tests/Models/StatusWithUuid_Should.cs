@@ -9,17 +9,13 @@ namespace NetOpnApi.Tests.Models
 {
     public class StatusWithUuid_Should : BaseModelTest<StatusWithUuid, StatusWithUuid_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<StatusWithUuid>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<StatusWithUuid>> ParamList = 
-                new ParamBuilder(@"{""status"": ""ok"", ""msg_uuid"": ""6ead6b35-c968-467c-a820-582a23f5a228""}")
-                    .AddTestsFor(m => m.Status)
-                    .AddTestsFor(m => m.Uuid)
-                    .ToArray();
-
-            public IEnumerator<ModelTestParam<StatusWithUuid>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<StatusWithUuid>> GetList()
+                => new ParamBuilder(@"{""status"": ""ok"", ""msg_uuid"": ""6ead6b35-c968-467c-a820-582a23f5a228""}")
+                   .AddTestsFor(m => m.Status)
+                   .AddTestsFor(m => m.Uuid)
+                   .ToArray();
         }
 
 
@@ -33,7 +29,6 @@ namespace NetOpnApi.Tests.Models
             Assert.Equal(expected.Status, actual.Status);
         }
 
-        protected override StatusWithUuid Expected => new StatusWithUuid(){ Status = "ok", Uuid = Guid.Parse("6ead6b35-c968-467c-a820-582a23f5a228") };
-        
+        protected override StatusWithUuid Expected => new StatusWithUuid() {Status = "ok", Uuid = Guid.Parse("6ead6b35-c968-467c-a820-582a23f5a228")};
     }
 }

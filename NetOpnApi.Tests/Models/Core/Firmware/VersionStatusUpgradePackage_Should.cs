@@ -8,19 +8,14 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 {
     public class VersionStatusUpgradePackage_Should : BaseModelTest<VersionStatus.UpgradePackage, VersionStatusUpgradePackage_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<VersionStatus.UpgradePackage>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<VersionStatus.UpgradePackage>> ParamList
-                = new ParamBuilder(@"{""name"":""aThing"",""current_version"":""1.2.3.3"",""new_version"":""1.2.3.4""}")
-                  .AddTestsFor(m => m.Name)
-                  .AddTestsFor(m => m.CurrentVersion)
-                  .AddTestsFor(m => m.NewVersion)
-                    .ToArray();
-
-            public IEnumerator<ModelTestParam<VersionStatus.UpgradePackage>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator()
-                => GetEnumerator();
+            public override IEnumerable<ModelTestParam<VersionStatus.UpgradePackage>> GetList()
+                => new ParamBuilder(@"{""name"":""aThing"",""current_version"":""1.2.3.3"",""new_version"":""1.2.3.4""}")
+                   .AddTestsFor(m => m.Name)
+                   .AddTestsFor(m => m.CurrentVersion)
+                   .AddTestsFor(m => m.NewVersion)
+                   .ToArray();
         }
 
         public VersionStatusUpgradePackage_Should(ITestOutputHelper output)
@@ -37,9 +32,9 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 
         protected override VersionStatus.UpgradePackage Expected => new VersionStatus.UpgradePackage()
         {
-            Name = "aThing",
+            Name           = "aThing",
             CurrentVersion = "1.2.3.3",
-            NewVersion = "1.2.3.4"
+            NewVersion     = "1.2.3.4"
         };
     }
 }

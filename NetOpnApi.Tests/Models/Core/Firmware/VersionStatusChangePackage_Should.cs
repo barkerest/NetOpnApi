@@ -8,19 +8,15 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 {
     public class VersionStatusChangePackage_Should : BaseModelTest<VersionStatus.ChangePackage, VersionStatusChangePackage_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<VersionStatus.ChangePackage>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<VersionStatus.ChangePackage>> ParamList
-                = new ParamBuilder(@"{""name"":""thePackage"",""reason"":""install"",""new"":""1.2.3.4"",""old"":""n/a""}")
-                  .AddTestsFor(m => m.Name)
-                  .AddTestsFor(m => m.Change)
-                  .AddTestsFor(m => m.NewVersion)
-                  .AddTestsFor(m => m.OldVersion)
-                  .ToArray();
-
-            public IEnumerator<ModelTestParam<VersionStatus.ChangePackage>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<VersionStatus.ChangePackage>> GetList()
+                => new ParamBuilder(@"{""name"":""thePackage"",""reason"":""install"",""new"":""1.2.3.4"",""old"":""n/a""}")
+                   .AddTestsFor(m => m.Name)
+                   .AddTestsFor(m => m.Change)
+                   .AddTestsFor(m => m.NewVersion)
+                   .AddTestsFor(m => m.OldVersion)
+                   .ToArray();
         }
 
         public VersionStatusChangePackage_Should(ITestOutputHelper output)
@@ -38,8 +34,8 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 
         protected override VersionStatus.ChangePackage Expected => new VersionStatus.ChangePackage()
         {
-            Name = "thePackage",
-            Change = "install",
+            Name       = "thePackage",
+            Change     = "install",
             NewVersion = "1.2.3.4",
             OldVersion = "n/a"
         };

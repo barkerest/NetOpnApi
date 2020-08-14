@@ -9,18 +9,14 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 {
     public class InfoChangeLog_Should : BaseModelTest<Info.ChangeLogEntry, InfoChangeLog_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<Info.ChangeLogEntry>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<Info.ChangeLogEntry>> ParamList
-                = new ParamBuilder(@"{""series"": ""20.1"",""version"": ""20.1.9"",""date"": ""2020-07-23""}")
-                  .AddTestsFor(m => m.Series)
-                  .AddTestsFor(m => m.Version)
-                  .AddTestsFor(m => m.Date)
-                  .ToArray();
-
-            public IEnumerator<ModelTestParam<Info.ChangeLogEntry>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<Info.ChangeLogEntry>> GetList()
+                => new ParamBuilder(@"{""series"": ""20.1"",""version"": ""20.1.9"",""date"": ""2020-07-23""}")
+                   .AddTestsFor(m => m.Series)
+                   .AddTestsFor(m => m.Version)
+                   .AddTestsFor(m => m.Date)
+                   .ToArray();
         }
 
 

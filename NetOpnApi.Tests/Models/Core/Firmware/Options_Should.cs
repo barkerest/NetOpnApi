@@ -9,20 +9,18 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 {
     public class Options_Should : BaseModelTest<Options, Options_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<Options>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<Options>> ParamList
-                = new ParamBuilder(@"{""has_subscription"": [""https://opnsense-update.deciso.com""],""flavours"": {"""": ""(default)"",""libressl"": ""LibreSSL"",""latest"": ""OpenSSL""},""families"": {"""": ""Production"",""devel"": ""Development""},""mirrors"": {"""": ""(default)"",""https://pkg.opnsense.org"": ""OPNsense (HTTPS, Amsterdam, NL)""},""allow_custom"": true}")
-                  .AddTestsFor(m => m.Subscriptions, new[] {"alpha.example.com", "bravo.example.net", "charlie.example.org"})
-                  .AddTestsFor(m => m.Flavors, new Dictionary<string, string>() {{"one", "The One"}})
-                  .AddTestsFor(m => m.ReleaseTypes, new Dictionary<string, string>() {{"aaaa", "The letter AAAA"}})
-                  .AddTestsFor(m => m.Mirrors, new Dictionary<string, string>() {{"", ""}, {"home", "home.example.com"}})
-                  .AddTestsFor(m => m.AllowCustom)
-                  .ToArray();
+            public override IEnumerable<ModelTestParam<Options>> GetList()
+            => new ParamBuilder(@"{""has_subscription"": [""https://opnsense-update.deciso.com""],""flavours"": {"""": ""(default)"",""libressl"": ""LibreSSL"",""latest"": ""OpenSSL""},""families"": {"""": ""Production"",""devel"": ""Development""},""mirrors"": {"""": ""(default)"",""https://pkg.opnsense.org"": ""OPNsense (HTTPS, Amsterdam, NL)""},""allow_custom"": true}")
+               .AddTestsFor(m => m.Subscriptions, new[] {"alpha.example.com", "bravo.example.net", "charlie.example.org"})
+               .AddTestsFor(m => m.Flavors, new Dictionary<string, string>() {{"one", "The One"}})
+               .AddTestsFor(m => m.ReleaseTypes, new Dictionary<string, string>() {{"aaaa", "The letter AAAA"}})
+               .AddTestsFor(m => m.Mirrors, new Dictionary<string, string>() {{"", ""}, {"home", "home.example.com"}})
+               .AddTestsFor(m => m.AllowCustom)
+               .ToArray();
 
-            public IEnumerator<ModelTestParam<Options>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            
         }
 
         public Options_Should(ITestOutputHelper output)

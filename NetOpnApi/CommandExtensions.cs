@@ -172,12 +172,25 @@ namespace NetOpnApi
 
         #region Get Response Root Element
 
+        private static JsonElement GetEmptyJsonObject()
+        {
+            var doc = JsonDocument.Parse("{}");
+            return doc.RootElement;
+        }
+        
         private static JsonElement GetResponseRootElement(this ICommand self, JsonDocument jsonDocument)
         {
             if (string.IsNullOrEmpty(self.ResponseRootElementName))
             {
                 if (jsonDocument.RootElement.ValueKind != self.ResponseRootElementValueKind)
                 {
+                    if (self.ResponseRootElementValueKind == JsonValueKind.Object &&
+                        jsonDocument.RootElement.ValueKind == JsonValueKind.Array &&
+                        jsonDocument.RootElement.GetArrayLength() == 0)
+                    {
+                        return GetEmptyJsonObject();
+                    }
+                    
                     throw new NetOpnApiInvalidResponseException(
                         ErrorCode.InvalidResponseRootObject,
                         $"The root element of the json response is not an {self.ResponseRootElementValueKind}."
@@ -191,6 +204,13 @@ namespace NetOpnApi
             {
                 if (root.ValueKind != self.ResponseRootElementValueKind)
                 {
+                    if (self.ResponseRootElementValueKind == JsonValueKind.Object &&
+                        root.ValueKind == JsonValueKind.Array &&
+                        root.GetArrayLength() == 0)
+                    {
+                        return GetEmptyJsonObject();
+                    }
+
                     throw new NetOpnApiInvalidResponseException(
                         ErrorCode.InvalidResponseRootObject,
                         $"The root element property named {self.ResponseRootElementName} is not an {self.ResponseRootElementValueKind}."
@@ -398,14 +418,16 @@ namespace NetOpnApi
 
         private static void SetResponse<T>(this ICommandWithResponse<T> self, JsonElement value)
         {
+            var t = typeof(T);
+            
             try
             {
-                self.Logger?.LogDebug($"Deserializing {typeof(T)} from JSON element.");
+                self.Logger?.LogDebug($"Deserializing {t} from JSON element.");
                 self.Response = JsonSerializer.Deserialize<T>(value.ToString(), new JsonSerializerOptions());
             }
             catch (JsonException)
             {
-                throw new ArgumentException($"Failed to decode {typeof(T)} from JSON.");
+                throw new ArgumentException($"Failed to decode {t} from JSON.");
             }
         }
 

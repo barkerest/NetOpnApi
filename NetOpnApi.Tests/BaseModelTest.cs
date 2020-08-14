@@ -7,12 +7,13 @@ using System.Reflection;
 using System.Text.Json;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace NetOpnApi.Tests
 {
     public abstract class BaseModelTest<TModel, TParamList> 
         where TModel : class,new()
-        where TParamList : class, IEnumerable<ModelTestParam<TModel>>, new()
+        where TParamList : BaseModelTest<TModel,TParamList>.ParamList, new()
     {
         protected class ParamBuilder
         {
@@ -32,6 +33,12 @@ namespace NetOpnApi.Tests
                         _defJson
                     )
                 };
+            }
+
+            public ParamBuilder AddTestFor(Expression<Func<TModel, object>> prop, object testValue, object expectedValue)
+            {
+                _params.Add(ModelTestParam<TModel>.CreateExplicit(_defJson, prop, testValue, expectedValue));
+                return this;
             }
 
             public ParamBuilder AddTestsFor(Expression<Func<TModel, string>> prop)
@@ -90,6 +97,11 @@ namespace NetOpnApi.Tests
 
             public ModelTestParam<TModel>[] ToArray() => _params.ToArray();
         }
+
+        public abstract class ParamList
+        {
+            public abstract IEnumerable<ModelTestParam<TModel>> GetList();
+        }
         
         protected readonly ITestOutputHelper Output;
 
@@ -101,8 +113,8 @@ namespace NetOpnApi.Tests
         protected abstract void Compare([NotNull]TModel expected, [NotNull]TModel actual);
 
         protected abstract TModel Expected { get; }
-        
-        public static IEnumerable<object[]> Data => new TParamList().Select(x => new object[]{x});
+
+        public static IEnumerable<object[]> Data() => new TParamList().GetList().Select(x => new object[]{x});
 
         [Theory]
         [MemberData(nameof(Data))]

@@ -8,17 +8,13 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 {
     public class VersionStatusNewPackage_Should : BaseModelTest<VersionStatus.NewPackage, VersionStatusNewPackage_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<VersionStatus.NewPackage>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<VersionStatus.NewPackage>> ParamList
-                = new ParamBuilder(@"{""name"":""something"",""version"":""1.2.3.4""}")
-                  .AddTestsFor(m => m.Name)
-                  .AddTestsFor(m => m.Version)
-                  .ToArray();
-
-            public IEnumerator<ModelTestParam<VersionStatus.NewPackage>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<VersionStatus.NewPackage>> GetList()
+                => new ParamBuilder(@"{""name"":""something"",""version"":""1.2.3.4""}")
+                   .AddTestsFor(m => m.Name)
+                   .AddTestsFor(m => m.Version)
+                   .ToArray();
         }
 
         public VersionStatusNewPackage_Should(ITestOutputHelper output)
@@ -34,7 +30,7 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 
         protected override VersionStatus.NewPackage Expected => new VersionStatus.NewPackage()
         {
-            Name = "something",
+            Name    = "something",
             Version = "1.2.3.4"
         };
     }

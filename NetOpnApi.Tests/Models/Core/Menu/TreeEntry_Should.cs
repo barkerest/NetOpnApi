@@ -8,32 +8,28 @@ namespace NetOpnApi.Tests.Models.Core.Menu
 {
     public class TreeEntry_Should : BaseModelTest<TreeEntry, TreeEntry_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<TreeEntry>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<TreeEntry>> ParamList
-                = new ParamBuilder(@"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}")
-                  .AddTestsFor(m => m.ID)
-                  .AddTestsFor(m => m.Order)
-                  .AddTestsFor(m => m.VisibleName)
-                  .AddTestsFor(m => m.CssClass)
-                  .AddTestsFor(m => m.Url)
-                  .AddTestsFor(m => m.IsExternal)
-                  .AddTestsFor(m => m.Visibility)
-                  .AddTestsFor(m => m.Selected)
-                  .AddTestsFor(
-                      m => m.Children,
-                      new[]
-                      {
-                          new TreeEntry() {ID = "Gamma", VisibleName = "gamma"},
-                          new TreeEntry() {ID = "Theta", VisibleName = "theta"}
-                      }
-                  )
-                  .AddTestsFor(m => m.IsVisible)
-                  .ToArray();
-
-            public IEnumerator<ModelTestParam<TreeEntry>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<TreeEntry>> GetList()
+                => new ParamBuilder(@"{""Id"": ""Alpha"", ""Order"": 1234, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": """", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [{""Id"": ""Bravo"", ""Order"": 0, ""VisibleName"": ""Bravo"", ""CssClass"": ""something"", ""Url"": ""/index.php"", ""IsExternal"": false, ""Visibility"": ""all"", ""Selected"": true, ""Children"": [{""Id"": ""Charlie"", ""Order"": 0, ""VisibleName"": ""Charlie"", ""CssClass"": """", ""Url"": ""/index.php*"", ""IsExternal"": false, ""Visibility"": ""hidden"", ""Selected"": false, ""Children"": [], ""isVisible"": false}], ""isVisible"": true}, {""Id"": ""Delta"", ""Order"": 1, ""VisibleName"": ""Delta"", ""CssClass"": ""something"", ""Url"": ""/ui/core/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": false, ""Children"": [], ""isVisible"": true}], ""isVisible"": true}")
+                   .AddTestsFor(m => m.ID)
+                   .AddTestsFor(m => m.Order)
+                   .AddTestsFor(m => m.VisibleName)
+                   .AddTestsFor(m => m.CssClass)
+                   .AddTestsFor(m => m.Url)
+                   .AddTestsFor(m => m.IsExternal)
+                   .AddTestsFor(m => m.Visibility)
+                   .AddTestsFor(m => m.Selected)
+                   .AddTestsFor(
+                       m => m.Children,
+                       new[]
+                       {
+                           new TreeEntry() {ID = "Gamma", VisibleName = "gamma"},
+                           new TreeEntry() {ID = "Theta", VisibleName = "theta"}
+                       }
+                   )
+                   .AddTestsFor(m => m.IsVisible)
+                   .ToArray();
         }
 
         protected override TreeEntry Expected => new TreeEntry()

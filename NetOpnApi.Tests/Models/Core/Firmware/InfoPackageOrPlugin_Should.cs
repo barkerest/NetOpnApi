@@ -8,27 +8,23 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 {
     public class InfoPackageOrPlugin_Should : BaseModelTest<Info.PackageOrPlugin, InfoPackageOrPlugin_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<Info.PackageOrPlugin>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<Info.PackageOrPlugin>> ParamList
-                = new ParamBuilder(@"{""name"": ""acme.sh"",""version"": ""2.8.6"",""comment"": ""ACME protocol client written in shell"",""flatsize"": ""758KiB"",""locked"": ""N/A"",""license"": ""GPLv3+"",""repository"": ""OPNsense"",""origin"": ""security/acme.sh"",""provided"": ""1"",""installed"": ""0"",""path"": ""OPNsense/security/acme.sh"",""configured"": ""0""}")
-                  .AddTestsFor(m => m.Name)
-                  .AddTestsFor(m => m.Version)
-                  .AddTestsFor(m => m.Comment)
-                  .AddTestsFor(m => m.FlatSize)
-                  .AddTestsFor(m => m.Locked)
-                  .AddTestsFor(m => m.License)
-                  .AddTestsFor(m => m.Repository)
-                  .AddTestsFor(m => m.Origin)
-                  .AddTestsFor(m => m.Provided)
-                  .AddTestsFor(m => m.Installed)
-                  .AddTestsFor(m => m.Path)
-                  .AddTestsFor(m => m.Configured)
-                  .ToArray();
-
-            public IEnumerator<ModelTestParam<Info.PackageOrPlugin>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<Info.PackageOrPlugin>> GetList()
+                => new ParamBuilder(@"{""name"": ""acme.sh"",""version"": ""2.8.6"",""comment"": ""ACME protocol client written in shell"",""flatsize"": ""758KiB"",""locked"": ""N/A"",""license"": ""GPLv3+"",""repository"": ""OPNsense"",""origin"": ""security/acme.sh"",""provided"": ""1"",""installed"": ""0"",""path"": ""OPNsense/security/acme.sh"",""configured"": ""0""}")
+                   .AddTestsFor(m => m.Name)
+                   .AddTestsFor(m => m.Version)
+                   .AddTestsFor(m => m.Comment)
+                   .AddTestsFor(m => m.FlatSize)
+                   .AddTestsFor(m => m.Locked)
+                   .AddTestsFor(m => m.License)
+                   .AddTestsFor(m => m.Repository)
+                   .AddTestsFor(m => m.Origin)
+                   .AddTestsFor(m => m.Provided)
+                   .AddTestsFor(m => m.Installed)
+                   .AddTestsFor(m => m.Path)
+                   .AddTestsFor(m => m.Configured)
+                   .ToArray();
         }
 
         public InfoPackageOrPlugin_Should(ITestOutputHelper output)
@@ -49,22 +45,22 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
             Assert.Equal(expected.Provided, actual.Provided);
             Assert.Equal(expected.Installed, actual.Installed);
             Assert.Equal(expected.Path, actual.Path);
-            Assert.Equal(expected.Configured,actual.Configured);
+            Assert.Equal(expected.Configured, actual.Configured);
         }
 
         protected override Info.PackageOrPlugin Expected => new Info.PackageOrPlugin()
         {
-            Name = "acme.sh",
-            Version = "2.8.6",
-            Comment = "ACME protocol client written in shell",
-            FlatSize = "758KiB",
-            Locked = false,
-            License = "GPLv3+",
+            Name       = "acme.sh",
+            Version    = "2.8.6",
+            Comment    = "ACME protocol client written in shell",
+            FlatSize   = "758KiB",
+            Locked     = false,
+            License    = "GPLv3+",
             Repository = "OPNsense",
-            Origin = "security/acme.sh",
-            Provided = true,
-            Installed = false,
-            Path = "OPNsense/security/acme.sh",
+            Origin     = "security/acme.sh",
+            Provided   = true,
+            Installed  = false,
+            Path       = "OPNsense/security/acme.sh",
             Configured = false
         };
     }

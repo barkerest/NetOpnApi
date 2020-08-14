@@ -8,16 +8,12 @@ namespace NetOpnApi.Tests.Models
 {
     public class StatusMessage_Should : BaseModelTest<StatusMessage, StatusMessage_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<StatusMessage>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<StatusMessage>> ParamList =
-                new ParamBuilder(@"{""status"": ""ok""}")
-                    .AddTestsFor(m => m.Status)
-                    .ToArray();
-
-            public IEnumerator<ModelTestParam<StatusMessage>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<StatusMessage>> GetList()
+                => new ParamBuilder(@"{""status"": ""ok""}")
+                   .AddTestsFor(m => m.Status)
+                   .ToArray();
         }
 
 
@@ -31,7 +27,6 @@ namespace NetOpnApi.Tests.Models
             Assert.Equal(expected.Status, actual.Status);
         }
 
-        protected override StatusMessage Expected => new StatusMessage(){ Status = "ok" };
-        
+        protected override StatusMessage Expected => new StatusMessage() {Status = "ok"};
     }
 }

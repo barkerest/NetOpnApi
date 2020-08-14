@@ -12,38 +12,36 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 {
     public class VersionStatus_Should : BaseModelTest<VersionStatus, VersionStatus_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<VersionStatus>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<VersionStatus>> ParamList
-                = new ParamBuilder(@"{""connection"":""ok"",""download_size"":""1MiB"",""last_check"":""2020-08-06 21:39:08Z"",""os_version"":""12.1"",""product_name"":""opnsense"",""product_version"":""20.7"",""repository"":""ok"",""updates"":6,""upgrade_major_message"":""nada"",""upgrade_major_version"":""20.8"",""upgrade_needs_reboot"":true,""status_upgrade_action"":""all"",""status"":""Ok"",""status_msg"":""There are updates available."",""new_packages"":[{""name"":""itemToAdd"",""version"":""1.0""}],""reinstall_packages"":[{""name"":""firstItemToReinstall"",""version"":""1.2""},{""name"":""anotherItemToReinstall"",""version"":""2.2""}],""remove_packages"":[{""name"":""itemToRemove"",""version"":""5.0""}],""upgrade_packages"":[{""name"":""itemToUpgrade"",""current_version"":""1.0"",""new_version"":""1.1""}],""downgrade_packages"":[{""name"":""itemToDowngrade"",""current_version"":""2.5"",""new_version"":""2.4""}],""all_packages"":{""itemToAdd"":{""reason"":""add"",""new"":""1.0"",""old"":""n/a"",""name"":""itemToAdd""},""firstItemToReinstall"":{""reason"":""reinstall"",""new"":""1.2"",""old"":""1.2"",""name"":""firstItemToReinstall""},""anotherItemToReinstall"":{""reason"":""reinstall"",""new"":""2.2"",""old"":""2.2"",""name"":""anotherItemToReinstall""},""itemToRemove"":{""reason"":""remove"",""new"":""n/a"",""old"":""5.0"",""name"":""itemToRemove""},""itemToUpgrade"":{""reason"":""upgrade"",""new"":""1.2"",""old"":""1.1"",""name"":""itemToUpgrade""},""itemToDowngrade"":{""reason"":""downgrade"",""new"":""2.4"",""old"":""2.5"",""name"":""itemToDowngrade""}}}")
-                  .AddTestsFor(m => m.ConnectionStatus)
-                  .AddTestsFor(m => m.DownloadSize)
-                  .AddTestsFor(m => m.LastCheck)
-                  .AddTestsFor(m => m.OsVersion)
-                  .AddTestsFor(m => m.ProductName)
-                  .AddTestsFor(m => m.ProductVersion)
-                  .AddTestsFor(m => m.RepositoryStatus)
-                  .AddTestsFor(m => m.Updates)
-                  .AddTestsFor(m => m.UpgradeMajorMessage)
-                  .AddTestsFor(m => m.UpgradeMajorVersion)
-                  .AddTestsFor(m => m.UpgradeNeedsReboot)
-                  .AddTestsFor(m => m.StatusUpgradeAction)
-                  .AddTestsFor(m => m.Status)
-                  .AddTestsFor(m => m.StatusMessage)
-                  .AddTestsFor(m => m.NewPackages, new []{new VersionStatus.NewPackage(){ Name = "testItem", Version = "0.0"}, })
-                  .AddTestsFor(m => m.ReinstallPackages, new []{new VersionStatus.NewPackage(){ Name = "testItem", Version = "0.0"}, })
-                  .AddTestsFor(m => m.RemovePackages, new []{new VersionStatus.NewPackage(){ Name = "testItem", Version = "0.0"}, })
-                  .AddTestsFor(m => m.UpgradePackages, new []{new VersionStatus.UpgradePackage(){ Name = "testItem", CurrentVersion = "0.0", NewVersion = "0.1"}})
-                  .AddTestsFor(m => m.DowngradePackages, new []{new VersionStatus.UpgradePackage(){ Name = "testItem", CurrentVersion = "0.0", NewVersion = "0.1"}})
-                  .AddTestsFor(m => m.AllPackages, new Dictionary<string, VersionStatus.ChangePackage>()
-                  {
-                      {"testItem", new VersionStatus.ChangePackage(){ Name = "testItem", Change = "none", NewVersion = "1.0", OldVersion = "1.0"}}
-                  })
-                  .ToArray();
-
-            public IEnumerator<ModelTestParam<VersionStatus>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<VersionStatus>> GetList()
+                => new ParamBuilder(@"{""connection"":""ok"",""download_size"":""1MiB"",""last_check"":""2020-08-06 21:39:08Z"",""os_version"":""12.1"",""product_name"":""opnsense"",""product_version"":""20.7"",""repository"":""ok"",""updates"":6,""upgrade_major_message"":""nada"",""upgrade_major_version"":""20.8"",""upgrade_needs_reboot"":true,""status_upgrade_action"":""all"",""status"":""Ok"",""status_msg"":""There are updates available."",""new_packages"":[{""name"":""itemToAdd"",""version"":""1.0""}],""reinstall_packages"":[{""name"":""firstItemToReinstall"",""version"":""1.2""},{""name"":""anotherItemToReinstall"",""version"":""2.2""}],""remove_packages"":[{""name"":""itemToRemove"",""version"":""5.0""}],""upgrade_packages"":[{""name"":""itemToUpgrade"",""current_version"":""1.0"",""new_version"":""1.1""}],""downgrade_packages"":[{""name"":""itemToDowngrade"",""current_version"":""2.5"",""new_version"":""2.4""}],""all_packages"":{""itemToAdd"":{""reason"":""add"",""new"":""1.0"",""old"":""n/a"",""name"":""itemToAdd""},""firstItemToReinstall"":{""reason"":""reinstall"",""new"":""1.2"",""old"":""1.2"",""name"":""firstItemToReinstall""},""anotherItemToReinstall"":{""reason"":""reinstall"",""new"":""2.2"",""old"":""2.2"",""name"":""anotherItemToReinstall""},""itemToRemove"":{""reason"":""remove"",""new"":""n/a"",""old"":""5.0"",""name"":""itemToRemove""},""itemToUpgrade"":{""reason"":""upgrade"",""new"":""1.2"",""old"":""1.1"",""name"":""itemToUpgrade""},""itemToDowngrade"":{""reason"":""downgrade"",""new"":""2.4"",""old"":""2.5"",""name"":""itemToDowngrade""}}}")
+                   .AddTestsFor(m => m.ConnectionStatus)
+                   .AddTestsFor(m => m.DownloadSize)
+                   .AddTestsFor(m => m.LastCheck)
+                   .AddTestsFor(m => m.OsVersion)
+                   .AddTestsFor(m => m.ProductName)
+                   .AddTestsFor(m => m.ProductVersion)
+                   .AddTestsFor(m => m.RepositoryStatus)
+                   .AddTestsFor(m => m.Updates)
+                   .AddTestsFor(m => m.UpgradeMajorMessage)
+                   .AddTestsFor(m => m.UpgradeMajorVersion)
+                   .AddTestsFor(m => m.UpgradeNeedsReboot)
+                   .AddTestsFor(m => m.StatusUpgradeAction)
+                   .AddTestsFor(m => m.Status)
+                   .AddTestsFor(m => m.StatusMessage)
+                   .AddTestsFor(m => m.NewPackages, new[] {new VersionStatus.NewPackage() {Name           = "testItem", Version        = "0.0"},})
+                   .AddTestsFor(m => m.ReinstallPackages, new[] {new VersionStatus.NewPackage() {Name     = "testItem", Version        = "0.0"},})
+                   .AddTestsFor(m => m.RemovePackages, new[] {new VersionStatus.NewPackage() {Name        = "testItem", Version        = "0.0"},})
+                   .AddTestsFor(m => m.UpgradePackages, new[] {new VersionStatus.UpgradePackage() {Name   = "testItem", CurrentVersion = "0.0", NewVersion = "0.1"}})
+                   .AddTestsFor(m => m.DowngradePackages, new[] {new VersionStatus.UpgradePackage() {Name = "testItem", CurrentVersion = "0.0", NewVersion = "0.1"}})
+                   .AddTestsFor(
+                       m => m.AllPackages, new Dictionary<string, VersionStatus.ChangePackage>()
+                       {
+                           {"testItem", new VersionStatus.ChangePackage() {Name = "testItem", Change = "none", NewVersion = "1.0", OldVersion = "1.0"}}
+                       }
+                   )
+                   .ToArray();
         }
 
         public VersionStatus_Should(ITestOutputHelper output)

@@ -8,26 +8,22 @@ namespace NetOpnApi.Tests.Models.Core.Menu
 {
     public class SearchEntry_Should : BaseModelTest<SearchEntry, SearchEntry_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<SearchEntry>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<SearchEntry>> ParamList
-                = new ParamBuilder(@"{""Id"": ""Alpha"", ""Order"": 42, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": ""/path/to/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": true, ""isVisible"": true, ""breadcrumb"": ""Alpha / Alpha"", ""depth"": 2}")
-                  .AddTestsFor(m => m.ID)
-                  .AddTestsFor(m => m.Order)
-                  .AddTestsFor(m => m.VisibleName)
-                  .AddTestsFor(m => m.CssClass)
-                  .AddTestsFor(m => m.Url)
-                  .AddTestsFor(m => m.IsExternal)
-                  .AddTestsFor(m => m.Visibility)
-                  .AddTestsFor(m => m.Selected)
-                  .AddTestsFor(m => m.IsVisible)
-                  .AddTestsFor(m => m.Breadcrumb)
-                  .AddTestsFor(m => m.Depth)
-                  .ToArray();
-
-            public IEnumerator<ModelTestParam<SearchEntry>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<SearchEntry>> GetList()
+                => new ParamBuilder(@"{""Id"": ""Alpha"", ""Order"": 42, ""VisibleName"": ""Alpha"", ""CssClass"": ""something"", ""Url"": ""/path/to/something"", ""IsExternal"": true, ""Visibility"": ""all"", ""Selected"": true, ""isVisible"": true, ""breadcrumb"": ""Alpha / Alpha"", ""depth"": 2}")
+                   .AddTestsFor(m => m.ID)
+                   .AddTestsFor(m => m.Order)
+                   .AddTestsFor(m => m.VisibleName)
+                   .AddTestsFor(m => m.CssClass)
+                   .AddTestsFor(m => m.Url)
+                   .AddTestsFor(m => m.IsExternal)
+                   .AddTestsFor(m => m.Visibility)
+                   .AddTestsFor(m => m.Selected)
+                   .AddTestsFor(m => m.IsVisible)
+                   .AddTestsFor(m => m.Breadcrumb)
+                   .AddTestsFor(m => m.Depth)
+                   .ToArray();
         }
 
 

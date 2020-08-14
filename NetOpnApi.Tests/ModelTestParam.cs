@@ -17,19 +17,20 @@ namespace NetOpnApi.Tests
             return model;
         }
     }
+
     public class ModelTestParam<T>
     {
         public string Description { get; }
         public string Json        { get; }
 
-        public Func<T,T> ModifyExpected { get; }
+        public Func<T, T> ModifyExpected { get; }
 
         private static T NoChanges(T model)
         {
             return model;
         }
 
-        public ModelTestParam(string d, string j, Func<T,T> m = null)
+        public ModelTestParam(string d, string j, Func<T, T> m = null)
         {
             Description    = d;
             Json           = j;
@@ -38,22 +39,48 @@ namespace NetOpnApi.Tests
 
         public override string ToString() => Description;
 
+        public static ModelTestParam<T> CreateExplicit(string defaultJson, Expression<Func<T, object>> property, object valueForJson, object expectedModelValue)
+        {
+            var mex = property.Body as MemberExpression;
+            if (mex is null &&
+                property.Body is UnaryExpression uex &&
+                (uex.NodeType == ExpressionType.Convert || uex.NodeType == ExpressionType.ConvertChecked))
+            {
+                mex = uex.Operand as MemberExpression;
+            }
+
+            if (mex is null) throw new ArgumentException("must be a property selecting expression", nameof(property));
+
+            var propInfo     = (PropertyInfo) mex.Member;
+            var jsonPropName = propInfo.GetCustomAttribute<JsonPropertyNameAttribute>();
+            var jsonName     = jsonPropName?.Name ?? propInfo.Name;
+            var propName     = propInfo.Name;
+            var dict         = JsonSerializer.Deserialize<Dictionary<string, object>>(defaultJson);
+
+            dict[jsonName] = valueForJson;
+            return new ModelTestParam<T>(
+                $"{propName} = {JsonSerializer.Serialize(dict[jsonName])}",
+                JsonSerializer.Serialize(dict),
+                m => propInfo.SetPropValue(m, expectedModelValue)
+            );
+        }
+
         public static IEnumerable<ModelTestParam<T>> CreateForProperty(string defaultJson, Expression<Func<T, string>> property)
         {
-            var propInfo = (PropertyInfo) ((MemberExpression) property.Body).Member;
+            var propInfo     = (PropertyInfo) ((MemberExpression) property.Body).Member;
             var jsonPropName = propInfo.GetCustomAttribute<JsonPropertyNameAttribute>();
-            var jsonName = jsonPropName?.Name ?? propInfo.Name;
-            var propName = propInfo.Name;
-            var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(defaultJson);
-            
+            var jsonName     = jsonPropName?.Name ?? propInfo.Name;
+            var propName     = propInfo.Name;
+            var dict         = JsonSerializer.Deserialize<Dictionary<string, object>>(defaultJson);
+
             // test 1: "Hello World"
             dict[jsonName] = "Hello World";
             yield return new ModelTestParam<T>(
                 $"{propName} = {JsonSerializer.Serialize(dict[jsonName])}",
                 JsonSerializer.Serialize(dict),
-                m => propInfo.SetPropValue(m,"Hello World")
+                m => propInfo.SetPropValue(m, "Hello World")
             );
-            
+
             // test 2: "   "
             dict[jsonName] = "   ";
             yield return new ModelTestParam<T>(
@@ -86,7 +113,7 @@ namespace NetOpnApi.Tests
             var jsonName     = jsonPropName?.Name ?? propInfo.Name;
             var propName     = propInfo.Name;
             var dict         = JsonSerializer.Deserialize<Dictionary<string, object>>(defaultJson);
-            
+
             // test 1: 0
             dict[jsonName] = 0;
             yield return new ModelTestParam<T>(
@@ -94,7 +121,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, 0)
             );
-            
+
             // test 2: 100
             dict[jsonName] = 100;
             yield return new ModelTestParam<T>(
@@ -102,7 +129,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, 100)
             );
-            
+
             // test 3: -100
             dict[jsonName] = -100;
             yield return new ModelTestParam<T>(
@@ -134,7 +161,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, -100)
             );
-            
+
             // test 7: 123.45
             dict[jsonName] = 123.45;
             yield return new ModelTestParam<T>(
@@ -142,7 +169,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, 123)
             );
-            
+
             // test 8: min value
             dict[jsonName] = int.MinValue;
             yield return new ModelTestParam<T>(
@@ -167,7 +194,7 @@ namespace NetOpnApi.Tests
             var jsonName     = jsonPropName?.Name ?? propInfo.Name;
             var propName     = propInfo.Name;
             var dict         = JsonSerializer.Deserialize<Dictionary<string, object>>(defaultJson);
-            
+
             // test 1: 0
             dict[jsonName] = 0;
             yield return new ModelTestParam<T>(
@@ -175,7 +202,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, 0)
             );
-            
+
             // test 2: 100
             dict[jsonName] = 100;
             yield return new ModelTestParam<T>(
@@ -183,7 +210,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, 100)
             );
-            
+
             // test 3: -100
             dict[jsonName] = -100;
             yield return new ModelTestParam<T>(
@@ -215,7 +242,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, -100)
             );
-            
+
             // test 7: 123.45
             dict[jsonName] = 123.45;
             yield return new ModelTestParam<T>(
@@ -223,7 +250,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, 123)
             );
-            
+
             // test 8: min value
             dict[jsonName] = long.MinValue;
             yield return new ModelTestParam<T>(
@@ -248,7 +275,7 @@ namespace NetOpnApi.Tests
             var jsonName     = jsonPropName?.Name ?? propInfo.Name;
             var propName     = propInfo.Name;
             var dict         = JsonSerializer.Deserialize<Dictionary<string, object>>(defaultJson);
-            
+
             // test 1: 0
             dict[jsonName] = 0;
             yield return new ModelTestParam<T>(
@@ -256,7 +283,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, 0.0)
             );
-            
+
             // test 2: 100
             dict[jsonName] = 100;
             yield return new ModelTestParam<T>(
@@ -264,7 +291,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, 100.0)
             );
-            
+
             // test 3: -100
             dict[jsonName] = -100;
             yield return new ModelTestParam<T>(
@@ -296,7 +323,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, -100.0)
             );
-            
+
             // test 7: 123.45
             dict[jsonName] = 123.45;
             yield return new ModelTestParam<T>(
@@ -304,7 +331,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, 123.45)
             );
-            
+
             // test 8: 0.1
             dict[jsonName] = 0.1;
             yield return new ModelTestParam<T>(
@@ -320,7 +347,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, -0.1)
             );
-            
+
             // test 10: "123.45"
             dict[jsonName] = "123.45";
             yield return new ModelTestParam<T>(
@@ -328,7 +355,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, 123.45)
             );
-            
+
             // test 11: "0.1"
             dict[jsonName] = "0.1";
             yield return new ModelTestParam<T>(
@@ -353,7 +380,7 @@ namespace NetOpnApi.Tests
             var jsonName     = jsonPropName?.Name ?? propInfo.Name;
             var propName     = propInfo.Name;
             var dict         = JsonSerializer.Deserialize<Dictionary<string, object>>(defaultJson);
-            
+
             // test 1: true
             dict[jsonName] = true;
             yield return new ModelTestParam<T>(
@@ -361,7 +388,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, true)
             );
-            
+
             // test 2: false
             dict[jsonName] = false;
             yield return new ModelTestParam<T>(
@@ -385,7 +412,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, true)
             );
-            
+
             // test 5: 101
             dict[jsonName] = 101;
             yield return new ModelTestParam<T>(
@@ -401,7 +428,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, true)
             );
-            
+
             // test 7: 0
             dict[jsonName] = 0;
             yield return new ModelTestParam<T>(
@@ -419,7 +446,7 @@ namespace NetOpnApi.Tests
                     m => propInfo.SetPropValue(m, true)
                 );
             }
-            
+
             foreach (var v in AlwaysBool.FalseValues)
             {
                 dict[jsonName] = v;
@@ -431,7 +458,7 @@ namespace NetOpnApi.Tests
             }
         }
 
-        public static IEnumerable<ModelTestParam<T>> CreateForProperty<TV>(string defaultJson, Expression<Func<T, IDictionary<string,TV>>> property, IDictionary<string,TV> nonEmptyValue)
+        public static IEnumerable<ModelTestParam<T>> CreateForProperty<TV>(string defaultJson, Expression<Func<T, IDictionary<string, TV>>> property, IDictionary<string, TV> nonEmptyValue)
         {
             var propInfo     = (PropertyInfo) ((MemberExpression) property.Body).Member;
             var jsonPropName = propInfo.GetCustomAttribute<JsonPropertyNameAttribute>();
@@ -446,7 +473,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, nonEmptyValue)
             );
-            
+
             // test 2: null
             dict[jsonName] = null;
             yield return new ModelTestParam<T>(
@@ -470,7 +497,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, new Dictionary<string, TV>())
             );
-            
+
             // test 4: {}
             dict[jsonName] = new string[0];
             yield return new ModelTestParam<T>(
@@ -487,7 +514,7 @@ namespace NetOpnApi.Tests
             var jsonName     = jsonPropName?.Name ?? propInfo.Name;
             var propName     = propInfo.Name;
             var dict         = JsonSerializer.Deserialize<Dictionary<string, object>>(defaultJson);
-            
+
             // test 1: non-empty
             dict[jsonName] = nonEmptyValue;
             yield return new ModelTestParam<T>(
@@ -495,7 +522,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, nonEmptyValue)
             );
-            
+
             // test 2: null
             dict[jsonName] = null;
             yield return new ModelTestParam<T>(
@@ -538,7 +565,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, g)
             );
-            
+
             // test 2: Guid.Empty
             dict[jsonName] = Guid.Empty;
             yield return new ModelTestParam<T>(
@@ -562,7 +589,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, Guid.Empty)
             );
-            
+
             // test 5: "0"
             dict[jsonName] = "0";
             yield return new ModelTestParam<T>(
@@ -570,7 +597,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, Guid.Empty)
             );
-            
+
             // test 6: ""
             dict[jsonName] = "";
             yield return new ModelTestParam<T>(
@@ -578,7 +605,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, Guid.Empty)
             );
-            
+
             // test 7: g("N")
             dict[jsonName] = g.ToString("N");
             yield return new ModelTestParam<T>(
@@ -586,7 +613,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, g)
             );
-            
+
             // test 8: g("B")
             dict[jsonName] = g.ToString("B");
             yield return new ModelTestParam<T>(
@@ -594,7 +621,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, g)
             );
-            
+
             // test 9: g("P")
             dict[jsonName] = g.ToString("P");
             yield return new ModelTestParam<T>(
@@ -610,7 +637,6 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, g)
             );
-
         }
 
         public static IEnumerable<ModelTestParam<T>> CreateForProperty(string defaultJson, Expression<Func<T, DateTime>> property)
@@ -622,11 +648,11 @@ namespace NetOpnApi.Tests
             var dict         = JsonSerializer.Deserialize<Dictionary<string, object>>(defaultJson);
 
             var msRes = new DateTime(2015, 9, 15, 19, 45, 30, 25, DateTimeKind.Utc);
-            var sRes = new DateTime(2015, 9, 15, 19, 45, 30, DateTimeKind.Utc);
-            var mRes = new DateTime(2015, 9, 15, 19, 45, 0, DateTimeKind.Utc);
-            var dRes = new DateTime(2015, 9, 15, 0, 0, 0, DateTimeKind.Utc);
-            var zRes = new DateTime(2015, 9, 15, 19, 45, 0, DateTimeKind.Local);
-            
+            var sRes  = new DateTime(2015, 9, 15, 19, 45, 30, DateTimeKind.Utc);
+            var mRes  = new DateTime(2015, 9, 15, 19, 45, 0, DateTimeKind.Utc);
+            var dRes  = new DateTime(2015, 9, 15, 0, 0, 0, DateTimeKind.Utc);
+            var zRes  = new DateTime(2015, 9, 15, 19, 45, 0, DateTimeKind.Local);
+
             // test 1: yyyy-mm-dd
             dict[jsonName] = dRes.ToString("yyyy-MM-dd");
             yield return new ModelTestParam<T>(
@@ -634,7 +660,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, dRes)
             );
-            
+
             // test 2: yyyy-m-d
             dict[jsonName] = dRes.ToString("yyyy-M-d");
             yield return new ModelTestParam<T>(
@@ -658,7 +684,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, dRes)
             );
-            
+
             // test 5: d mmm, yyyy
             dict[jsonName] = dRes.ToString("d MMM, yyyy");
             yield return new ModelTestParam<T>(
@@ -674,7 +700,7 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, dRes)
             );
-            
+
             // test 7: mmmm dd, yyyy
             dict[jsonName] = dRes.ToString("MMMM dd, yyyy");
             yield return new ModelTestParam<T>(
@@ -684,7 +710,7 @@ namespace NetOpnApi.Tests
             );
 
             // Time formats are common between all date formats, so we don't have to test every combination.
-            
+
             // test 8: yyyy-mm-dd hh:mm:ss.fff
             dict[jsonName] = msRes.ToString("yyyy-MM-dd HH:mm:ss.fff");
             yield return new ModelTestParam<T>(
@@ -757,7 +783,5 @@ namespace NetOpnApi.Tests
                 m => propInfo.SetPropValue(m, sRes)
             );
         }
-        
-        
     }
 }

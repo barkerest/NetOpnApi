@@ -7,19 +7,15 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 {
     public class Config_Should : BaseModelTest<NetOpnApi.Models.Core.Firmware.Config, Config_Should.Params>
     {
-        public class Params : IEnumerable<ModelTestParam<NetOpnApi.Models.Core.Firmware.Config>>
+        public class Params : ParamList
         {
-            private static readonly IEnumerable<ModelTestParam<NetOpnApi.Models.Core.Firmware.Config>> ParamList
-                = new ParamBuilder(@"{""flavour"": """",""mirror"": ""https://pkg.opnsense.org"",""type"": """"}")
-                  .AddTestsFor(m => m.Flavor)
-                  .AddTestsFor(m => m.Mirror)
-                  .AddTestsFor(m => m.ReleaseType)
-                  .AddTestsFor(m => m.Subscription)
-                  .ToArray();
-
-            public IEnumerator<ModelTestParam<NetOpnApi.Models.Core.Firmware.Config>> GetEnumerator() => ParamList.GetEnumerator();
-
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public override IEnumerable<ModelTestParam<NetOpnApi.Models.Core.Firmware.Config>> GetList()
+                => new ParamBuilder(@"{""flavour"": """",""mirror"": ""https://pkg.opnsense.org"",""type"": """"}")
+                   .AddTestsFor(m => m.Flavor)
+                   .AddTestsFor(m => m.Mirror)
+                   .AddTestsFor(m => m.ReleaseType)
+                   .AddTestsFor(m => m.Subscription)
+                   .ToArray();
         }
 
         public Config_Should(ITestOutputHelper output)
@@ -37,11 +33,10 @@ namespace NetOpnApi.Tests.Models.Core.Firmware
 
         protected override NetOpnApi.Models.Core.Firmware.Config Expected => new NetOpnApi.Models.Core.Firmware.Config()
         {
-            Flavor = "",
-            Mirror = "https://pkg.opnsense.org",
-            ReleaseType = "",
+            Flavor       = "",
+            Mirror       = "https://pkg.opnsense.org",
+            ReleaseType  = "",
             Subscription = null
         };
-        
     }
 }
