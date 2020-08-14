@@ -16,6 +16,7 @@ namespace NetOpnApi.Commands.Core.Firmware
         /// <inheritdoc />
         public GetChangeLogParameterSet ParameterSet { get; } = new GetChangeLogParameterSet();
 
+        /// <inheritdoc />
         public override bool UsePost { get; } = true;
 
         public GetChangeLog()
