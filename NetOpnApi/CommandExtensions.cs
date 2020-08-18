@@ -174,58 +174,73 @@ namespace NetOpnApi
 
         #region Get Response Root Element
 
-        private static JsonElement GetEmptyJsonObject()
-        {
-            var doc = JsonDocument.Parse("{}");
-            return doc.RootElement;
-        }
+        private static readonly JsonElement NullJsonObject  = JsonDocument.Parse("null").RootElement;
+        private static readonly JsonElement EmptyJsonObject = JsonDocument.Parse("{}").RootElement;
+        private static readonly JsonElement EmptyJsonArray  = JsonDocument.Parse("[]").RootElement;
         
         private static JsonElement GetResponseRootElement(this ICommand self, JsonDocument jsonDocument)
         {
-            if (string.IsNullOrEmpty(self.ResponseRootElementName))
+            var root = jsonDocument.RootElement;
+
+            // null returned from API, return null.
+            if (root.ValueKind == JsonValueKind.Null) return NullJsonObject;
+            
+            // empty array returned from API where root element is named, return null.
+            if (root.ValueKind == JsonValueKind.Array &&
+                root.GetArrayLength() == 0)
             {
-                if (jsonDocument.RootElement.ValueKind != self.ResponseRootElementValueKind)
+                if (string.IsNullOrEmpty(self.ResponseRootElementName))
                 {
-                    if (self.ResponseRootElementValueKind == JsonValueKind.Object &&
-                        jsonDocument.RootElement.ValueKind == JsonValueKind.Array &&
-                        jsonDocument.RootElement.GetArrayLength() == 0)
+                    return self.ResponseRootElementValueKind == JsonValueKind.Object ? EmptyJsonObject : EmptyJsonArray;
+                }
+
+                return NullJsonObject;
+            }
+
+            if (!string.IsNullOrEmpty(self.ResponseRootElementName))
+            {
+                if (root.ValueKind == JsonValueKind.Object)
+                {
+                    if (!root.TryGetProperty(self.ResponseRootElementName, out root))
                     {
-                        return GetEmptyJsonObject();
+                        // json response was object, but has no matching property, return null.
+                        return NullJsonObject;
                     }
-                    
+                }
+                else
+                {
+                    throw new NetOpnApiInvalidResponseException(
+                        ErrorCode.InvalidResponseRootObject,
+                        "The json response does not contain an object.");
+                }
+            }
+
+            if (root.ValueKind != self.ResponseRootElementValueKind)
+            {
+                // the root element contains an empty array where an object is expected, return an empty object.
+                if (self.ResponseRootElementValueKind == JsonValueKind.Object &&
+                    root.ValueKind == JsonValueKind.Array &&
+                    root.GetArrayLength() == 0)
+                {
+                    return EmptyJsonObject;
+                }
+
+                if (string.IsNullOrEmpty(self.ResponseRootElementName))
+                {
                     throw new NetOpnApiInvalidResponseException(
                         ErrorCode.InvalidResponseRootObject,
                         $"The root element of the json response is not an {self.ResponseRootElementValueKind}."
                     );
                 }
 
-                return jsonDocument.RootElement;
+                throw new NetOpnApiInvalidResponseException(
+                    ErrorCode.InvalidResponseRootObject,
+                    $"The root element property named {self.ResponseRootElementName} is not an {self.ResponseRootElementValueKind}."
+                );
             }
-
-            if (jsonDocument.RootElement.TryGetProperty(self.ResponseRootElementName, out var root))
-            {
-                if (root.ValueKind != self.ResponseRootElementValueKind)
-                {
-                    if (self.ResponseRootElementValueKind == JsonValueKind.Object &&
-                        root.ValueKind == JsonValueKind.Array &&
-                        root.GetArrayLength() == 0)
-                    {
-                        return GetEmptyJsonObject();
-                    }
-
-                    throw new NetOpnApiInvalidResponseException(
-                        ErrorCode.InvalidResponseRootObject,
-                        $"The root element property named {self.ResponseRootElementName} is not an {self.ResponseRootElementValueKind}."
-                    );
-                }
-
-                return root;
-            }
-
-            throw new NetOpnApiInvalidResponseException(
-                ErrorCode.MissingResponseRootObject,
-                $"The root element is missing a property named {self.ResponseRootElementName}."
-            );
+            
+            // root element found.
+            return root;
         }
 
         #endregion
@@ -399,7 +414,7 @@ namespace NetOpnApi
 
         private static void SetEmptyResponse(this ICommand self)
         {
-            if (self.SupportsResponse()) return;
+            if (!self.SupportsResponse()) return;
 
             var prop = self.GetType().GetProperty("Response", BindingFlags.Instance | BindingFlags.Public);
             if (prop is null) throw new ArgumentException("Command does not implement \"Response\" property publicly.");
@@ -420,6 +435,12 @@ namespace NetOpnApi
 
         private static void SetResponse<T>(this ICommandWithResponse<T> self, JsonElement value)
         {
+            if (value.ValueKind == JsonValueKind.Null)
+            {
+                self.SetEmptyResponse();
+                return;
+            }
+
             var t = typeof(T);
             
             try
@@ -436,6 +457,12 @@ namespace NetOpnApi
         private static void SetResponse(this ICommand self, JsonElement value)
         {
             if (!self.SupportsResponse()) return;
+
+            if (value.ValueKind == JsonValueKind.Null)
+            {
+                self.SetEmptyResponse();
+                return;
+            }
 
             var prop = self.GetType().GetProperty("Response", BindingFlags.Instance | BindingFlags.Public);
             if (prop is null) throw new ArgumentException("Command does not implement \"Response\" property publicly.");

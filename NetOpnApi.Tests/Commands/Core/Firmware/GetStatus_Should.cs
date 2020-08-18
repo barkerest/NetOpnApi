@@ -13,7 +13,7 @@ namespace NetOpnApi.Tests.Commands.Core.Firmware
         protected override void CheckResponse()
         {
             Assert.NotNull(Command.Response);
-            Assert.Equal("ready", Command.Response.Status, ignoreCase: true);
+            Assert.Contains(Command.Response.Status, new[] {"ready", "busy"});
         }
     }
 }

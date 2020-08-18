@@ -27,6 +27,7 @@ namespace NetOpnApi.Tests.Models
         protected override void Compare(StatusWithUuid expected, StatusWithUuid actual)
         {
             Assert.Equal(expected.Status, actual.Status);
+            Assert.Equal(expected.Uuid, actual.Uuid);
         }
 
         protected override StatusWithUuid Expected => new StatusWithUuid() {Status = "ok", Uuid = Guid.Parse("6ead6b35-c968-467c-a820-582a23f5a228")};
