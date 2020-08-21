@@ -185,6 +185,15 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, int.MaxValue)
             );
+            
+            // test 10: 0xc001
+            dict[jsonName] = "0xc001";
+            yield return new ModelTestParam<T>(
+                $"{propName} = {JsonSerializer.Serialize(dict[jsonName])}",
+                JsonSerializer.Serialize(dict),
+                m => propInfo.SetPropValue(m, 0xc001)
+            );
+
         }
 
         public static IEnumerable<ModelTestParam<T>> CreateForProperty(string defaultJson, Expression<Func<T, long>> property)
@@ -266,6 +275,15 @@ namespace NetOpnApi.Tests
                 JsonSerializer.Serialize(dict),
                 m => propInfo.SetPropValue(m, long.MaxValue)
             );
+            
+            // test 10: 0xc001
+            dict[jsonName] = "0xc0010000c001";
+            yield return new ModelTestParam<T>(
+                $"{propName} = {JsonSerializer.Serialize(dict[jsonName])}",
+                JsonSerializer.Serialize(dict),
+                m => propInfo.SetPropValue(m, 0xc0010000c001)
+            );
+
         }
 
         public static IEnumerable<ModelTestParam<T>> CreateForProperty(string defaultJson, Expression<Func<T, double>> property)

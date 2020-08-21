@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -517,8 +519,8 @@ namespace NetOpnApi
                         case HttpStatusCode.Accepted:
                         case HttpStatusCode.Created:
                         case HttpStatusCode.PartialContent:
-                            var json = response.Content.ReadAsStringAsync().Result;
-
+                            var json  = response.Content.ReadAsStringAsync().Result;
+                            
                             if (string.IsNullOrWhiteSpace(json))
                             {
                                 self.Logger?.LogDebug("No content returned.");
@@ -526,6 +528,15 @@ namespace NetOpnApi
                             }
                             else
                             {
+                                if (!string.Equals("application/json", response.Content.Headers.ContentType.MediaType, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    json = JsonSerializer.Serialize(new Dictionary<string, string>()
+                                    {
+                                        {"content", json},
+                                        {"contentType", response.Content.Headers.ContentType.ToString()}
+                                    });
+                                }
+
                                 JsonDocument doc;
                                 try
                                 {

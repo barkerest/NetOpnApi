@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,7 +10,16 @@ namespace NetOpnApi.JsonConverters
     /// </summary>
     public class AlwaysLong : JsonConverter<long>
     {
-        private static long Parse(string s) => long.TryParse(s, out var i) ? i : (decimal.TryParse(s, out var d) ? (long) d : 0);
+        private static long Parse(string s) 
+        {
+            if (s.StartsWith("0x") &&
+                long.TryParse(s.Substring(2), NumberStyles.AllowHexSpecifier, null, out var h))
+            {
+                return h;
+            }
+            
+            return long.TryParse(s, out var i) ? i : (double.TryParse(s, out var d) ? (long) d : 0);
+        }
 
         public override long Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             => reader.TokenType == JsonTokenType.Number

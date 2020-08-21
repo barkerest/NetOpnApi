@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,7 +10,16 @@ namespace NetOpnApi.JsonConverters
     /// </summary>
     public class AlwaysInt : JsonConverter<int>
     {
-        private static int Parse(string s) => int.TryParse(s, out var i) ? i : (decimal.TryParse(s, out var d) ? (int) d : 0);
+        private static int Parse(string s)
+        {
+            if (s.StartsWith("0x") &&
+                int.TryParse(s.Substring(2), NumberStyles.AllowHexSpecifier, null, out var h))
+            {
+                return h;
+            }
+            
+            return int.TryParse(s, out var i) ? i : (double.TryParse(s, out var d) ? (int) d : 0);
+        }
 
         public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
             => reader.TokenType == JsonTokenType.Number
