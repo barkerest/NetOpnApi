@@ -1,0 +1,32 @@
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+namespace NetOpnApiBuilder.Models
+{
+    public class ApiModule
+    {
+        [Key]
+        public int ID { get; set; }
+        
+        /// <summary>
+        /// The name according to the API.
+        /// </summary>
+        [Required]
+        [StringLength(100)]
+        public string ApiName { get; set; }
+        
+        /// <summary>
+        /// The name we'll use in the CLR.
+        /// </summary>
+        [StringLength(100)]
+        public string ClrName { get; set; }
+
+        /// <summary>
+        /// The controllers belonging to this module.
+        /// </summary>
+        public IList<ApiController> Controllers { get; set; }
+
+        public override string ToString()
+            => ApiName;
+    }
+}

@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using Microsoft.Extensions.Logging;
 using NetOpnApi.Errors;
@@ -27,12 +28,21 @@ namespace NetOpnApi
 
         static CommandExtensions()
         {
-            var handler = new HttpClientHandler()
+            var validatedHandler = new TimeoutHandler()
             {
-                ServerCertificateCustomValidationCallback = (message, certificate, chain, error) => true
+                InnerHandler = new HttpClientHandler()
             };
-            ValidatedClient    = new HttpClient();
-            NonValidatedClient = new HttpClient(handler);
+            
+            var nonValidatedHandler = new TimeoutHandler()
+            {
+                InnerHandler = new HttpClientHandler()
+                {
+                    ServerCertificateCustomValidationCallback = (message, certificate, chain, error) => true    
+                }
+            };
+            
+            ValidatedClient    = new HttpClient(validatedHandler);
+            NonValidatedClient = new HttpClient(nonValidatedHandler);
         }
 
         #region Generic Interface Helpers
@@ -484,9 +494,60 @@ namespace NetOpnApi
 
         #endregion
 
+        #region Request Timeouts
+
+        private const string TimeoutKey = "RequestTimeout";
+
+        private static void SetTimeout(this HttpRequestMessage self, TimeSpan? timeout)
+        {
+            self.Properties[TimeoutKey] = timeout;
+        }
+
+        private static TimeSpan? GetTimeout(this HttpRequestMessage self)
+        {
+            if (self.Properties.TryGetValue(TimeoutKey, out var value) &&
+                value is TimeSpan timeout)
+            {
+                return timeout;
+            }
+
+            return null;
+        }
+
+        private class TimeoutHandler : DelegatingHandler
+        {
+            private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(100);
+
+            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                var                     timeout = request.GetTimeout() ?? DefaultTimeout;
+                CancellationTokenSource cts = null;
+                
+                if (timeout != Timeout.InfiniteTimeSpan)
+                {
+                    cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    cts.CancelAfter(timeout);
+                }
+
+                using (cts)
+                {
+                    try
+                    {
+                        return await base.SendAsync(request, cts?.Token ?? cancellationToken);
+                    }
+                    catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+                    {
+                        throw new NetOpnApiTimeoutException(timeout);
+                    }
+                }
+            }
+        }
+
+        #endregion
+        
         #region ExecuteCommand
 
-        private static void ExecuteCommand(this ICommand self, Func<IDeviceConfig, HttpRequestMessage> createRequest, Action setEmpty, Action<JsonElement> setValue)
+        private static void ExecuteCommand(this ICommand self, Func<IDeviceConfig, HttpRequestMessage> createRequest, Action setEmpty, Action<JsonElement> setValue, int timeout)
         {
             if (self is null) throw new ArgumentNullException(nameof(self));
             var cfg    = self.Config ?? throw new ArgumentNullException(nameof(self.Config));
@@ -494,87 +555,101 @@ namespace NetOpnApi
             try
             {
                 using (var request = createRequest(cfg))
-                using (var response = client.SendAsync(request).Result)
                 {
-                    self.Logger?.LogDebug($"Response Code: {(int) response.StatusCode} ({response.StatusCode})");
-
-                    if (NetOpnApiNotImplementedException.HandledCodes.Contains(response.StatusCode))
+                    request.SetTimeout(TimeSpan.FromSeconds(timeout));
+                    using (var response = client.SendAsync(request).Result)
                     {
-                        throw new NetOpnApiNotImplementedException(response.StatusCode, self);
-                    }
+                        self.Logger?.LogDebug($"Response Code: {(int) response.StatusCode} ({response.StatusCode})");
 
-                    if (NetOpnApiNotAuthorizedException.HandledCodes.Contains(response.StatusCode))
-                    {
-                        throw new NetOpnApiNotAuthorizedException(response.StatusCode);
-                    }
+                        if (NetOpnApiNotImplementedException.HandledCodes.Contains(response.StatusCode))
+                        {
+                            throw new NetOpnApiNotImplementedException(response.StatusCode, self);
+                        }
 
-                    switch (response.StatusCode)
-                    {
-                        case HttpStatusCode.NoContent:
-                        case HttpStatusCode.ResetContent:
-                            setEmpty();
-                            break;
+                        if (NetOpnApiNotAuthorizedException.HandledCodes.Contains(response.StatusCode))
+                        {
+                            throw new NetOpnApiNotAuthorizedException(response.StatusCode);
+                        }
 
-                        case HttpStatusCode.OK:
-                        case HttpStatusCode.Accepted:
-                        case HttpStatusCode.Created:
-                        case HttpStatusCode.PartialContent:
-                            var json  = response.Content.ReadAsStringAsync().Result;
-                            
-                            if (string.IsNullOrWhiteSpace(json))
-                            {
-                                self.Logger?.LogDebug("No content returned.");
+                        switch (response.StatusCode)
+                        {
+                            case HttpStatusCode.NoContent:
+                            case HttpStatusCode.ResetContent:
                                 setEmpty();
-                            }
-                            else
-                            {
-                                if (!string.Equals("application/json", response.Content.Headers.ContentType.MediaType, StringComparison.OrdinalIgnoreCase))
+                                break;
+
+                            case HttpStatusCode.OK:
+                            case HttpStatusCode.Accepted:
+                            case HttpStatusCode.Created:
+                            case HttpStatusCode.PartialContent:
+                                var json = response.Content.ReadAsStringAsync().Result;
+
+                                if (string.IsNullOrWhiteSpace(json))
                                 {
-                                    json = JsonSerializer.Serialize(new Dictionary<string, string>()
+                                    self.Logger?.LogDebug("No content returned.");
+                                    setEmpty();
+                                }
+                                else
+                                {
+                                    if (!string.Equals("application/json", response.Content.Headers.ContentType.MediaType, StringComparison.OrdinalIgnoreCase))
                                     {
-                                        {"content", json},
-                                        {"contentType", response.Content.Headers.ContentType.ToString()}
-                                    });
+                                        json = JsonSerializer.Serialize(
+                                            new Dictionary<string, string>()
+                                            {
+                                                {"content", json},
+                                                {"contentType", response.Content.Headers.ContentType.ToString()}
+                                            }
+                                        );
+                                    }
+
+                                    JsonDocument doc;
+                                    try
+                                    {
+                                        self.Logger?.LogDebug($"Received {json.Length} bytes, parsing JSON response...");
+                                        doc = JsonDocument.Parse(json);
+                                    }
+                                    catch (JsonException e)
+                                    {
+                                        self.Logger?.LogError(e, "Failed to parse JSON.");
+                                        throw new NetOpnApiInvalidResponseException(json);
+                                    }
+
+                                    if (doc.RootElement.ValueKind == JsonValueKind.Null)
+                                    {
+                                        self.Logger?.LogError("API returned NULL.");
+                                        throw new NetOpnApiInvalidResponseException(ErrorCode.MissingResponseRootObject, "API returned NULL.");
+                                    }
+
+                                    var root = self.GetResponseRootElement(doc);
+                                    try
+                                    {
+                                        self.Logger?.LogDebug("Processing response object...");
+                                        setValue(root);
+                                    }
+                                    catch (ArgumentException e)
+                                    {
+                                        self.Logger?.LogError(e, "Failed to set the response.");
+                                        throw new NetOpnApiInvalidResponseException(e);
+                                    }
                                 }
 
-                                JsonDocument doc;
-                                try
-                                {
-                                    self.Logger?.LogDebug($"Received {json.Length} bytes, parsing JSON response...");
-                                    doc = JsonDocument.Parse(json);
-                                }
-                                catch (JsonException e)
-                                {
-                                    self.Logger?.LogError(e, "Failed to parse JSON.");
-                                    throw new NetOpnApiInvalidResponseException(json);
-                                }
+                                break;
 
-                                if (doc.RootElement.ValueKind == JsonValueKind.Null)
-                                {
-                                    self.Logger?.LogError("API returned NULL.");
-                                    throw new NetOpnApiInvalidResponseException(ErrorCode.MissingResponseRootObject, "API returned NULL.");
-                                }
-
-                                var root = self.GetResponseRootElement(doc);
-                                try
-                                {
-                                    self.Logger?.LogDebug("Processing response object...");
-                                    setValue(root);
-                                }
-                                catch (ArgumentException e)
-                                {
-                                    self.Logger?.LogError(e, "Failed to set the response.");
-                                    throw new NetOpnApiInvalidResponseException(e);
-                                }
-                            }
-
-                            break;
-
-                        default:
-                            self.Logger?.LogError($"API returned unexpected status code {(int) response.StatusCode} ({response.StatusCode}).");
-                            throw new NetOpnApiHttpException(response.StatusCode);
+                            default:
+                                self.Logger?.LogError($"API returned unexpected status code {(int) response.StatusCode} ({response.StatusCode}).");
+                                throw new NetOpnApiHttpException(response.StatusCode);
+                        }
                     }
                 }
+            }
+            catch (AggregateException e) when (e.InnerExceptions.First() is NetOpnApiException ex)
+            {
+                throw ex;
+            }
+            catch (AggregateException e) when (e.InnerExceptions.First() is HttpRequestException ex)
+            {
+                self.Logger?.LogError(ex, "HTTP request failed.");
+                throw new NetOpnApiHttpException(ex);
             }
             catch (HttpRequestException e)
             {
@@ -596,12 +671,13 @@ namespace NetOpnApi
         /// <exception cref="NetOpnApiNotAuthorizedException">The configured API key does not have sufficient access.</exception>
         /// <exception cref="NetOpnApiNotImplementedException">The command is not implemented on the device.</exception>
         /// <exception cref="NetOpnApiInvalidResponseException">The command returns an invalid response.</exception>
-        public static void Execute(this ICommand self)
+        public static void Execute(this ICommand self, int timeout=100)
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
                 self.SetEmptyResponse,
-                self.SetResponse
+                self.SetResponse,
+                timeout
             );
 
         /// <summary>
@@ -613,12 +689,13 @@ namespace NetOpnApi
         /// <exception cref="NetOpnApiNotAuthorizedException">The configured API key does not have sufficient access.</exception>
         /// <exception cref="NetOpnApiNotImplementedException">The command is not implemented on the device.</exception>
         /// <exception cref="NetOpnApiInvalidResponseException">The command returns an invalid response.</exception>
-        public static void Execute<TResponse>(this ICommandWithResponse<TResponse> self)
+        public static void Execute<TResponse>(this ICommandWithResponse<TResponse> self, int timeout=100)
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
                 self.SetEmptyResponse,
-                self.SetResponse
+                self.SetResponse,
+                timeout
             );
 
         /// <summary>
@@ -630,12 +707,13 @@ namespace NetOpnApi
         /// <exception cref="NetOpnApiNotAuthorizedException">The configured API key does not have sufficient access.</exception>
         /// <exception cref="NetOpnApiNotImplementedException">The command is not implemented on the device.</exception>
         /// <exception cref="NetOpnApiInvalidResponseException">The command returns an invalid response.</exception>
-        public static void Execute<TParameterSet>(this ICommandWithParameterSet<TParameterSet> self) where TParameterSet : IParameterSet
+        public static void Execute<TParameterSet>(this ICommandWithParameterSet<TParameterSet> self, int timeout=100) where TParameterSet : IParameterSet
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
                 self.SetEmptyResponse,
-                self.SetResponse
+                self.SetResponse,
+                timeout
             );
 
         /// <summary>
@@ -647,13 +725,14 @@ namespace NetOpnApi
         /// <exception cref="NetOpnApiNotAuthorizedException">The configured API key does not have sufficient access.</exception>
         /// <exception cref="NetOpnApiNotImplementedException">The command is not implemented on the device.</exception>
         /// <exception cref="NetOpnApiInvalidResponseException">The command returns an invalid response.</exception>
-        public static void Execute<TResponse, TParameterSet>(this ICommandWithResponseAndParameterSet<TResponse, TParameterSet> self)
+        public static void Execute<TResponse, TParameterSet>(this ICommandWithResponseAndParameterSet<TResponse, TParameterSet> self, int timeout=100)
             where TParameterSet : IParameterSet
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
                 self.SetEmptyResponse,
-                self.SetResponse
+                self.SetResponse,
+                timeout
             );
 
         #endregion
@@ -665,14 +744,15 @@ namespace NetOpnApi
         /// </summary>
         /// <param name="self"></param>
         /// <param name="errorCode">Returns the error code if command execution fails.</param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        public static bool TryExecute(this ICommand self, out ErrorCode errorCode)
+        public static bool TryExecute(this ICommand self, out ErrorCode errorCode, int timeout=100)
         {
             errorCode = ErrorCode.NoError;
 
             try
             {
-                self.Execute();
+                self.Execute(timeout);
                 return true;
             }
             catch (NetOpnApiException e)
@@ -687,14 +767,15 @@ namespace NetOpnApi
         /// </summary>
         /// <param name="self"></param>
         /// <param name="errorCode">Returns the error code if command execution fails.</param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        public static bool TryExecute<TResponse>(this ICommandWithResponse<TResponse> self, out ErrorCode errorCode)
+        public static bool TryExecute<TResponse>(this ICommandWithResponse<TResponse> self, out ErrorCode errorCode, int timeout=100)
         {
             errorCode = ErrorCode.NoError;
 
             try
             {
-                self.Execute();
+                self.Execute(timeout);
                 return true;
             }
             catch (NetOpnApiException e)
@@ -709,15 +790,16 @@ namespace NetOpnApi
         /// </summary>
         /// <param name="self"></param>
         /// <param name="errorCode">Returns the error code if command execution fails.</param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        public static bool TryExecute<TParameterSet>(this ICommandWithParameterSet<TParameterSet> self, out ErrorCode errorCode)
+        public static bool TryExecute<TParameterSet>(this ICommandWithParameterSet<TParameterSet> self, out ErrorCode errorCode, int timeout=100)
             where TParameterSet : IParameterSet
         {
             errorCode = ErrorCode.NoError;
 
             try
             {
-                self.Execute();
+                self.Execute(timeout);
                 return true;
             }
             catch (NetOpnApiException e)
@@ -732,15 +814,16 @@ namespace NetOpnApi
         /// </summary>
         /// <param name="self"></param>
         /// <param name="errorCode">Returns the error code if command execution fails.</param>
+        /// <param name="timeout"></param>
         /// <returns></returns>
-        public static bool TryExecute<TResponse, TParameterSet>(this ICommandWithResponseAndParameterSet<TResponse, TParameterSet> self, out ErrorCode errorCode)
+        public static bool TryExecute<TResponse, TParameterSet>(this ICommandWithResponseAndParameterSet<TResponse, TParameterSet> self, out ErrorCode errorCode, int timeout=100)
             where TParameterSet : IParameterSet
         {
             errorCode = ErrorCode.NoError;
 
             try
             {
-                self.Execute();
+                self.Execute(timeout);
                 return true;
             }
             catch (NetOpnApiException e)
@@ -758,10 +841,11 @@ namespace NetOpnApi
         /// Execute the command and wait for completion.
         /// </summary>
         /// <param name="self"></param>
+        /// <param name="perRequestTimeout"></param>
         /// <returns></returns>
-        public static StatusWithUuidAndLog ExecuteAndWait(this ICommandWithResponse<StatusWithUuid> self)
+        public static StatusWithUuidAndLog ExecuteAndWait(this ICommandWithResponse<StatusWithUuid> self, int perRequestTimeout=10)
         {
-            self.Execute();
+            self.Execute(perRequestTimeout);
             if (self.Response?.Status != "ok")
             {
                 return new StatusWithUuidAndLog()
@@ -785,7 +869,7 @@ namespace NetOpnApi
 
             while (true)
             {
-                progressCommand.Execute();
+                progressCommand.Execute(perRequestTimeout);
 
                 if (progressCommand.Response is null) throw new NetOpnApiInvalidResponseException(ErrorCode.MissingResponse, "Failed to determine status of running command.");
 

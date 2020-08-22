@@ -59,5 +59,10 @@
         /// The response contains an invalid status code. 
         /// </summary>
         InvalidStatus,
+        
+        /// <summary>
+        /// The request timed out.
+        /// </summary>
+        Timeout,
     }
 }

@@ -1,0 +1,33 @@
+﻿@model NetOpnApiBuilder.Models.TestDevice
+
+@{
+    ViewBag.Title = "Your Test Device";
+    Layout = "_Layout";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+        <div class="card">
+            <div class="card-header">
+                Your Test Device
+            </div>
+            <div class="card-body">
+                <form asp-action="Update" method="post">
+                    <div class="form-group">
+                        <label asp-for="Host">Hostname or IP</label>
+                        <input asp-for="Host" value="@Model.Host" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Key">API Key</label>
+                        <input asp-for="Key" value="@Model.Key" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Secret">API Secret</label>
+                        <input asp-for="Secret" value="@Model.Secret" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
