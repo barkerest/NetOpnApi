@@ -27,6 +27,23 @@ namespace NetOpnApiBuilder.Models
         /// </summary>
         public bool UsePost { get; set; }
         
+        /// <summary>
+        /// The function signature for the command.
+        /// </summary>
+        [Required]
+        public string Signature { get; set; }
+        
+        /// <summary>
+        /// The comment preceding the function definition in the source file.
+        /// </summary>
+        public string Comment { get; set; }
+        
+        /// <summary>
+        /// The body of the function from the source file.
+        /// </summary>
+        [Required]
+        public string Body { get; set; }
+        
         [EditorBrowsable(EditorBrowsableState.Never)]
         public int ControllerID { get; set; }
         
@@ -36,6 +53,16 @@ namespace NetOpnApiBuilder.Models
         [Required]
         public ApiController Controller { get; set; }
 
+        /// <summary>
+        /// True if the command is a new addition.
+        /// </summary>
+        public bool NewCommand { get; set; }
+        
+        /// <summary>
+        /// True if the command definition has changed.
+        /// </summary>
+        public bool CommandChanged { get; set; }
+        
         /// <summary>
         /// The URL parameters for this command.
         /// </summary>
@@ -53,11 +80,19 @@ namespace NetOpnApiBuilder.Models
         /// The object type definition for post requests.
         /// </summary>
         public ApiObjectType PostBodyObjectType { get; set; }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public int? ResponseBodyObjectTypeID { get; set; }
 
         /// <summary>
-        /// The API version this command was designed against.
+        /// The object type definition for the response.
         /// </summary>
-        public string ApiVersion { get; set; }
+        public ApiObjectType ResponseBodyObjectType { get; set; }
+        
+        /// <summary>
+        /// The source version this command was loaded from.
+        /// </summary>
+        public string SourceVersion { get; set; }
         
         public override string ToString()
             => $"{Controller}/{ApiName}";

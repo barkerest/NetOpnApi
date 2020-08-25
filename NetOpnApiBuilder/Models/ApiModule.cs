@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace NetOpnApiBuilder.Models
@@ -7,6 +8,14 @@ namespace NetOpnApiBuilder.Models
     {
         [Key]
         public int ID { get; set; }
+        
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public int SourceID { get; set; }
+        
+        /// <summary>
+        /// The API source for this module.
+        /// </summary>
+        public ApiSource Source { get; set; }
         
         /// <summary>
         /// The name according to the API.

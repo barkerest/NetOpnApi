@@ -1,25 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace NetOpnApiBuilder.Migrations
 {
-    public partial class InitializeModel : Migration
+    public partial class CreateDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "ApiModules",
-                columns: table => new
-                {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ApiName = table.Column<string>(maxLength: 100, nullable: false),
-                    ClrName = table.Column<string>(maxLength: 100, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ApiModules", x => x.ID);
-                });
-
             migrationBuilder.CreateTable(
                 name: "ApiObjectTypes",
                 columns: table => new
@@ -35,6 +22,21 @@ namespace NetOpnApiBuilder.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ApiSources",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(maxLength: 120, nullable: false),
+                    Version = table.Column<string>(maxLength: 32, nullable: false),
+                    LastSync = table.Column<DateTime>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApiSources", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TestDevice",
                 columns: table => new
                 {
@@ -46,27 +48,6 @@ namespace NetOpnApiBuilder.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TestDevice", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ApiControllers",
-                columns: table => new
-                {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ApiName = table.Column<string>(maxLength: 100, nullable: false),
-                    ClrName = table.Column<string>(maxLength: 100, nullable: true),
-                    ModuleID = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ApiControllers", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_ApiControllers_ApiModules_ModuleID",
-                        column: x => x.ModuleID,
-                        principalTable: "ApiModules",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -100,6 +81,48 @@ namespace NetOpnApiBuilder.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ApiModules",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SourceID = table.Column<int>(nullable: false),
+                    ApiName = table.Column<string>(maxLength: 100, nullable: false),
+                    ClrName = table.Column<string>(maxLength: 100, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApiModules", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_ApiModules_ApiSources_SourceID",
+                        column: x => x.SourceID,
+                        principalTable: "ApiSources",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ApiControllers",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ApiName = table.Column<string>(maxLength: 100, nullable: false),
+                    ClrName = table.Column<string>(maxLength: 100, nullable: true),
+                    ModuleID = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApiControllers", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_ApiControllers_ApiModules_ModuleID",
+                        column: x => x.ModuleID,
+                        principalTable: "ApiModules",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ApiCommands",
                 columns: table => new
                 {
@@ -108,9 +131,15 @@ namespace NetOpnApiBuilder.Migrations
                     ApiName = table.Column<string>(maxLength: 100, nullable: false),
                     ClrName = table.Column<string>(maxLength: 100, nullable: true),
                     UsePost = table.Column<bool>(nullable: false),
+                    Signature = table.Column<string>(nullable: false),
+                    Comment = table.Column<string>(nullable: true),
+                    Body = table.Column<string>(nullable: false),
                     ControllerID = table.Column<int>(nullable: false),
+                    NewCommand = table.Column<bool>(nullable: false),
+                    CommandChanged = table.Column<bool>(nullable: false),
                     PostBodyObjectTypeID = table.Column<int>(nullable: true),
-                    ApiVersion = table.Column<string>(nullable: true)
+                    ResponseBodyObjectTypeID = table.Column<int>(nullable: true),
+                    SourceVersion = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -124,6 +153,12 @@ namespace NetOpnApiBuilder.Migrations
                     table.ForeignKey(
                         name: "FK_ApiCommands_ApiObjectTypes_PostBodyObjectTypeID",
                         column: x => x.PostBodyObjectTypeID,
+                        principalTable: "ApiObjectTypes",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_ApiCommands_ApiObjectTypes_ResponseBodyObjectTypeID",
+                        column: x => x.ResponseBodyObjectTypeID,
                         principalTable: "ApiObjectTypes",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.SetNull);
@@ -153,22 +188,23 @@ namespace NetOpnApiBuilder.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ApiUrlCommands",
+                name: "ApiUrlParams",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     CommandID = table.Column<int>(nullable: false),
                     Order = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(maxLength: 100, nullable: false),
+                    ApiName = table.Column<string>(maxLength: 100, nullable: false),
+                    ClrName = table.Column<string>(maxLength: 100, nullable: true),
                     DataType = table.Column<int>(nullable: false),
                     AllowNull = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ApiUrlCommands", x => x.ID);
+                    table.PrimaryKey("PK_ApiUrlParams", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_ApiUrlCommands_ApiCommands_CommandID",
+                        name: "FK_ApiUrlParams_ApiCommands_CommandID",
                         column: x => x.CommandID,
                         principalTable: "ApiCommands",
                         principalColumn: "ID",
@@ -179,6 +215,11 @@ namespace NetOpnApiBuilder.Migrations
                 name: "IX_ApiCommands_PostBodyObjectTypeID",
                 table: "ApiCommands",
                 column: "PostBodyObjectTypeID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApiCommands_ResponseBodyObjectTypeID",
+                table: "ApiCommands",
+                column: "ResponseBodyObjectTypeID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ApiCommands_ControllerID_ApiName",
@@ -193,9 +234,9 @@ namespace NetOpnApiBuilder.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApiModules_ApiName",
+                name: "IX_ApiModules_SourceID_ApiName",
                 table: "ApiModules",
-                column: "ApiName",
+                columns: new[] { "SourceID", "ApiName" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -222,8 +263,14 @@ namespace NetOpnApiBuilder.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ApiUrlCommands_CommandID_Order",
-                table: "ApiUrlCommands",
+                name: "IX_ApiSources_Name",
+                table: "ApiSources",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApiUrlParams_CommandID_Order",
+                table: "ApiUrlParams",
                 columns: new[] { "CommandID", "Order" },
                 unique: true);
         }
@@ -237,7 +284,7 @@ namespace NetOpnApiBuilder.Migrations
                 name: "ApiQueryParams");
 
             migrationBuilder.DropTable(
-                name: "ApiUrlCommands");
+                name: "ApiUrlParams");
 
             migrationBuilder.DropTable(
                 name: "TestDevice");
@@ -253,6 +300,9 @@ namespace NetOpnApiBuilder.Migrations
 
             migrationBuilder.DropTable(
                 name: "ApiModules");
+
+            migrationBuilder.DropTable(
+                name: "ApiSources");
         }
     }
 }

@@ -1,36 +1,76 @@
 ﻿@using Microsoft.AspNetCore.Mvc
-@model NetOpnApiBuilder.ViewModels.Home.IndexViewModel
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
-    <div id="alert_repo_status" class="alert alert-@(Model.RepositoriesCloned ? "success" : "warning")">
-        OPNsense repositories @(Model.RepositoriesCloned ? "have been successfully cloned" : "are currently being cloned").
-    </div>
-    <div id="alert_device_status" class="alert alert-@(Model.DeviceConfigured ? "success" : "warning")">
-        @if (Model.DeviceConfigured)
-        {
-            @:Test device at @(Model.DeviceHost) is configured and available.
-        }
-        else
-        {
-            @:Test device needs configured or the device is not available.<br>
-            <a asp-controller="TestDevice" asp-action="Index" title="Configure device" class="text-warning">Click here to configure the device.</a>
-        }
-    </div>
-    
-
 </div>
+
+<div class="row">
+    <div class="col-xl-4 col-lg-5 col-md-6 offset-xl-2 offset-lg-1">
+        <div class="card bg-light">
+            <div class="card-header text-white bg-info" id="device_header">
+                Device Status
+            </div>
+            <div class="card-body" id="device_status">
+                Checking device status...
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-4 col-lg-5 col-md-6">
+        <div class="card bg-light">
+            <div class="card-header text-white bg-info" id="repo_header">
+                Repository Status
+            </div>
+            <div class="card-body" id="repo_status">
+                Checking repository status...
+            </div>
+        </div>
+    </div>
+</div>
+
 
 @section Scripts
 {
     <script type="text/javascript">
     //<![CDATA[
     
-    const repoCheck = '@(Url.ActionLink("ReposReady"))';
+    const repoCheck = '@(Url.ActionLink("Status", "Repo"))';
+    const repoSync = '@(Url.ActionLink("Sync", "Repo"))';
     const deviceCheck = '@(Url.ActionLink("DeviceReady"))';
+    
+    function setHeaderColor(header, bgColor, textColor='white')
+    {
+        if (header.is('.text-' + textColor) && header.is('.bg-' + bgColor))
+            return;
+        
+        header
+            .removeClass()
+            .addClass('card-header')
+            .addClass('text-' + textColor)
+            .addClass('bg-' + bgColor);
+    }
+    
+    function setStatusContent(status, content)
+    {
+        let current = status.html();
+        let proposed = content.html();
+        
+        if (current === proposed)
+                return;
+        
+        status.empty().append(proposed);
+    }
+    
+    function synchronizeRepo()
+    {
+        $.ajax({
+            url: repoSync,
+            method: 'POST',
+            dataType: 'json'
+        });
+    }
     
     function checkRepoStatus()
     {
@@ -38,21 +78,62 @@
             url: repoCheck,
             method: 'GET',
             dataType: 'json',
-            success: function(data, status,xhr)
+            success: function(data)
             {
-                let alert = $('#alert_repo_status');
+                let header = $('#repo_header');
+                let status = $('#repo_status');
                 
-                if (data.ready)
+                if (data.syncComplete)
                 {
-                    alert
-                        .removeClass('alert-warning')
-                        .addClass('alert-success')
-                        .text('OPNsense repositories have been successfully cloned.');
+                    setHeaderColor(header, 'success');
+                    
+                    setStatusContent(
+                        status,
+                        $('<div/>')
+                            .append('The repositories have been synchronized to the database.')
+                            .append('<br>')
+                            .append('Last sync: ' + data.lastSync)
+                            .append('<br>')
+                            .append('<a href="javascript:synchronizeRepo()" title="Synchronize Repo">Synchronize Repo to Database</a>')
+                    );
+                    
+                }
+                else if (data.syncRunning)
+                {
+                    setHeaderColor(header, 'warning');
+                    
+                    setStatusContent(
+                        status,
+                        $('<div/>')
+                            .append('The repositories are currently being synchronized to the database.')
+                    );
+                }
+                else if (data.cloneComplete)
+                {
+                    setHeaderColor(header, 'success');
+                    
+                    setStatusContent(
+                        status,
+                        $('<div/>')
+                            .append('The repositories have been cloned locally.')
+                            .append('<br>')
+                            .append('Last sync: ' + data.lastSync)
+                            .append('<br>')
+                            .append('<a href="javascript:synchronizeRepo()" title="Synchronize Repo">Synchronize Repo to Database</a>')
+                    );
                 }
                 else
                 {
-                    window.setTimeout(checkRepoStatus, 500);
+                    setHeaderColor(header, 'warning');
+                    
+                    setStatusContent(
+                        status,
+                        $('<div/>')
+                            .append('The repositories are currently being cloned locally.')
+                    );
                 }
+                
+                window.setTimeout(checkRepoStatus, 500);
             },
         })
     }
@@ -63,38 +144,50 @@
             url: deviceCheck,
             method: 'GET',
             dataType: 'json',
-            success: function(data, status,xhr)
+            success: function(data)
             {
-                let alert = $('#alert_device_status');
+                let header = $('#device_header');
+                let status = $('#device_status');
                 
                 if (data.ready)
                 {
-                    alert
-                        .removeClass('alert-warning')
-                        .addClass('alert-success')
-                        .text('Test device at ' + data.host + ' is configured and available.');
+                    setHeaderColor(header, 'success');
+                    
+                    setStatusContent(
+                        status,
+                        $('<div/>')
+                            .append('Test device ' + data.host + ' is configured and available.')
+                    );
+                }
+                else if (data.configured)
+                {
+                    setHeaderColor(header, 'danger');
+                    setStatusContent(
+                        status,
+                        $('<div/>')
+                            .append('Test device ' + data.host + ' is configured but not available.')
+                    );
                 }
                 else
                 {
-                    window.setTimeout(checkDeviceStatus, 500);
+                    setHeaderColor(header, 'warning');
+                    setStatusContent(
+                        status,
+                        $('<div/>')
+                            .append('Test device is not configured.')
+                            .append('<br>')
+                            .append('<a href="@Url.Action("Index", "TestDevice")" title="Configure Device">Configure Device</a>')
+                    );
                 }
+                window.setTimeout(checkDeviceStatus, 500);
             },
         })
     }
     
-    @if (!Model.RepositoriesCloned)
-    {
-    <text>
-    window.setTimeout(checkRepoStatus, 500);
-    </text>
-    }
-    
-    @if (!Model.DeviceConfigured)
-    {
-    <text>
-    window.setTimeout(checkDeviceStatus, 500);
-    </text>
-    }
+    $(function(){
+        checkDeviceStatus();
+        checkRepoStatus();
+    });
     
     //]]>
     </script>

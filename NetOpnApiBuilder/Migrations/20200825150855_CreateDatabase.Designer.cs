@@ -9,8 +9,8 @@ using NetOpnApiBuilder;
 namespace NetOpnApiBuilder.Migrations
 {
     [DbContext(typeof(BuilderDb))]
-    [Migration("20200822004227_InitializeModel")]
-    partial class InitializeModel
+    [Migration("20200825150855_CreateDatabase")]
+    partial class CreateDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -29,18 +29,38 @@ namespace NetOpnApiBuilder.Migrations
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
-                    b.Property<string>("ApiVersion")
+                    b.Property<string>("Body")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ClrName")
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
+                    b.Property<bool>("CommandChanged")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ControllerID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("NewCommand")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("PostBodyObjectTypeID")
                         .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ResponseBodyObjectTypeID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Signature")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SourceVersion")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("UsePost")
                         .HasColumnType("INTEGER");
@@ -48,6 +68,8 @@ namespace NetOpnApiBuilder.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("PostBodyObjectTypeID");
+
+                    b.HasIndex("ResponseBodyObjectTypeID");
 
                     b.HasIndex("ControllerID", "ApiName")
                         .IsUnique();
@@ -96,9 +118,12 @@ namespace NetOpnApiBuilder.Migrations
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
+                    b.Property<int>("SourceID")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("ID");
 
-                    b.HasIndex("ApiName")
+                    b.HasIndex("SourceID", "ApiName")
                         .IsUnique();
 
                     b.ToTable("ApiModules");
@@ -197,6 +222,33 @@ namespace NetOpnApiBuilder.Migrations
                     b.ToTable("ApiQueryParams");
                 });
 
+            modelBuilder.Entity("NetOpnApiBuilder.Models.ApiSource", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("LastSync")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(120);
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(32);
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("ApiSources");
+                });
+
             modelBuilder.Entity("NetOpnApiBuilder.Models.ApiUrlParam", b =>
                 {
                     b.Property<int>("ID")
@@ -206,16 +258,20 @@ namespace NetOpnApiBuilder.Migrations
                     b.Property<bool>("AllowNull")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ApiName")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(100);
+
+                    b.Property<string>("ClrName")
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(100);
+
                     b.Property<int>("CommandID")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("DataType")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(100);
 
                     b.Property<int>("Order")
                         .HasColumnType("INTEGER");
@@ -225,7 +281,7 @@ namespace NetOpnApiBuilder.Migrations
                     b.HasIndex("CommandID", "Order")
                         .IsUnique();
 
-                    b.ToTable("ApiUrlCommands");
+                    b.ToTable("ApiUrlParams");
                 });
 
             modelBuilder.Entity("NetOpnApiBuilder.Models.TestDevice", b =>
@@ -265,6 +321,11 @@ namespace NetOpnApiBuilder.Migrations
                         .WithMany()
                         .HasForeignKey("PostBodyObjectTypeID")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("NetOpnApiBuilder.Models.ApiObjectType", "ResponseBodyObjectType")
+                        .WithMany()
+                        .HasForeignKey("ResponseBodyObjectTypeID")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("NetOpnApiBuilder.Models.ApiController", b =>
@@ -272,6 +333,15 @@ namespace NetOpnApiBuilder.Migrations
                     b.HasOne("NetOpnApiBuilder.Models.ApiModule", "Module")
                         .WithMany("Controllers")
                         .HasForeignKey("ModuleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("NetOpnApiBuilder.Models.ApiModule", b =>
+                {
+                    b.HasOne("NetOpnApiBuilder.Models.ApiSource", "Source")
+                        .WithMany("Modules")
+                        .HasForeignKey("SourceID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

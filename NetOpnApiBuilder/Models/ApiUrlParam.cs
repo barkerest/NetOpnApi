@@ -25,11 +25,17 @@ namespace NetOpnApiBuilder.Models
         public int Order { get; set; }
         
         /// <summary>
-        /// The name for this parameter. 
+        /// The name for this parameter in the API. 
         /// </summary>
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public string ApiName { get; set; }
+        
+        /// <summary>
+        /// The name for this parameter in the CLR.
+        /// </summary>
+        [StringLength(100)]
+        public string ClrName { get; set; }
         
         /// <summary>
         /// The data type of this parameter (cannot include Object, Array, or Dictionary).
@@ -41,7 +47,7 @@ namespace NetOpnApiBuilder.Models
         /// </summary>
         public bool AllowNull { get; set; }
 
-        public override string ToString() => Name;
+        public override string ToString() => ApiName;
         
         IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
         {

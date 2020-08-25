@@ -64,6 +64,8 @@ namespace NetOpnApiBuilder
             return ret;
         }
         
+        public DbSet<ApiSource> ApiSources { get; set; }
+        
         public DbSet<ApiObjectType> ApiObjectTypes { get; set; }
         
         public DbSet<ApiObjectProperty> ApiObjectProperties { get; set; }
@@ -74,7 +76,7 @@ namespace NetOpnApiBuilder
         
         public DbSet<ApiCommand> ApiCommands { get; set; }
         
-        public DbSet<ApiUrlParam> ApiUrlCommands { get; set; }
+        public DbSet<ApiUrlParam> ApiUrlParams { get; set; }
         
         public DbSet<ApiQueryParam> ApiQueryParams { get; set; }
         
@@ -106,8 +108,17 @@ namespace NetOpnApiBuilder
             aopBuilder.HasIndex(x => new {x.ObjectTypeID, x.ApiName})
                       .IsUnique();
 
+            var asBuilder = modelBuilder.Entity<ApiSource>();
+            asBuilder.HasIndex(x => x.Name)
+                     .IsUnique();
+            
             var amBuilder = modelBuilder.Entity<ApiModule>();
-            amBuilder.HasIndex(x => x.ApiName).IsUnique();
+            amBuilder.HasOne(x => x.Source)
+                     .WithMany(x => x.Modules)
+                     .HasForeignKey(x => x.SourceID)
+                     .OnDelete(DeleteBehavior.Cascade);
+            amBuilder.HasIndex(x => new {x.SourceID, x.ApiName})
+                     .IsUnique();
 
             var acBuilder = modelBuilder.Entity<ApiController>();
             acBuilder.HasOne(x => x.Module)
@@ -127,6 +138,10 @@ namespace NetOpnApiBuilder
             aaBuilder.HasOne(x => x.PostBodyObjectType)
                      .WithMany()
                      .HasForeignKey(x => x.PostBodyObjectTypeID)
+                     .OnDelete(DeleteBehavior.SetNull);
+            aaBuilder.HasOne(x => x.ResponseBodyObjectType)
+                     .WithMany()
+                     .HasForeignKey(x => x.ResponseBodyObjectTypeID)
                      .OnDelete(DeleteBehavior.SetNull);
 
             var aqpBuilder = modelBuilder.Entity<ApiQueryParam>();
