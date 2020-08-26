@@ -1,0 +1,38 @@
+﻿@model NetOpnApiBuilder.Models.ApiModule[]
+
+@{
+    ViewBag.Title = "API Modules";
+    Layout = "_Layout";
+}
+
+<div class="card bg-light">
+    <div class="card-header text-white bg-primary">
+        API Modules
+    </div>
+    <table class="card-body table table-sm">
+        <thead>
+        <tr>
+            <th>Source</th>
+            <th>API Name</th>
+            <th>CLR Name</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <td colspan="4" class="text-center">@(Model.Length) modules</td>
+        </tr>
+        </tfoot>
+        <tbody>
+        @foreach (var mod in Model)
+        {
+            <tr>
+                <td>@mod.Source</td>
+                <td>@mod.ApiName</td>
+                <td>@mod.ClrName</td>
+                <td><a asp-action="Edit" asp-route-id="@mod.ID" class="btn btn-primary btn-sm" title="Edit">Edit</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

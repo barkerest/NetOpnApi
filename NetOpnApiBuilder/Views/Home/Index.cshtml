@@ -38,6 +38,7 @@
     
     const repoCheck = '@(Url.ActionLink("Status", "Repo"))';
     const repoSync = '@(Url.ActionLink("Sync", "Repo"))';
+    const repoInit = '@(Url.ActionLink("Init", "Repo"))';
     const deviceCheck = '@(Url.ActionLink("DeviceReady"))';
     
     function setHeaderColor(header, bgColor, textColor='white')
@@ -61,6 +62,15 @@
                 return;
         
         status.empty().append(proposed);
+    }
+    
+    function initializeRepo()
+    {
+        $.ajax({
+            url: repoInit,
+            method: 'POST',
+            dataType: 'json'
+        });
     }
     
     function synchronizeRepo()
@@ -122,7 +132,7 @@
                             .append('<a href="javascript:synchronizeRepo()" title="Synchronize Repo">Synchronize Repo to Database</a>')
                     );
                 }
-                else
+                else if (data.cloneRunning)
                 {
                     setHeaderColor(header, 'warning');
                     
@@ -130,6 +140,20 @@
                         status,
                         $('<div/>')
                             .append('The repositories are currently being cloned locally.')
+                    );
+                }
+                else
+                {
+                    setHeaderColor(header, 'warning');
+                                        
+                    setStatusContent(
+                        status,
+                        $('<div/>')
+                            .append('The repositories are not currently available locally.')
+                            .append('<br>')
+                            .append('Last sync: ' + data.lastSync)
+                            .append('<br>')
+                            .append('<a href="javascript:initializeRepo()" title="Initialize Repos">Initialize Repos</a>')
                     );
                 }
                 
@@ -157,6 +181,8 @@
                         status,
                         $('<div/>')
                             .append('Test device ' + data.host + ' is configured and available.')
+                            .append('<br>')
+                            .append('<a href="@Url.Action("Index", "TestDevice")" title="Configure Device">Configure Device</a>')
                     );
                 }
                 else if (data.configured)
@@ -166,6 +192,8 @@
                         status,
                         $('<div/>')
                             .append('Test device ' + data.host + ' is configured but not available.')
+                            .append('<br>')
+                            .append('<a href="@Url.Action("Index", "TestDevice")" title="Configure Device">Configure Device</a>')
                     );
                 }
                 else

@@ -1,0 +1,35 @@
+﻿@model ApiModule
+
+@{
+    ViewBag.Title = "Edit Module Name";
+    Layout = "_Layout";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header text-white bg-primary">
+                Edit Module Name
+            </div>
+            <div class="card-body">
+                <form asp-action="Update" asp-route-id="@Model.ID" method="post">
+                    <div class="form-group">
+                        <label>Source</label>
+                        <span class="form-control">@Model.Source</span>
+                    </div>
+                    <div class="form-group">
+                        <label>API Name</label>
+                        <span class="form-control">@Model.ApiName</span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ClrName">CLR Name</label>
+                        <input type="text" asp-for="ClrName" class="form-control"/>
+                    </div>
+                    <button type="submit" class="btn btn-primary" title="Update">Update</button>
+                    &nbsp;&nbsp;
+                    <a asp-action="Index" class="btn btn-light" title="Cancel">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

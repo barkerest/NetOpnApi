@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using NetOpnApiBuilder.Attributes;
 
 namespace NetOpnApiBuilder.Models
 {
@@ -13,6 +14,7 @@ namespace NetOpnApiBuilder.Models
         /// </summary>
         [Required]
         [StringLength(100)]
+        [SafeClrName]
         public string Name { get; set; }
 
         /// <summary>

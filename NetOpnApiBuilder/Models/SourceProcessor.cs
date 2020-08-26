@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetOpnApiBuilder.Enums;
+using NetOpnApiBuilder.Extensions;
 
 namespace NetOpnApiBuilder.Models
 {
@@ -94,8 +95,8 @@ namespace NetOpnApiBuilder.Models
             foreach (var modName in _apiModules.Keys)
             {
                 var mod = _db
-                                .ApiModules
-                                .FirstOrDefault(x => x.SourceID == _source.ID && x.ApiName == modName);
+                          .ApiModules
+                          .FirstOrDefault(x => x.SourceID == _source.ID && x.ApiName == modName);
 
                 if (mod is null)
                 {
@@ -104,6 +105,7 @@ namespace NetOpnApiBuilder.Models
                     {
                         SourceID = _source.ID,
                         ApiName  = modName,
+                        ClrName  = modName.ToSafeClrName()
                     };
                     _db.Add(mod);
                     _db.SaveChanges();
@@ -117,8 +119,8 @@ namespace NetOpnApiBuilder.Models
                     ctlName = ctlName.Substring(0, ctlName.Length - 10);
 
                     var ctl = _db
-                                    .ApiControllers
-                                    .FirstOrDefault(x => x.ModuleID == mod.ID && x.ApiName == ctlName);
+                              .ApiControllers
+                              .FirstOrDefault(x => x.ModuleID == mod.ID && x.ApiName == ctlName);
 
                     if (ctl is null)
                     {
@@ -126,7 +128,8 @@ namespace NetOpnApiBuilder.Models
                         ctl = new ApiController()
                         {
                             ModuleID = mod.ID,
-                            ApiName  = ctlName
+                            ApiName  = ctlName,
+                            ClrName  = ctlName.ToSafeClrName()
                         };
                         _db.Add(ctl);
                         _db.SaveChanges();
@@ -145,11 +148,11 @@ namespace NetOpnApiBuilder.Models
                         var cmdSig = $"function {cmdName}Action({cmdArgs})";
 
                         var cmd = _db
-                                        .ApiCommands
-                                        .FirstOrDefault(x => x.ControllerID == ctl.ID && x.ApiName == cmdName);
+                                  .ApiCommands
+                                  .FirstOrDefault(x => x.ControllerID == ctl.ID && x.ApiName == cmdName);
 
                         var sigChanged = !string.Equals(cmdSig, cmd?.Signature);
-                        
+
                         if (cmd is null)
                         {
                             _logger.LogDebug($"> added command {modName}:{ctlName}:{cmdName}");
@@ -157,6 +160,7 @@ namespace NetOpnApiBuilder.Models
                             {
                                 ControllerID = ctl.ID,
                                 ApiName      = cmdName,
+                                ClrName      = cmdName.ToSafeClrName(),
                                 Comment      = cmdComment,
                                 Body         = cmdBody,
                                 Signature    = cmdSig,
@@ -246,9 +250,10 @@ namespace NetOpnApiBuilder.Models
                                     {
                                         CommandID = cmd.ID,
                                         ApiName   = paramName,
+                                        ClrName   = paramName.ToSafeClrName(),
                                         AllowNull = nullable,
-                                        DataType = ApiDataType.String,
-                                        Order = order
+                                        DataType  = ApiDataType.String,
+                                        Order     = order
                                     };
                                     _db.Add(item);
                                     existingUrlParams.Add(item);
@@ -259,6 +264,7 @@ namespace NetOpnApiBuilder.Models
                                     {
                                         _logger.LogDebug($"> updating url param {modName}:{ctlName}:{cmdName}:{paramName}");
                                     }
+
                                     item.Order     = order;
                                     item.AllowNull = nullable;
                                     _db.Update(item);

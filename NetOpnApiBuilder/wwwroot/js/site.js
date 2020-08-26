@@ -1,4 +1,21 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿
+$(function() {
+    // ------------------------------------------------------- //
+    // Multi Level dropdowns
+    // ------------------------------------------------------ //
+    $("ul.dropdown-menu [data-toggle='dropdown']").on("click", function(event) {
+        event.preventDefault();
+        event.stopPropagation();
 
-// Write your JavaScript code.
+        $(this).siblings().toggleClass("show");
+
+
+        if (!$(this).next().hasClass('show')) {
+            $(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
+        }
+        $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
+            $('.dropdown-submenu .show').removeClass("show");
+        });
+
+    });
+});

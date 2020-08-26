@@ -19,6 +19,24 @@ namespace NetOpnApiBuilder.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> Init()
+        {
+            try
+            {
+                await _repos.Initialize();
+                return Json(new {result = "ok"});
+            }
+            catch (InvalidOperationException e)
+            {
+                return Json(new {result = "failed", message = e.Message});
+            }
+            catch (AggregateException e) when (e.InnerExceptions.FirstOrDefault() is InvalidOperationException ex)
+            {
+                return Json(new {result = "failed", message = ex.Message});
+            }
+        }
+
+        [HttpPost]
         public async Task<IActionResult> Sync()
         {
             try
@@ -42,6 +60,7 @@ namespace NetOpnApiBuilder.Controllers
             var lastSync = _db.ApiSources.Where(x => x.LastSync != null).Max(x => x.LastSync);
             return Json(new
             {
+                cloneRunning = _repos.InitStarted && !_repos.InitComplete,
                 cloneComplete = _repos.InitComplete,
                 syncComplete = _repos.Synchronized,
                 syncRunning = _repos.Synchronizing,

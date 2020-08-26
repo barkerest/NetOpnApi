@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using NetOpnApiBuilder.Attributes;
 
 namespace NetOpnApiBuilder.Models
 {
@@ -28,6 +29,7 @@ namespace NetOpnApiBuilder.Models
         /// The name we'll use in the CLR.
         /// </summary>
         [StringLength(100)]
+        [SafeClrName]
         public string ClrName { get; set; }
 
         /// <summary>

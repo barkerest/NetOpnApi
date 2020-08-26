@@ -36,6 +36,11 @@ namespace NetOpnApiBuilder.Models
         public bool InitComplete => _initTask.IsCompleted;
 
         /// <summary>
+        /// Determine if the repo initialization has been started.
+        /// </summary>
+        public bool InitStarted => _initTask.Status != TaskStatus.Created;
+
+        /// <summary>
         /// Get the core repo.
         /// </summary>
         public GitRepo Core { get; private set; }
@@ -52,7 +57,7 @@ namespace NetOpnApiBuilder.Models
         {
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             
-            _initTask = Task.Run(
+            _initTask = new Task(
                 () =>
                 {
                     Core    = new CoreRepo(loggerFactory.CreateLogger<CoreRepo>());
@@ -84,6 +89,25 @@ namespace NetOpnApiBuilder.Models
 
             return "0.0";
         }
+
+        public Task Initialize()
+        {
+            lock (_taskLock)
+            {
+                if (InitComplete)
+                {
+                    throw new InvalidOperationException("Initialization has already completed.");
+                }
+                
+                if (InitStarted)
+                {
+                    throw new InvalidOperationException("Initialization has already started.");
+                }
+
+                _initTask.Start();
+                return _initTask;
+            }
+        }
         
         public void Synchronize(BuilderDb db)
         {
@@ -114,7 +138,7 @@ namespace NetOpnApiBuilder.Models
                 {
                     source = new ApiSource()
                     {
-                        Name    = Core.Name,
+                        Name    = sourceName,
                         Version = "0.0"
                     };
                     db.Add(source);
