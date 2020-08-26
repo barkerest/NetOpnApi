@@ -96,7 +96,15 @@ namespace NetOpnApiBuilder.Models
         /// </summary>
         public string SourceVersion { get; set; }
         
+        /// <summary>
+        /// True to skip exporting this command.
+        /// </summary>
+        public bool Skip { get; set; }
+        
         public override string ToString()
-            => $"{Controller}/{ApiName}";
+        {
+            var name = string.IsNullOrEmpty(ClrName) ? ApiName : ClrName;
+            return $"{Controller}/{name}";
+        }
     }
 }

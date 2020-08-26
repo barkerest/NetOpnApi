@@ -1,4 +1,5 @@
-﻿@model NetOpnApiBuilder.Models.ApiModule[]
+﻿@using NetOpnApiBuilder.Extensions
+@model NetOpnApiBuilder.Models.ApiModule[]
 
 @{
     ViewBag.Title = "API Modules";
@@ -15,22 +16,29 @@
             <th>Source</th>
             <th>API Name</th>
             <th>CLR Name</th>
+            <th class="text-center">Export</th>
             <th></th>
         </tr>
         </thead>
         <tfoot>
         <tr>
-            <td colspan="4" class="text-center">@(Model.Length) modules</td>
+            <td colspan="5" class="text-center">@(Model.Length) module@(Model.Length == 1 ? "" : "s")</td>
         </tr>
         </tfoot>
         <tbody>
-        @foreach (var mod in Model)
+        @foreach (var mod in Model.OrderBy(x => x.Source.Name).ThenBy(x => x.ApiName))
         {
-            <tr>
-                <td>@mod.Source</td>
-                <td>@mod.ApiName</td>
+            <tr id="mod@(mod.ID)">
+                <td><span title="@(mod.Source.Version)">@mod.Source</span></td>
+                <td>
+                    <a asp-action="Show" asp-route-id="@mod.ID">@mod.ApiName</a>
+                </td>
                 <td>@mod.ClrName</td>
-                <td><a asp-action="Edit" asp-route-id="@mod.ID" class="btn btn-primary btn-sm" title="Edit">Edit</a></td>
+                <td class="text-center">@(mod.Skip ? "N" : "Y")</td>
+                <td class="text-right">
+                    @Url.EditButton(mod.ID)
+                    @Url.ToggleButton(mod.ID, !mod.Skip)
+                </td>
             </tr>
         }
         </tbody>

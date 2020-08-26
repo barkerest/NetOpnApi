@@ -24,10 +24,18 @@
                     <div class="form-group">
                         <label asp-for="ClrName">CLR Name</label>
                         <input type="text" asp-for="ClrName" class="form-control"/>
+                        <span asp-validation-for="ClrName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Skip">Export Status</label>
+                        <select asp-for="Skip" class="form-control">
+                            <option value="true">Do Not Export</option>
+                            <option value="false">Export</option>
+                        </select>
                     </div>
                     <button type="submit" class="btn btn-primary" title="Update">Update</button>
                     &nbsp;&nbsp;
-                    <a asp-action="Index" class="btn btn-light" title="Cancel">Cancel</a>
+                    <a asp-action="Index" asp-fragment="mod@(Model.ID)" class="btn btn-light" title="Cancel">Cancel</a>
                 </form>
             </div>
         </div>

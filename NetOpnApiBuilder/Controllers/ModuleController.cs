@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetOpnApiBuilder.Enums;
 using NetOpnApiBuilder.Extensions;
-using NetOpnApiBuilder.Models;
 
 namespace NetOpnApiBuilder.Controllers
 {
+    [Route("module")]
     public class ModuleController : Controller
     {
         private readonly ILogger   _logger;
@@ -27,7 +26,40 @@ namespace NetOpnApiBuilder.Controllers
             return View(model);
         }
 
-        [HttpGet]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Show(int id)
+        {
+            var model = await _db.ApiModules
+                                 .Include(x => x.Source)
+                                 .Include(x => x.Controllers)
+                                 .FirstOrDefaultAsync(x => x.ID == id);
+            if (model is null)
+            {
+                this.AddFlashMessage("The specified module ID was invalid.", AlertType.Danger);
+                return RedirectToAction("Index");
+            }
+
+            return View(model);
+        }
+
+        [HttpGet("{id}/toggle")]
+        public async Task<IActionResult> Toggle(int id)
+        {
+            var model = await _db.ApiModules.Include(x => x.Source).FirstOrDefaultAsync(x => x.ID == id);
+            if (model is null)
+            {
+                this.AddFlashMessage("The specified module ID was invalid.", AlertType.Danger);
+                return RedirectToAction("Index");
+            }
+
+            model.Skip = !model.Skip;
+            _db.Update(model);
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Index", null, fragment: $"mod{id}");
+        }
+        
+        [HttpGet("{id}/edit")]
         public async Task<IActionResult> Edit(int id)
         {
             var model = await _db.ApiModules.Include(x => x.Source).FirstOrDefaultAsync(x => x.ID == id);
@@ -45,8 +77,8 @@ namespace NetOpnApiBuilder.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Update(int id, string clrName)
+        [HttpPost("{id}/edit")]
+        public async Task<IActionResult> Update(int id, string clrName, bool skip)
         {
             var model = await _db.ApiModules.Include(x => x.Source).FirstOrDefaultAsync(x => x.ID == id);
             if (model is null)
@@ -56,6 +88,7 @@ namespace NetOpnApiBuilder.Controllers
             }
 
             model.ClrName = clrName;
+            model.Skip    = skip;
             
             if (!TryValidateModel(model))
             {
@@ -65,7 +98,7 @@ namespace NetOpnApiBuilder.Controllers
             _db.Update(model);
             await _db.SaveChangesAsync();
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", null, fragment: $"mod{id}");
         }
 
     }

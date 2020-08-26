@@ -1,0 +1,45 @@
+﻿@using NetOpnApiBuilder.Extensions
+@model ApiModule
+
+@{
+    ViewBag.Title = "API Module: " + Model;
+    Layout = "_Layout";
+}
+
+<div class="card bg-light">
+    <div class="card-header text-white bg-primary">
+        <div class="float-right">
+            <a asp-action="Index" asp-fragment="mod@(Model.ID)" title="Cancel" class="btn btn-light btn-sm">Cancel</a>
+        </div>
+        API Module: @Model
+    </div>
+    <table class="card-body table table-sm">
+        <thead>
+        <tr>
+            <th>API Name</th>
+            <th>CLR Name</th>
+            <th class="text-center">Export</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <td colspan="4" class="text-center">@(Model.Controllers.Count) controller@(Model.Controllers.Count == 1 ? "" : "s")</td>
+        </tr>
+        </tfoot>
+        <tbody>
+        @foreach (var ctlr in Model.Controllers.OrderBy(x => x.ApiName))
+        {
+            <tr id="ctlr@(ctlr.ID)">
+                <td><a asp-controller="Controller" asp-action="Show" asp-route-id="@(ctlr.ID)">@ctlr.ApiName</a></td>
+                <td>@ctlr.ClrName</td>
+                <td class="text-center">@(ctlr.Skip ? "N" : "Y")</td>
+                <td class="text-right">
+                    @Url.EditButton(ctlr.ID, "Controller")
+                    @Url.ToggleButton(ctlr.ID, !ctlr.Skip, "Controller")
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

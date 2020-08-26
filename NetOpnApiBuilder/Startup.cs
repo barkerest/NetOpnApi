@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -31,11 +32,23 @@ namespace NetOpnApiBuilder
             // When the options are first created, we'll auto-migrate the database.
             services.AddSingleton(sp =>
                 {
+                    if (!File.Exists(BuilderDb.DatabasePath))
+                    {
+                        // restore the snapshot.
+                        var snapshot = Path.GetDirectoryName(typeof(BuilderDb).Assembly.Location)!.TrimEnd('\\', '/') + "/Migrations/snapshot.db";
+                        if (File.Exists(snapshot))
+                        {
+                            File.Copy(snapshot, BuilderDb.DatabasePath);
+                        }
+                    }
+
                     var options = BuilderDb.GetOptions(sp.GetRequiredService<ILoggerFactory>());
+                    
                     using (var ctx = new BuilderDb(options))
                     {
                         ctx.Database.Migrate();
                     }
+                    
                     return options;
                 }
             );

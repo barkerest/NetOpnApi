@@ -34,12 +34,20 @@ namespace NetOpnApiBuilder.Models
         public ApiModule Module { get; set; }
         
         /// <summary>
+        /// True to skip exporting this controller.
+        /// </summary>
+        public bool Skip { get; set; }
+        
+        /// <summary>
         /// The commands belonging to this controller.
         /// </summary>
         public IList<ApiCommand> Commands { get; set; }
-
+        
 
         public override string ToString()
-            => $"{Module}/{ApiName}";
+        {
+            var name = string.IsNullOrEmpty(ClrName) ? ApiName : ClrName;
+            return $"{Module}/{name}";
+        }
     }
 }
