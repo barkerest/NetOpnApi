@@ -1,0 +1,48 @@
+﻿@using NetOpnApiBuilder.Extensions
+@model ApiController
+
+@{
+    ViewBag.Title = "API Controller:" + Model;
+    Layout = "_Layout";
+}
+
+<div class="card bg-light">
+    <div class="card-header text-white bg-primary">
+        <div class="float-right">
+            <a asp-action="Show" asp-controller="Module" asp-route-id="@Model.ModuleID" asp-fragment="ctlr@(Model.ID)" title="Cancel" class="btn btn-light btn-sm">Cancel</a>
+        </div>
+        API Controller: @Model
+    </div>
+    <table class="card-body table table-sm">
+        <thead>
+        <tr>
+            <th>API Name</th>
+            <th>CLR Name</th>
+            <th>Method</th>
+            <th class="text-center">Export</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <td colspan="5" class="text-center">@(Model.Commands.Count) command@(Model.Commands.Count == 1 ? "" : "s")</td>
+        </tr>
+        </tfoot>
+        <tbody>
+        @foreach (var cmd in Model.Commands.OrderBy(x => x.ApiName))
+        {
+            <tr id="cmd@(cmd.ID)">
+                <td><a asp-controller="Command" asp-action="Show" asp-route-id="@(cmd.ID)">@cmd.ApiName</a></td>
+                <td>@cmd.ClrName</td>
+                <td>@(cmd.UsePost ? "POST" : "GET")</td>
+                <td class="text-center">@(cmd.Skip ? "N" : "Y")</td>
+                <td class="text-right">
+                    @Url.EditButton(cmd.ID, "Command")
+                    @Url.ToggleButton(cmd.ID, !cmd.Skip, "Command")
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+

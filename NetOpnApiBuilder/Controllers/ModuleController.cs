@@ -45,7 +45,8 @@ namespace NetOpnApiBuilder.Controllers
         [HttpGet("{id}/toggle")]
         public async Task<IActionResult> Toggle(int id)
         {
-            var model = await _db.ApiModules.Include(x => x.Source).FirstOrDefaultAsync(x => x.ID == id);
+            var model = await _db.ApiModules
+                                 .FirstOrDefaultAsync(x => x.ID == id);
             if (model is null)
             {
                 this.AddFlashMessage("The specified module ID was invalid.", AlertType.Danger);
@@ -62,7 +63,9 @@ namespace NetOpnApiBuilder.Controllers
         [HttpGet("{id}/edit")]
         public async Task<IActionResult> Edit(int id)
         {
-            var model = await _db.ApiModules.Include(x => x.Source).FirstOrDefaultAsync(x => x.ID == id);
+            var model = await _db.ApiModules
+                                 .Include(x => x.Source)
+                                 .FirstOrDefaultAsync(x => x.ID == id);
             if (model is null)
             {
                 this.AddFlashMessage("The specified module ID was invalid.", AlertType.Danger);
@@ -80,7 +83,9 @@ namespace NetOpnApiBuilder.Controllers
         [HttpPost("{id}/edit")]
         public async Task<IActionResult> Update(int id, string clrName, bool skip)
         {
-            var model = await _db.ApiModules.Include(x => x.Source).FirstOrDefaultAsync(x => x.ID == id);
+            var model = await _db.ApiModules
+                                 .Include(x => x.Source)
+                                 .FirstOrDefaultAsync(x => x.ID == id);
             if (model is null)
             {
                 this.AddFlashMessage("The specified module ID was invalid.", AlertType.Danger);

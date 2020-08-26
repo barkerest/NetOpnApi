@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using NetOpnApiBuilder.Attributes;
 
 namespace NetOpnApiBuilder.Models
@@ -42,7 +43,11 @@ namespace NetOpnApiBuilder.Models
         /// The commands belonging to this controller.
         /// </summary>
         public IList<ApiCommand> Commands { get; set; }
-        
+
+        /// <summary>
+        /// True if there are any commands with changes needing looked at.
+        /// </summary>
+        public bool HasCommandChanges => Commands?.Any(x => x.NewCommand || x.CommandChanged) ?? false;
 
         public override string ToString()
         {

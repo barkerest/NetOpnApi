@@ -19,7 +19,6 @@
 
     <ItemGroup>
       <Folder Include="Pages" />
-      <Folder Include="ViewModels\Home" />
     </ItemGroup>
 
     <ItemGroup>

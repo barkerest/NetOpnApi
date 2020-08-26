@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using NetOpnApiBuilder.Attributes;
 
 namespace NetOpnApiBuilder.Models
@@ -42,6 +43,11 @@ namespace NetOpnApiBuilder.Models
         /// </summary>
         public IList<ApiController> Controllers { get; set; }
 
+        /// <summary>
+        /// True if there are any commands with changes needing looked at.
+        /// </summary>
+        public bool HasCommandChanges => Controllers?.Any(x => x.HasCommandChanges) ?? false;
+        
         public override string ToString()
         {
             var name = string.IsNullOrEmpty(ClrName) ? ApiName : ClrName;

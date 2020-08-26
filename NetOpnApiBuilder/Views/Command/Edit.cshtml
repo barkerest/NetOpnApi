@@ -1,0 +1,81 @@
+﻿@using NetOpnApiBuilder.ViewModels
+@model ApiCommand
+@inject ObjectTypeList ObjectTypes
+
+@{
+    ViewBag.Title = "Edit Command";
+    Layout = "_Layout";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header text-white bg-primary">
+                Edit Command
+            </div>
+            <div class="card-body">
+                <form asp-action="Update" asp-route-id="@Model.ID" method="post">
+                    <div class="form-group">
+                        <label>Controller</label>
+                        <span class="form-control">@Model.Controller</span>
+                    </div>
+                    <div class="form-group">
+                        <label>API Name</label>
+                        <span class="form-control">@Model.ApiName</span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ClrName">CLR Name</label>
+                        <input type="text" asp-for="ClrName" class="form-control"/>
+                        <span asp-validation-for="ClrName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="UsePost">Method</label>
+                        <select asp-for="UsePost" class="form-control">
+                            <option value="true">POST</option>
+                            <option value="false">GET</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="PostBodyObjectTypeID">Request Object Type<br><small>(for POST only)</small></label>
+                        <select asp-for="PostBodyObjectTypeID" class="form-control" asp-items="@ObjectTypes.SelectItems">
+                            <option value="">-</option>
+                        </select>
+                        <span asp-validation-for="PostBodyObjectTypeID" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ResponseBodyObjectTypeID">Response Object Type</label>
+                        <select asp-for="ResponseBodyObjectTypeID" class="form-control" asp-items="@ObjectTypes.SelectItems">
+                            <option value="">-</option>
+                        </select>
+                        <span asp-validation-for="ResponseBodyObjectTypeID" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Skip">Export Status</label>
+                        <select asp-for="Skip" class="form-control">
+                            <option value="true">Do Not Export</option>
+                            <option value="false">Export</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" title="Update">Update</button>
+                    &nbsp;&nbsp;
+                    <a asp-action="Show" asp-controller="Controller" asp-route-id="@Model.ControllerID" asp-fragment="cmd@(Model.ID)" class="btn btn-light" title="Cancel">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header text-white bg-primary">
+                Source
+            </div>
+            <div class="card-body">
+                <pre>
+    @Model.Comment
+    @Model.Signature
+    @Model.Body
+</pre>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -1,7 +1,7 @@
-﻿@model ApiModule
+﻿@model ApiController
 
 @{
-    ViewBag.Title = "Edit Module";
+    ViewBag.Title = "Edit Controller";
     Layout = "_Layout";
 }
 
@@ -9,13 +9,13 @@
     <div class="col-md-6">
         <div class="card bg-light">
             <div class="card-header text-white bg-primary">
-                Edit Module
+                Edit Controller
             </div>
             <div class="card-body">
                 <form asp-action="Update" asp-route-id="@Model.ID" method="post">
                     <div class="form-group">
-                        <label>Source</label>
-                        <span class="form-control">@Model.Source</span>
+                        <label>Module</label>
+                        <span class="form-control">@Model.Module</span>
                     </div>
                     <div class="form-group">
                         <label>API Name</label>
@@ -35,7 +35,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary" title="Update">Update</button>
                     &nbsp;&nbsp;
-                    <a asp-action="Index" asp-fragment="mod@(Model.ID)" class="btn btn-light" title="Cancel">Cancel</a>
+                    <a asp-action="Show" asp-controller="Module" asp-route-id="@Model.ModuleID" asp-fragment="ctlr@(Model.ID)" class="btn btn-light" title="Cancel">Cancel</a>
                 </form>
             </div>
         </div>
