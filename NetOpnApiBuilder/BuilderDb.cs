@@ -19,7 +19,7 @@ namespace NetOpnApiBuilder
         /// The path to the application database.
         /// </summary>
         public static string DatabasePath => Program.AppDataPath + "/application.db";
-        
+
         /// <summary>
         /// Get the options needed to build the default DB context.
         /// </summary>
@@ -85,7 +85,8 @@ namespace NetOpnApiBuilder
 
         public DbSet<ApiQueryParam> ApiQueryParams { get; set; }
 
-        
+        public DbSet<ApiObjectTypeReferences> ApiObjectTypeReferences { get; set; }
+
         public BuilderDb(DbContextOptions<BuilderDb> options)
             : base(options)
         {
@@ -94,75 +95,116 @@ namespace NetOpnApiBuilder
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            
             modelBuilder.Entity<TestDevice>();
 
-            var aotBuilder = modelBuilder.Entity<ApiObjectType>();
-            aotBuilder.HasIndex(x => x.Name)
+            modelBuilder.Entity<ApiObjectType>(
+                eb =>
+                {
+                    eb.HasIndex(x => x.Name)
                       .IsUnique();
+                }
+            );
 
-            var aopBuilder = modelBuilder.Entity<ApiObjectProperty>();
-            aopBuilder.HasOne(x => x.ObjectType)
+            modelBuilder.Entity<ApiObjectProperty>(
+                eb =>
+                {
+                    eb.HasOne(x => x.ObjectType)
                       .WithMany(x => x.Properties)
                       .HasForeignKey(x => x.ObjectTypeID)
                       .OnDelete(DeleteBehavior.Cascade);
-            aopBuilder.HasOne(x => x.DataTypeObjectType)
+                    eb.HasOne(x => x.DataTypeObjectType)
                       .WithMany()
                       .HasForeignKey(x => x.DataTypeObjectTypeID)
                       .OnDelete(DeleteBehavior.SetNull);
-            aopBuilder.HasIndex(x => new {x.ObjectTypeID, x.ApiName})
+                    eb.HasIndex(x => new {x.ObjectTypeID, x.ApiName})
                       .IsUnique();
+                }
+            );
 
-            var asBuilder = modelBuilder.Entity<ApiSource>();
-            asBuilder.HasIndex(x => x.Name)
-                     .IsUnique();
+            modelBuilder.Entity<ApiSource>(
+                eb =>
+                {
+                    eb.HasIndex(x => x.Name)
+                      .IsUnique();
+                }
+            );
 
-            var amBuilder = modelBuilder.Entity<ApiModule>();
-            amBuilder.HasOne(x => x.Source)
-                     .WithMany(x => x.Modules)
-                     .HasForeignKey(x => x.SourceID)
-                     .OnDelete(DeleteBehavior.Cascade);
-            amBuilder.HasIndex(x => new {x.SourceID, x.ApiName})
-                     .IsUnique();
+            modelBuilder.Entity<ApiModule>(
+                eb =>
+                {
+                    eb.HasOne(x => x.Source)
+                      .WithMany(x => x.Modules)
+                      .HasForeignKey(x => x.SourceID)
+                      .OnDelete(DeleteBehavior.Cascade);
+                    eb.HasIndex(x => new {x.SourceID, x.ApiName})
+                      .IsUnique();
+                }
+            );
 
-            var acBuilder = modelBuilder.Entity<ApiController>();
-            acBuilder.HasOne(x => x.Module)
-                     .WithMany(x => x.Controllers)
-                     .HasForeignKey(x => x.ModuleID)
-                     .OnDelete(DeleteBehavior.Cascade);
-            acBuilder.HasIndex(x => new {x.ModuleID, x.ApiName})
-                     .IsUnique();
+            modelBuilder.Entity<ApiController>(
+                eb =>
+                {
+                    eb.HasOne(x => x.Module)
+                      .WithMany(x => x.Controllers)
+                      .HasForeignKey(x => x.ModuleID)
+                      .OnDelete(DeleteBehavior.Cascade);
+                    eb.HasIndex(x => new {x.ModuleID, x.ApiName})
+                      .IsUnique();
+                }
+            );
 
-            var aaBuilder = modelBuilder.Entity<ApiCommand>();
-            aaBuilder.HasOne(x => x.Controller)
-                     .WithMany(x => x.Commands)
-                     .HasForeignKey(x => x.ControllerID)
-                     .OnDelete(DeleteBehavior.Cascade);
-            aaBuilder.HasIndex(x => new {x.ControllerID, x.ApiName})
-                     .IsUnique();
-            aaBuilder.HasOne(x => x.PostBodyObjectType)
-                     .WithMany()
-                     .HasForeignKey(x => x.PostBodyObjectTypeID)
-                     .OnDelete(DeleteBehavior.SetNull);
-            aaBuilder.HasOne(x => x.ResponseBodyObjectType)
-                     .WithMany()
-                     .HasForeignKey(x => x.ResponseBodyObjectTypeID)
-                     .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<ApiCommand>(
+                eb =>
+                {
+                    eb.HasOne(x => x.Controller)
+                      .WithMany(x => x.Commands)
+                      .HasForeignKey(x => x.ControllerID)
+                      .OnDelete(DeleteBehavior.Cascade);
+                    eb.HasIndex(x => new {x.ControllerID, x.ApiName})
+                      .IsUnique();
+                    eb.HasOne(x => x.PostBodyObjectType)
+                      .WithMany()
+                      .HasForeignKey(x => x.PostBodyObjectTypeID)
+                      .OnDelete(DeleteBehavior.SetNull);
+                    eb.HasOne(x => x.ResponseBodyObjectType)
+                      .WithMany()
+                      .HasForeignKey(x => x.ResponseBodyObjectTypeID)
+                      .OnDelete(DeleteBehavior.SetNull);
+                }
+            );
 
-            var aqpBuilder = modelBuilder.Entity<ApiQueryParam>();
-            aqpBuilder.HasOne(x => x.Command)
+            modelBuilder.Entity<ApiQueryParam>(
+                eb =>
+                {
+                    eb.HasOne(x => x.Command)
                       .WithMany(x => x.QueryParams)
                       .HasForeignKey(x => x.CommandID)
                       .OnDelete(DeleteBehavior.Cascade);
-            aqpBuilder.HasIndex(x => new {x.CommandID, x.ApiName})
+                    eb.HasIndex(x => new {x.CommandID, x.ApiName})
                       .IsUnique();
+                }
+            );
 
-            var aupBuilder = modelBuilder.Entity<ApiUrlParam>();
-            aupBuilder.HasOne(x => x.Command)
+            modelBuilder.Entity<ApiUrlParam>(
+                eb =>
+                {
+                    eb.HasOne(x => x.Command)
                       .WithMany(x => x.UrlParams)
                       .HasForeignKey(x => x.CommandID)
                       .OnDelete(DeleteBehavior.Cascade);
-            aupBuilder.HasIndex(x => new {x.CommandID, x.Order})
+                    eb.HasIndex(x => new {x.CommandID, x.Order})
                       .IsUnique();
+                }
+            );
+            
+            modelBuilder.Entity<ApiObjectTypeReferences>(
+                eb =>
+                {
+                    eb.HasNoKey();
+                    eb.ToView("ApiObjectTypeReferences");
+                }
+            );
         }
     }
 }

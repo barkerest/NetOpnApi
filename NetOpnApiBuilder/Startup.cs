@@ -53,6 +53,7 @@ namespace NetOpnApiBuilder
             services.AddSingleton<Repos>();
 
             services.AddTransient<ObjectTypeList>();
+            services.AddSingleton<ApiDataTypeList>();
             
             services.AddControllersWithViews();
         }

@@ -27,24 +27,39 @@ namespace NetOpnApiBuilder.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Update([Bind("Host", "Key", "Secret")]TestDevice values)
+        public async Task<IActionResult> Update(string host, string key, string secret)
         {
             var device = await _db.GetTestDeviceAsync();
-            device.Host   = values.Host;
-            device.Key    = values.Key;
-            device.Secret = values.Secret;
-            _db.Update(device);
-            await _db.SaveChangesAsync();
-            this.AddFlashMessage("The test device information has been saved.");
+            device.Host   = host;
+            device.Key    = key;
+            device.Secret = secret;
 
-            if (device.Test(_logger))
+            if (!TryValidateModel(device))
             {
-                this.AddFlashMessage("Connection test succeeded.", AlertType.Success);
+                return View("Index", device);
             }
-            else
+            
+            _db.Update(device);
+            try
             {
-                this.AddFlashMessage("Connection test failed.", AlertType.Warning);
+                await _db.SaveChangesAsync();
+                this.AddFlashMessage("The test device information has been saved.");
+                
+                if (device.Test(_logger))
+                {
+                    this.AddFlashMessage("Connection test succeeded.", AlertType.Success);
+                }
+                else
+                {
+                    this.AddFlashMessage("Connection test failed.", AlertType.Warning);
+                }
+
             }
+            catch (DbUpdateException)
+            {
+                this.AddFlashMessage("Failed to update the database.", AlertType.Danger);
+            }
+
             
             return RedirectToAction("Index");
         }

@@ -1,0 +1,28 @@
+﻿@model ApiObjectType
+
+@{
+    ViewBag.Title = "New Object Type";
+    Layout = "_Layout";
+}
+
+<div clsas="row">
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header text-white bg-primary">
+                New Object Type
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div class="form-group">
+                        <label asp-for="Name">Name</label>
+                        <input asp-for="Name" type="text" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Name"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary" title="Create">Create</button>
+                    &nbsp;&nbsp;
+                    <a asp-action="Index" class="btn btn-light" title="Cancel">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

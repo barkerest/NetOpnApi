@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using NetOpnApiBuilder.Attributes;
 using NetOpnApiBuilder.Enums;
 
@@ -35,6 +37,7 @@ namespace NetOpnApiBuilder.Models
         /// <summary>
         /// The name for this parameter in the CLR.
         /// </summary>
+        [Required] 
         [StringLength(100)]
         [SafeClrName]
         public string ClrName { get; set; }
@@ -53,17 +56,34 @@ namespace NetOpnApiBuilder.Models
         
         IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
         {
+            var db       = validationContext.GetRequiredService<BuilderDb>();
+            var nameUsed = db.ApiUrlParams.Any(x => x.ID != ID && x.CommandID == CommandID && x.ApiName == ApiName);
+            if (nameUsed)
+            {
+                yield return new ValidationResult("already used", new []{nameof(ApiName)});
+            }
+            nameUsed = db.ApiUrlParams.Any(x => x.ID != ID && x.CommandID == CommandID && x.ClrName == ClrName);
+            if (nameUsed)
+            {
+                yield return new ValidationResult("already used", new []{nameof(ClrName)});
+            }
+            nameUsed = db.ApiUrlParams.Any(x => x.ID != ID && x.CommandID == CommandID && x.Order == Order);
+            if (nameUsed)
+            {
+                yield return new ValidationResult("already used", new []{nameof(Order)});
+            }
+
             if ((DataType & ApiDataType.Object) == ApiDataType.Object)
             {
                 yield return new ValidationResult("cannot specify an object", new []{nameof(DataType)});
             }
             
-            if ((DataType & ApiDataType.Array) == ApiDataType.Array)
+            if ((DataType & ApiDataType.ArrayOfStrings) == ApiDataType.ArrayOfStrings)
             {
                 yield return new ValidationResult("cannot specify an array", new []{nameof(DataType)});
             }
 
-            if ((DataType & ApiDataType.Dictionary) == ApiDataType.Dictionary)
+            if ((DataType & ApiDataType.DictionaryOfStrings) == ApiDataType.DictionaryOfStrings)
             {
                 yield return new ValidationResult("cannot specify a dictionary", new []{nameof(DataType)});
             }

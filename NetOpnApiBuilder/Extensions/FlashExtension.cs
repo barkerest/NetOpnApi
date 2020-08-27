@@ -11,7 +11,14 @@ namespace NetOpnApiBuilder.Extensions
     {
         public static IEnumerable<FlashMessage> GetFlashMessages(this IHtmlHelper self)
         {
-            var json = self.TempData.ContainsKey("flash") ? self.TempData["flash"]?.ToString() ?? "[]" : "[]";
+            if (!self.TempData.ContainsKey("flash"))
+            {
+                return new FlashMessage[0];
+            }
+            
+            var json = self.TempData["flash"]?.ToString() ?? "[]";
+            self.TempData.Remove("flash");
+            
             return JsonSerializer.Deserialize<FlashMessage[]>(json);
         }
 

@@ -1,0 +1,38 @@
+﻿@using NetOpnApiBuilder.Extensions
+@model NetOpnApiBuilder.Models.ApiObjectType[]
+
+@{
+    ViewBag.Title = "API Object Types";
+    Layout = "_Layout";
+}
+
+<div class="card bg-light">
+    <div class="card-header text-white bg-primary">
+        API Object Types
+    </div>
+    <table class="card-body table table-sm">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th class="text-right">@Url.AddButton()</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <td colspan="2" class="text-center">@(Model.Length) object type@(Model.Length == 1 ? "" : "s") @Url.AddButton()</td>
+        </tr>
+        </tfoot>
+        <tbody>
+        @foreach (var objType in Model.OrderBy(x => x.Name))
+        {
+            <tr id="ot@(objType.ID)">
+                <td><a asp-action="Show" asp-route-id="@objType.ID">@objType.Name</a></td>
+                <td class="text-right">
+                    @Url.EditButton(objType.ID)
+                    @Url.RemoveButton(objType.ID)
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

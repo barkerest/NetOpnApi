@@ -1,0 +1,48 @@
+﻿@using NetOpnApiBuilder.Extensions
+@model ApiObjectType
+
+@{
+    ViewBag.Title = "Object Type: " + Model;
+    Layout = "_Layout";
+}
+
+<div class="card bg-light">
+    <div class="card-header text-white bg-primary">
+        <div class="float-right">
+            <a asp-action="Index" asp-fragment="ot@(Model.ID)" title="Cancel" class="btn btn-light btn-sm">Cancel</a>
+        </div>
+        Object Type: @Model
+    </div>
+    <table class="card-body table table-sm">
+        <thead>
+        <tr>
+            <th colspan="4" clas="text-center">Properties</th>
+        </tr>
+        <tr>
+            <th>API Name</th>
+            <th>CLR Name</th>
+            <th>Data Type</th>
+            <th class="text-right">@Url.AddButton("ObjectProperty", values: new {objectTypeId = Model.ID})</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr>
+            <td colspan="4" class="text-center">@(Model.Properties.Count) propert@(Model.Properties.Count == 1 ? "y" : "ies") @Url.AddButton("ObjectProperty", values: new {objectTypeId = Model.ID})</td>
+        </tr>
+        </tfoot>
+        <tbody>
+        @foreach (var prop in Model.Properties.OrderBy(x => x.ApiName))
+        {
+            <tr id="prop@(prop.ID)">
+                <td>@prop.ApiName</td>
+                <td>@prop.ClrName</td>
+                <td class="text-center">@(prop.DataType.ToName(nullable: prop.CanBeNull))</td>
+                <td class="text-right">
+                    @Url.EditButton(prop.ID, "ObjectProperty")
+                    @Url.RemoveButton(prop.ID, "ObjectProperty")
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,57 @@
+﻿@using NetOpnApiBuilder.ViewModels
+@model ApiObjectProperty
+@inject ApiDataTypeList DataTypes
+@inject ObjectTypeList ObjectTypes
+
+@{
+    ViewBag.Title = "Update Property";
+    Layout = "_Layout";
+}
+
+<div clsas="row">
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header text-white bg-primary">
+                Update Property for @(Model.ObjectType)
+            </div>
+            <div class="card-body">
+                <form asp-action="Update" asp-route-id="@Model.ID" method="post">
+                    <div class="form-group">
+                        <label asp-for="ApiName">API Name</label>
+                        <input asp-for="ApiName" type="text" class="form-control" />
+                        <span class="text-danger" asp-validation-for="ApiName"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ClrName">CLR Name</label>
+                        <input asp-for="ClrName" type="text" class="form-control" />
+                        <span class="text-danger" asp-validation-for="ClrName"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="DataType">Data Type</label>
+                        <select asp-for="DataType" asp-items="@DataTypes.ListItems" class="form-control">
+                            
+                        </select>
+                        <span class="text-danger" asp-validation-for="DataType"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="DataTypeObjectTypeID">Object Type <small>(for object data types)</small></label>
+                        <select asp-for="DataTypeObjectTypeID" asp-items="ObjectTypes.SelectItems" class="form-control">
+                            <option value="">-</option>
+                        </select>
+                        <span asp-validation-for="DataTypeObjectTypeID" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="CanBeNull">Nullable</label>
+                        <select asp-for="CanBeNull" class="form-control">
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" title="Update">Update</button>
+                    &nbsp;&nbsp;
+                    <a asp-action="Show" asp-controller="ObjectType" asp-route-id="@Model.ObjectTypeID" class="btn btn-light" title="Cancel">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

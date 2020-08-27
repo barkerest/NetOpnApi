@@ -70,7 +70,14 @@ namespace NetOpnApiBuilder.Controllers
             model.Skip = !model.Skip;
 
             _db.Update(model);
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                this.AddFlashMessage("Failed to update the database.", AlertType.Danger);
+            }
 
             return RedirectToParent(model);
         }
@@ -94,7 +101,7 @@ namespace NetOpnApiBuilder.Controllers
         }
 
         [HttpPost("{id}/edit")]
-        public async Task<IActionResult> Update(int id, string clrName, bool skip, bool usePost, int? postBodyObjectTypeId, int? responseBodyObjectTypeId)
+        public async Task<IActionResult> Update(int id, string clrName, bool skip, bool usePost, int? postBodyObjectTypeId, int? responseBodyObjectTypeId, ApiDataType? postBodyDataType, ApiDataType? responseBodyDataType)
         {
             var model = await _db.ApiCommands
                                  .Include(x => x.Controller)
@@ -111,7 +118,9 @@ namespace NetOpnApiBuilder.Controllers
             model.ClrName                  = clrName;
             model.Skip                     = skip;
             model.UsePost                  = usePost;
+            model.ResponseBodyDataType     = responseBodyDataType;
             model.ResponseBodyObjectTypeID = responseBodyObjectTypeId;
+            model.PostBodyDataType         = postBodyDataType;
             model.PostBodyObjectTypeID     = postBodyObjectTypeId;
 
             if (!TryValidateModel(model))
@@ -120,7 +129,15 @@ namespace NetOpnApiBuilder.Controllers
             }
 
             _db.Update(model);
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                this.AddFlashMessage("Failed to update the database.", AlertType.Danger);
+                return View("Edit", model);
+            }
 
             return RedirectToParent(model);
         }

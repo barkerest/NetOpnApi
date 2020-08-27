@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using NetOpnApiBuilder.Attributes;
+using NetOpnApiBuilder.Enums;
 
 namespace NetOpnApiBuilder.Models
 {
-    public class ApiCommand
+    public class ApiCommand : IValidatableObject
     {
         [Key]
         public int ID { get; set; }
@@ -20,6 +23,7 @@ namespace NetOpnApiBuilder.Models
         /// <summary>
         /// The name we'll use in the CLR.
         /// </summary>
+        [Required] 
         [StringLength(100)]
         [SafeClrName]
         public string ClrName { get; set; }
@@ -75,6 +79,11 @@ namespace NetOpnApiBuilder.Models
         /// </summary>
         public IList<ApiQueryParam> QueryParams { get; set; }
 
+        /// <summary>
+        /// The data type for post requests.
+        /// </summary>
+        public ApiDataType? PostBodyDataType { get; set; }
+        
         [EditorBrowsable(EditorBrowsableState.Never)]
         public int? PostBodyObjectTypeID { get; set; }
         
@@ -82,6 +91,11 @@ namespace NetOpnApiBuilder.Models
         /// The object type definition for post requests.
         /// </summary>
         public ApiObjectType PostBodyObjectType { get; set; }
+        
+        /// <summary>
+        /// The data type for the response.
+        /// </summary>
+        public ApiDataType? ResponseBodyDataType { get; set; }
         
         [EditorBrowsable(EditorBrowsableState.Never)]
         public int? ResponseBodyObjectTypeID { get; set; }
@@ -105,6 +119,83 @@ namespace NetOpnApiBuilder.Models
         {
             var name = string.IsNullOrEmpty(ClrName) ? ApiName : ClrName;
             return $"{Controller}/{name}";
+        }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var db       = validationContext.GetRequiredService<BuilderDb>();
+            var nameUsed = db.ApiCommands.Any(x => x.ID != ID && x.ControllerID == ControllerID && x.ApiName == ApiName);
+            if (nameUsed)
+            {
+                yield return new ValidationResult("already used", new []{nameof(ApiName)});
+            }
+            nameUsed = db.ApiCommands.Any(x => x.ID != ID && x.ControllerID == ControllerID && x.ClrName == ClrName);
+            if (nameUsed)
+            {
+                yield return new ValidationResult("already used", new []{nameof(ClrName)});
+            }
+
+            if (PostBodyDataType is null)
+            {
+                if (PostBodyObjectTypeID != null)
+                {
+                    yield return new ValidationResult("must be null when data type does not specify an object", new[] {nameof(PostBodyObjectTypeID)});
+                }
+            }
+            else
+            {
+                if ((PostBodyDataType.Value & ApiDataType.ArrayOfStrings) == ApiDataType.ArrayOfStrings &&
+                    (PostBodyDataType.Value & ApiDataType.DictionaryOfStrings) == ApiDataType.DictionaryOfStrings)
+                {
+                    yield return new ValidationResult("cannot specify both array and dictionary", new[] {nameof(PostBodyDataType)});
+                }
+
+                if ((PostBodyDataType.Value & ApiDataType.Object) == ApiDataType.Object)
+                {
+                    if (PostBodyObjectTypeID is null)
+                    {
+                        yield return new ValidationResult("is required when data type specifies an object", new[] {nameof(PostBodyObjectTypeID), nameof(PostBodyObjectType)});
+                    }
+                }
+                else
+                {
+                    if (PostBodyObjectTypeID != null)
+                    {
+                        yield return new ValidationResult("must be null when data type does not specify an object", new[] {nameof(PostBodyObjectTypeID), nameof(PostBodyObjectType)});
+                    }
+                }
+            }
+            
+            if (ResponseBodyDataType is null)
+            {
+                if (ResponseBodyObjectTypeID != null)
+                {
+                    yield return new ValidationResult("must be null when data type does not specify an object", new[] {nameof(ResponseBodyObjectTypeID)});
+                }
+            }
+            else
+            {
+                if ((ResponseBodyDataType.Value & ApiDataType.ArrayOfStrings) == ApiDataType.ArrayOfStrings &&
+                    (ResponseBodyDataType.Value & ApiDataType.DictionaryOfStrings) == ApiDataType.DictionaryOfStrings)
+                {
+                    yield return new ValidationResult("cannot specify both array and dictionary", new[] {nameof(ResponseBodyDataType)});
+                }
+
+                if ((ResponseBodyDataType.Value & ApiDataType.Object) == ApiDataType.Object)
+                {
+                    if (ResponseBodyObjectTypeID is null)
+                    {
+                        yield return new ValidationResult("is required when data type specifies an object", new[] {nameof(ResponseBodyObjectTypeID), nameof(ResponseBodyObjectType)});
+                    }
+                }
+                else
+                {
+                    if (ResponseBodyObjectTypeID != null)
+                    {
+                        yield return new ValidationResult("must be null when data type does not specify an object", new[] {nameof(ResponseBodyObjectTypeID), nameof(ResponseBodyObjectType)});
+                    }
+                }
+            }
         }
     }
 }

@@ -66,7 +66,14 @@ namespace NetOpnApiBuilder.Controllers
 
             model.Skip = !model.Skip;
             _db.Update(model);
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                this.AddFlashMessage("Failed to update the database.", AlertType.Danger);
+            }
 
             return RedirectToParent(model);
         }
@@ -113,7 +120,15 @@ namespace NetOpnApiBuilder.Controllers
             }
 
             _db.Update(model);
-            await _db.SaveChangesAsync();
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                this.AddFlashMessage("Failed to update the database.", AlertType.Danger);
+                return View("Edit", model);
+            }
 
             return RedirectToParent(model);
         }

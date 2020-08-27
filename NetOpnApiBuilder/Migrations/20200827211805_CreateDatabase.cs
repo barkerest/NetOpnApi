@@ -13,8 +13,7 @@ namespace NetOpnApiBuilder.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(maxLength: 100, nullable: false),
-                    ApiVersion = table.Column<string>(maxLength: 32, nullable: false)
+                    Name = table.Column<string>(maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -58,7 +57,7 @@ namespace NetOpnApiBuilder.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     ObjectTypeID = table.Column<int>(nullable: false),
                     ApiName = table.Column<string>(maxLength: 100, nullable: false),
-                    ClrName = table.Column<string>(maxLength: 100, nullable: true),
+                    ClrName = table.Column<string>(maxLength: 100, nullable: false),
                     DataType = table.Column<int>(nullable: false),
                     DataTypeObjectTypeID = table.Column<int>(nullable: true),
                     CanBeNull = table.Column<bool>(nullable: false)
@@ -88,7 +87,8 @@ namespace NetOpnApiBuilder.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     SourceID = table.Column<int>(nullable: false),
                     ApiName = table.Column<string>(maxLength: 100, nullable: false),
-                    ClrName = table.Column<string>(maxLength: 100, nullable: true)
+                    ClrName = table.Column<string>(maxLength: 100, nullable: false),
+                    Skip = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -108,8 +108,9 @@ namespace NetOpnApiBuilder.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ApiName = table.Column<string>(maxLength: 100, nullable: false),
-                    ClrName = table.Column<string>(maxLength: 100, nullable: true),
-                    ModuleID = table.Column<int>(nullable: false)
+                    ClrName = table.Column<string>(maxLength: 100, nullable: false),
+                    ModuleID = table.Column<int>(nullable: false),
+                    Skip = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -129,7 +130,7 @@ namespace NetOpnApiBuilder.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ApiName = table.Column<string>(maxLength: 100, nullable: false),
-                    ClrName = table.Column<string>(maxLength: 100, nullable: true),
+                    ClrName = table.Column<string>(maxLength: 100, nullable: false),
                     UsePost = table.Column<bool>(nullable: false),
                     Signature = table.Column<string>(nullable: false),
                     Comment = table.Column<string>(nullable: true),
@@ -137,9 +138,12 @@ namespace NetOpnApiBuilder.Migrations
                     ControllerID = table.Column<int>(nullable: false),
                     NewCommand = table.Column<bool>(nullable: false),
                     CommandChanged = table.Column<bool>(nullable: false),
+                    PostBodyDataType = table.Column<int>(nullable: true),
                     PostBodyObjectTypeID = table.Column<int>(nullable: true),
+                    ResponseBodyDataType = table.Column<int>(nullable: true),
                     ResponseBodyObjectTypeID = table.Column<int>(nullable: true),
-                    SourceVersion = table.Column<string>(nullable: true)
+                    SourceVersion = table.Column<string>(nullable: true),
+                    Skip = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -172,7 +176,7 @@ namespace NetOpnApiBuilder.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     CommandID = table.Column<int>(nullable: false),
                     ApiName = table.Column<string>(maxLength: 100, nullable: false),
-                    ClrName = table.Column<string>(maxLength: 100, nullable: true),
+                    ClrName = table.Column<string>(maxLength: 100, nullable: false),
                     DataType = table.Column<int>(nullable: false),
                     AllowNull = table.Column<bool>(nullable: false)
                 },
@@ -196,7 +200,7 @@ namespace NetOpnApiBuilder.Migrations
                     CommandID = table.Column<int>(nullable: false),
                     Order = table.Column<int>(nullable: false),
                     ApiName = table.Column<string>(maxLength: 100, nullable: false),
-                    ClrName = table.Column<string>(maxLength: 100, nullable: true),
+                    ClrName = table.Column<string>(maxLength: 100, nullable: false),
                     DataType = table.Column<int>(nullable: false),
                     AllowNull = table.Column<bool>(nullable: false)
                 },
@@ -273,10 +277,48 @@ namespace NetOpnApiBuilder.Migrations
                 table: "ApiUrlParams",
                 columns: new[] { "CommandID", "Order" },
                 unique: true);
+            
+            migrationBuilder.Sql(
+                @"CREATE VIEW ""ApiObjectTypeReferences"" AS
+SELECT
+    AP.""DataTypeObjectTypeID"" AS ""ObjectTypeID"",
+    AP.""ID"" AS ""PropertyID"",
+    CAST(NULL AS INT) AS ""PostCommandID"",
+    CAST(NULL AS INT) AS ""ResponseCommandID""
+FROM
+    ""ApiObjectProperties"" AS AP
+WHERE
+    (AP.""DataTypeObjectTypeID"" IS NOT NULL)
+    AND (AP.""ObjectTypeID"" <> AP.""DataTypeObjectTypeID"")
+UNION
+SELECT
+    PC.""PostBodyObjectTypeID"",
+    CAST(NULL AS INT),
+    PC.""ID"",
+    CAST(NULL AS INT)
+FROM
+    ""ApiCommands"" AS PC
+WHERE
+    (PC.""PostBodyObjectTypeID"" IS NOT NULL)
+UNION
+SELECT
+    RC.""PostBodyObjectTypeID"",
+    CAST(NULL AS INT),
+    CAST(NULL AS INT),
+    RC.""ID""
+FROM
+    ""ApiCommands"" AS RC
+WHERE
+    (RC.""ResponseBodyObjectTypeID"" IS NOT NULL)"
+            );
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql(
+                @"DROP VIEW ""ApiObjectTypeReferences"""
+            );
+            
             migrationBuilder.DropTable(
                 name: "ApiObjectProperties");
 

@@ -15,15 +15,18 @@
                 <form asp-action="Update" method="post">
                     <div class="form-group">
                         <label asp-for="Host">Hostname or IP</label>
-                        <input asp-for="Host" value="@Model.Host" class="form-control" />
+                        <input asp-for="Host" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Host"></span>
                     </div>
                     <div class="form-group">
                         <label asp-for="Key">API Key</label>
-                        <input asp-for="Key" value="@Model.Key" class="form-control" />
+                        <input asp-for="Key" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Key"></span>
                     </div>
                     <div class="form-group">
                         <label asp-for="Secret">API Secret</label>
-                        <input asp-for="Secret" value="@Model.Secret" class="form-control" />
+                        <input asp-for="Secret" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Secret"></span>
                     </div>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </form>

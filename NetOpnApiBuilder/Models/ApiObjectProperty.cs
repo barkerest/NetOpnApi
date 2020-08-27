@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using NetOpnApiBuilder.Attributes;
 using NetOpnApiBuilder.Enums;
 
@@ -30,6 +32,7 @@ namespace NetOpnApiBuilder.Models
         /// <summary>
         /// The name of this property in the CLR.
         /// </summary>
+        [Required] 
         [StringLength(100)]
         [SafeClrName]
         public string ClrName { get; set; }
@@ -57,24 +60,37 @@ namespace NetOpnApiBuilder.Models
         
         IEnumerable<ValidationResult> IValidatableObject.Validate(ValidationContext validationContext)
         {
-            if ((DataType & ApiDataType.Array) == ApiDataType.Array &&
-                (DataType & ApiDataType.Dictionary) == ApiDataType.Dictionary)
+            var db = validationContext.GetRequiredService<BuilderDb>();
+
+            var nameUsed = db.ApiObjectProperties.Any(x => x.ID != ID && x.ObjectTypeID == ObjectTypeID && x.ApiName == ApiName);
+            if (nameUsed)
+            {
+                yield return new ValidationResult("already used", new []{nameof(ApiName)});
+            }
+            nameUsed = db.ApiObjectProperties.Any(x => x.ID != ID && x.ObjectTypeID == ObjectTypeID && x.ClrName == ClrName);
+            if (nameUsed)
+            {
+                yield return new ValidationResult("already used", new []{nameof(ClrName)});
+            }
+
+            if ((DataType & ApiDataType.ArrayOfStrings) == ApiDataType.ArrayOfStrings &&
+                (DataType & ApiDataType.DictionaryOfStrings) == ApiDataType.DictionaryOfStrings)
             {
                 yield return new ValidationResult("cannot specify both array and dictionary", new []{nameof(DataType)});
             }
             
             if ((DataType & ApiDataType.Object) == ApiDataType.Object)
             {
-                if (DataTypeObjectType is null)
+                if (DataTypeObjectTypeID is null)
                 {
-                    yield return new ValidationResult("is required when data type specifies an object", new []{nameof(DataTypeObjectType)});
+                    yield return new ValidationResult("is required when data type specifies an object", new []{nameof(DataTypeObjectTypeID), nameof(DataTypeObjectType)});
                 }
             }
             else
             {
-                if (DataTypeObjectType != null)
+                if (DataTypeObjectTypeID != null)
                 {
-                    yield return new ValidationResult("must be null when data type does not specify an object", new []{nameof(DataTypeObjectType)});
+                    yield return new ValidationResult("must be null when data type does not specify an object", new []{nameof(DataTypeObjectTypeID), nameof(DataTypeObjectType)});
                 }
             }
         }

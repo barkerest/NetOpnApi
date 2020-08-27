@@ -1,0 +1,28 @@
+﻿@model ApiObjectType
+
+@{
+    ViewBag.Title = "Edit Object Type";
+    Layout = "_Layout";
+}
+
+<div clsas="row">
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header text-white bg-primary">
+                Edit Object Type
+            </div>
+            <div class="card-body">
+                <form asp-action="Update" asp-route-id="@Model.ID" method="post">
+                    <div class="form-group">
+                        <label asp-for="Name">Name</label>
+                        <input asp-for="Name" type="text" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Name"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary" title="Update">Update</button>
+                    &nbsp;&nbsp;
+                    <a asp-action="Index" class="btn btn-light" title="Cancel">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

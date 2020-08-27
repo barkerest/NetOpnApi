@@ -22,9 +22,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="tools\sqlite3.exe">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
       <None Update="Migrations\snapshot.db">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

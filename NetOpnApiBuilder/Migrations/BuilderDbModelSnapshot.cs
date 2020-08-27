@@ -32,6 +32,7 @@ namespace NetOpnApiBuilder.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ClrName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
@@ -47,7 +48,13 @@ namespace NetOpnApiBuilder.Migrations
                     b.Property<bool>("NewCommand")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("PostBodyDataType")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("PostBodyObjectTypeID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ResponseBodyDataType")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ResponseBodyObjectTypeID")
@@ -90,6 +97,7 @@ namespace NetOpnApiBuilder.Migrations
                         .HasMaxLength(100);
 
                     b.Property<string>("ClrName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
@@ -119,6 +127,7 @@ namespace NetOpnApiBuilder.Migrations
                         .HasMaxLength(100);
 
                     b.Property<string>("ClrName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
@@ -151,6 +160,7 @@ namespace NetOpnApiBuilder.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ClrName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
@@ -178,11 +188,6 @@ namespace NetOpnApiBuilder.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ApiVersion")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(32);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -212,6 +217,7 @@ namespace NetOpnApiBuilder.Migrations
                         .HasMaxLength(100);
 
                     b.Property<string>("ClrName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 
@@ -271,6 +277,7 @@ namespace NetOpnApiBuilder.Migrations
                         .HasMaxLength(100);
 
                     b.Property<string>("ClrName")
+                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasMaxLength(100);
 

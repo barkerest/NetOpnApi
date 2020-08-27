@@ -1,6 +1,7 @@
 ﻿@using NetOpnApiBuilder.ViewModels
 @model ApiCommand
 @inject ObjectTypeList ObjectTypes
+@inject ApiDataTypeList DataTypes
 
 @{
     ViewBag.Title = "Edit Command";
@@ -36,11 +37,25 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label asp-for="PostBodyObjectTypeID">Request Object Type<br><small>(for POST only)</small></label>
+                        <label asp-for="PostBodyDataType">Request Data Type <small>(for POST only)</small></label>
+                        <select asp-for="PostBodyDataType" class="form-control" asp-items="@DataTypes.ListItems">
+                            <option value="">-</option>
+                        </select>
+                        <span class="text-danger" asp-validation-for="PostBodyDataType"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="PostBodyObjectTypeID">Request Object Type <small>(for object data types in POST only)</small></label>
                         <select asp-for="PostBodyObjectTypeID" class="form-control" asp-items="@ObjectTypes.SelectItems">
                             <option value="">-</option>
                         </select>
                         <span asp-validation-for="PostBodyObjectTypeID" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ResponseBodyDataType">Response Data Type</label>
+                        <select asp-for="ResponseBodyDataType" class="form-control" asp-items="@DataTypes.ListItems">
+                            <option value="">-</option>
+                        </select>
+                        <span class="text-danger" asp-validation-for="ResponseBodyDataType"></span>
                     </div>
                     <div class="form-group">
                         <label asp-for="ResponseBodyObjectTypeID">Response Object Type</label>

@@ -2,11 +2,12 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using NetOpnApiBuilder.Attributes;
 
 namespace NetOpnApiBuilder.Models
 {
-    public class ApiModule
+    public class ApiModule : IValidatableObject
     {
         [Key]
         public int ID { get; set; }
@@ -29,6 +30,7 @@ namespace NetOpnApiBuilder.Models
         /// <summary>
         /// The name we'll use in the CLR.
         /// </summary>
+        [Required] 
         [StringLength(100)]
         [SafeClrName]
         public string ClrName { get; set; }
@@ -52,6 +54,21 @@ namespace NetOpnApiBuilder.Models
         {
             var name = string.IsNullOrEmpty(ClrName) ? ApiName : ClrName;
             return $"{Source}/{name}";
+        }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var db       = validationContext.GetRequiredService<BuilderDb>();
+            var nameUsed = db.ApiModules.Any(x => x.ID != ID && x.SourceID == SourceID && x.ApiName == ApiName);
+            if (nameUsed)
+            {
+                yield return new ValidationResult("already used", new []{nameof(ApiName)});
+            }
+            nameUsed = db.ApiModules.Any(x => x.ID != ID && x.SourceID == SourceID && x.ClrName == ClrName);
+            if (nameUsed)
+            {
+                yield return new ValidationResult("already used", new []{nameof(ClrName)});
+            }
         }
     }
 }
