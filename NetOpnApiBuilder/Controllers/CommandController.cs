@@ -32,29 +32,6 @@ namespace NetOpnApiBuilder.Controllers
             return RedirectToAction("Show", "Controller", new {id = cmd.ControllerID}, $"cmd{cmd.ID}");
         }
 
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Show(int id)
-        {
-            var model = await _db.ApiCommands
-                                 .Include(x => x.Controller)
-                                 .ThenInclude(x => x.Module)
-                                 .ThenInclude(x => x.Source)
-                                 .Include(x => x.PostBodyObjectType)
-                                 .Include(x => x.ResponseBodyObjectType)
-                                 .Include(x => x.QueryParams)
-                                 .Include(x => x.UrlParams)
-                                 .FirstOrDefaultAsync(x => x.ID == id);
-
-            if (model is null)
-            {
-                this.AddFlashMessage("The specified command ID was invalid.", AlertType.Danger);
-                return RedirectToParent(null);
-            }
-
-            return View(model);
-        }
-
         [HttpGet("{id}/toggle")]
         public async Task<IActionResult> Toggle(int id)
         {
@@ -89,6 +66,10 @@ namespace NetOpnApiBuilder.Controllers
                                  .Include(x => x.Controller)
                                  .ThenInclude(x => x.Module)
                                  .ThenInclude(x => x.Source)
+                                 .Include(x => x.PostBodyObjectType)
+                                 .Include(x => x.ResponseBodyObjectType)
+                                 .Include(x => x.QueryParams)
+                                 .Include(x => x.UrlParams)
                                  .FirstOrDefaultAsync(x => x.ID == id);
 
             if (model is null)
@@ -107,6 +88,10 @@ namespace NetOpnApiBuilder.Controllers
                                  .Include(x => x.Controller)
                                  .ThenInclude(x => x.Module)
                                  .ThenInclude(x => x.Source)
+                                 .Include(x => x.PostBodyObjectType)
+                                 .Include(x => x.ResponseBodyObjectType)
+                                 .Include(x => x.QueryParams)
+                                 .Include(x => x.UrlParams)
                                  .FirstOrDefaultAsync(x => x.ID == id);
 
             if (model is null)
@@ -132,14 +117,14 @@ namespace NetOpnApiBuilder.Controllers
             try
             {
                 await _db.SaveChangesAsync();
+                this.AddFlashMessage("Updated the database.", AlertType.Success);
             }
             catch (DbUpdateException)
             {
                 this.AddFlashMessage("Failed to update the database.", AlertType.Danger);
-                return View("Edit", model);
             }
-
-            return RedirectToParent(model);
+            
+            return View("Edit", model);
         }
     }
 }

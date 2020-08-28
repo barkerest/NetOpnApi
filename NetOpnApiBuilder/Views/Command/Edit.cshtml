@@ -31,35 +31,35 @@
                     </div>
                     <div class="form-group">
                         <label asp-for="UsePost">Method</label>
-                        <select asp-for="UsePost" class="form-control">
+                        <select id="methodSelect" asp-for="UsePost" class="form-control">
                             <option value="true">POST</option>
                             <option value="false">GET</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div id="postBodyTypeSection" class="form-group">
                         <label asp-for="PostBodyDataType">Request Data Type <small>(for POST only)</small></label>
-                        <select asp-for="PostBodyDataType" class="form-control" asp-items="@DataTypes.ListItems">
+                        <select id="postBodyTypeSelect" asp-for="PostBodyDataType" class="form-control" asp-items="@DataTypes.ListItems">
                             <option value="">-</option>
                         </select>
                         <span class="text-danger" asp-validation-for="PostBodyDataType"></span>
                     </div>
-                    <div class="form-group">
+                    <div id="postObjectTypeSection" class="form-group">
                         <label asp-for="PostBodyObjectTypeID">Request Object Type <small>(for object data types in POST only)</small></label>
-                        <select asp-for="PostBodyObjectTypeID" class="form-control" asp-items="@ObjectTypes.SelectItems">
+                        <select id="postObjectTypeSelect" asp-for="PostBodyObjectTypeID" class="form-control" asp-items="@ObjectTypes.SelectItems">
                             <option value="">-</option>
                         </select>
                         <span asp-validation-for="PostBodyObjectTypeID" class="text-danger"></span>
                     </div>
                     <div class="form-group">
                         <label asp-for="ResponseBodyDataType">Response Data Type</label>
-                        <select asp-for="ResponseBodyDataType" class="form-control" asp-items="@DataTypes.ListItems">
+                        <select id="responseBodyTypeSelect" asp-for="ResponseBodyDataType" class="form-control" asp-items="@DataTypes.ListItems">
                             <option value="">-</option>
                         </select>
                         <span class="text-danger" asp-validation-for="ResponseBodyDataType"></span>
                     </div>
-                    <div class="form-group">
+                    <div id="responseObjectTypeSection" class="form-group">
                         <label asp-for="ResponseBodyObjectTypeID">Response Object Type</label>
-                        <select asp-for="ResponseBodyObjectTypeID" class="form-control" asp-items="@ObjectTypes.SelectItems">
+                        <select id="responseObjectTypeSelect" asp-for="ResponseBodyObjectTypeID" class="form-control" asp-items="@ObjectTypes.SelectItems">
                             <option value="">-</option>
                         </select>
                         <span asp-validation-for="ResponseBodyObjectTypeID" class="text-danger"></span>
@@ -84,7 +84,7 @@
                 Source
             </div>
             <div class="card-body">
-                <pre>
+                <pre style="max-height: 500px; overflow-y: auto;">
     @Model.Comment
     @Model.Signature
     @Model.Body
@@ -93,4 +93,89 @@
         </div>
     </div>
 </div>
+<br>
+<div class="row">
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header bg-primary text-white">
+                URL Parameters
+            </div>
+            
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header bg-primary text-white">
+                Query Parameters
+            </div>
+            
+        </div>
+    </div>
+</div>
 
+@section Scripts
+{
+    <script type="text/javascript">
+    //<![CDATA[
+    
+    function methodChanged()
+    {
+        let val = $('#methodSelect').val();
+        
+                    
+        if (val === 'false')
+        {   // GET
+            $('#postObjectTypeSection').hide();
+            $('#postBodyTypeSection').hide();
+            $('#postBodyTypeSelect').val('');
+            $('#postObjectTypeSelect').val('');
+        }
+        else    
+        {   // POST
+            $('#postBodyTypeSection').show();
+            postDataTypeChanged();
+        }
+    }
+
+    function postDataTypeChanged()
+    {
+        let val = $('#postBodyTypeSelect').val();
+        
+        if (val === 'Object' || val.endsWith('Objects'))
+        {
+            $('#postObjectTypeSection').show();
+        }
+        else
+        {
+            $('#postObjectTypeSelect').val('');
+            $('#postObjectTypeSection').hide();
+        }
+    }
+    
+    function responseDataTypeChanged()
+    {
+        let val = $('#responseBodyTypeSelect').val();
+        
+        if (val === 'Object' || val.endsWith('Objects'))
+        {
+            $('#responseObjectTypeSection').show();
+        }
+        else
+        {
+            $('#responseObjectTypeSelect').val('');
+            $('#responseObjectTypeSection').hide();
+        }
+    }
+    
+    $(function(){
+        methodChanged();
+        responseDataTypeChanged();
+        
+        $('#methodSelect').change(methodChanged);
+        $('#postBodyTypeSelect').change(postDataTypeChanged);
+        $('#responseBodyTypeSelect').change(responseDataTypeChanged);
+    });
+    
+    //]]>
+    </script>
+}

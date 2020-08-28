@@ -49,7 +49,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary" title="Update">Update</button>
                     &nbsp;&nbsp;
-                    <a asp-action="Show" asp-controller="ObjectType" asp-route-id="@Model.ObjectTypeID" class="btn btn-light" title="Cancel">Cancel</a>
+                    <a asp-action="Show" asp-controller="ObjectType" asp-route-id="@Model.ObjectTypeID" asp-fragment="prop@(Model.ID)" class="btn btn-light" title="Cancel">Cancel</a>
                 </form>
             </div>
         </div>

@@ -32,7 +32,7 @@
         @foreach (var cmd in Model.Commands.OrderBy(x => x.ApiName))
         {
             <tr id="cmd@(cmd.ID)">
-                <td><a asp-controller="Command" asp-action="Show" asp-route-id="@(cmd.ID)">@cmd.ApiName</a></td>
+                <td>@cmd.ApiName</td>
                 <td>@cmd.ClrName</td>
                 <td>@(cmd.UsePost ? "POST" : "GET")</td>
                 <td class="text-center">@(cmd.Skip ? "N" : "Y")</td>

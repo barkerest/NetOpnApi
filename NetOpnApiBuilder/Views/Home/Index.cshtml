@@ -120,7 +120,14 @@
                 }
                 else if (data.cloneComplete)
                 {
-                    setHeaderColor(header, 'success');
+                    if (data.lastSync.toLowerCase() === 'never')
+                    {
+                        setHeaderColor(header, 'warning');
+                    }
+                    else
+                    {
+                        setHeaderColor(header, 'info');
+                    }
                     
                     setStatusContent(
                         status,
@@ -144,8 +151,15 @@
                 }
                 else
                 {
-                    setHeaderColor(header, 'warning');
-                                        
+                    if (data.lastSync.toLowerCase() === 'never')
+                    {
+                        setHeaderColor(header, 'warning');
+                    }
+                    else
+                    {
+                        setHeaderColor(header, 'info');
+                    }
+                    
                     setStatusContent(
                         status,
                         $('<div/>')
