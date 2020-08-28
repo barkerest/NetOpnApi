@@ -89,6 +89,8 @@ namespace NetOpnApiBuilder.Controllers
                 return RedirectToParent(null);
             }
 
+            model.Sample = model.GenerateSample(_db);
+            
             return View(model);
         }
 
