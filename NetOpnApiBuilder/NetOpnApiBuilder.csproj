@@ -21,5 +21,11 @@
       <Folder Include="Pages" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Migrations\snapshot.db">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 
 </Project>
