@@ -5,11 +5,11 @@ using Xunit.Abstractions;
 
 namespace NetOpnApi.Tests.Models
 {
-    public class ResultMessage_Should : BaseModelTest<ResultMessage, ResultMessage_Should.Params>
+    public class ResultMessage_Should : BaseModelTest<ResultOnly, ResultMessage_Should.Params>
     {
         public class Params : ParamList
         {
-            public override IEnumerable<ModelTestParam<ResultMessage>> GetList()
+            public override IEnumerable<ModelTestParam<ResultOnly>> GetList()
                 => new ParamBuilder(@"{""result"":""OK""}")
                    .AddTestsFor(x => x.Result)
                    .ToArray();
@@ -20,11 +20,11 @@ namespace NetOpnApi.Tests.Models
         {
         }
 
-        protected override void Compare(ResultMessage expected, ResultMessage actual)
+        protected override void Compare(ResultOnly expected, ResultOnly actual)
         {
             Assert.Equal(expected.Result, actual.Result);
         }
 
-        protected override ResultMessage Expected => new ResultMessage() {Result = "OK"};
+        protected override ResultOnly Expected => new ResultOnly() {Result = "OK"};
     }
 }

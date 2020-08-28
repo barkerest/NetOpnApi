@@ -8,13 +8,13 @@ namespace NetOpnApi.Commands.Cron.Service
     /// <remarks>
     /// POST: /api/cron/service/reconfigure
     /// </remarks>
-    public class Reconfigure : BaseCommand, ICommandWithResponse<StatusMessage>
+    public class Reconfigure : BaseCommand, ICommandWithResponse<StatusOnly>
     {
         /// <inheritdoc />
         public override bool UsePost { get; } = true;
 
         /// <inheritdoc />
-        public StatusMessage Response { get; set; }
+        public StatusOnly Response { get; set; }
     }
     
 }

@@ -9,13 +9,13 @@ namespace NetOpnApi.Commands.Cron.Settings
     /// <remarks>
     /// POST: /api/cron/settings/setjob/$jobid
     /// </remarks>
-    public class UpdateJob : BaseCommand, ICommandWithResponseAndParameterSet<ResultMessage, UpdateJobParameterSet>
+    public class UpdateJob : BaseCommand, ICommandWithResponseAndParameterSet<ResultOnly, UpdateJobParameterSet>
     {
         /// <inheritdoc />
         public override bool UsePost { get; } = true;
 
         /// <inheritdoc />
-        public ResultMessage Response { get; set; }
+        public ResultOnly Response { get; set; }
 
         /// <inheritdoc />
         public UpdateJobParameterSet ParameterSet { get; } = new UpdateJobParameterSet();

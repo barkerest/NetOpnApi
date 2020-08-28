@@ -31,7 +31,13 @@
         @foreach (var ctlr in Model.Controllers.OrderBy(x => x.ApiName))
         {
             <tr id="ctlr@(ctlr.ID)">
-                <td><a asp-controller="Controller" asp-action="Show" asp-route-id="@(ctlr.ID)">@ctlr.ApiName</a></td>
+                <td><a asp-controller="Controller" asp-action="Show" asp-route-id="@(ctlr.ID)">
+                    @if (ctlr.HasCommandChanges)
+                    {
+                        @:@ApiCommand.ChangeMarker
+                    }
+                    @ctlr.ApiName
+                </a></td>
                 <td>@ctlr.ClrName</td>
                 <td class="text-center">@(ctlr.Skip ? "N" : "Y")</td>
                 <td class="text-right">

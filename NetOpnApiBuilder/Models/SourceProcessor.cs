@@ -204,6 +204,7 @@ namespace NetOpnApiBuilder.Models
                         {
                             var urlParams = cmdArgs
                                             .Split(',')
+                                            .Where(x => !string.IsNullOrWhiteSpace(x))
                                             .Select(x => x.Split('=', 2))
                                             .Select(x => new KeyValuePair<string, bool>(x[0].Trim(), x.Length > 1))
                                             .ToArray();

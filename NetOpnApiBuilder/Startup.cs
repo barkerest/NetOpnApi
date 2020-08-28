@@ -54,6 +54,8 @@ namespace NetOpnApiBuilder
 
             services.AddTransient<ObjectTypeList>();
             services.AddSingleton<ApiDataTypeList>();
+            services.AddSingleton<UrlApiDataTypeList>();
+            services.AddSingleton<QueryApiDataTypeList>();
             
             services.AddControllersWithViews();
         }

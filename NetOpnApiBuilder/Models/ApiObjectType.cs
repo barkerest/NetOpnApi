@@ -16,7 +16,7 @@ namespace NetOpnApiBuilder.Models
         /// </summary>
         [Required]
         [StringLength(100)]
-        [SafeClrName]
+        [SafeClrName(AllowDots = true)]
         public string Name { get; set; }
 
         /// <summary>

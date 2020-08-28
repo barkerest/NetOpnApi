@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using NetOpnApiBuilder.Attributes;
@@ -48,7 +49,8 @@ namespace NetOpnApiBuilder.Models
         /// <summary>
         /// True if there are any commands with changes needing looked at.
         /// </summary>
-        public bool HasCommandChanges => Controllers?.Any(x => x.HasCommandChanges) ?? false;
+        [NotMapped]
+        public bool HasCommandChanges { get; set; }
         
         public override string ToString()
         {

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Microsoft.AspNetCore.Html;
 using Microsoft.Extensions.DependencyInjection;
 using NetOpnApiBuilder.Attributes;
 using NetOpnApiBuilder.Enums;
@@ -10,6 +11,10 @@ namespace NetOpnApiBuilder.Models
 {
     public class ApiCommand : IValidatableObject
     {
+        public static readonly IHtmlContent NewMarker = new HtmlString("<span title=\"New in API\">&#x2726;</span>");
+        
+        public static readonly IHtmlContent ChangeMarker = new HtmlString("<span title=\"Changes in API\">&#x2727;</span>");
+        
         [Key]
         public int ID { get; set; }
 

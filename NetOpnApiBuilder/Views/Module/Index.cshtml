@@ -31,7 +31,13 @@
             <tr id="mod@(mod.ID)">
                 <td><span title="@(mod.Source.Version)">@mod.Source</span></td>
                 <td>
-                    <a asp-action="Show" asp-route-id="@mod.ID">@mod.ApiName</a>
+                    <a asp-action="Show" asp-route-id="@mod.ID">
+                        @if (mod.HasCommandChanges)
+                        {
+                            @:@ApiCommand.ChangeMarker
+                        }
+                        @mod.ApiName
+                    </a>
                 </td>
                 <td>@mod.ClrName</td>
                 <td class="text-center">@(mod.Skip ? "N" : "Y")</td>

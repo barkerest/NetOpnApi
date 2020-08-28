@@ -2,7 +2,7 @@
 
 namespace NetOpnApi.Models
 {
-    public class ResultMessage
+    public class ResultOnly
     {
         [JsonPropertyName("result")]
         public string Result { get; set; }

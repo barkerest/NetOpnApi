@@ -6,11 +6,11 @@ using Xunit.Abstractions;
 
 namespace NetOpnApi.Tests.Models
 {
-    public class StatusMessage_Should : BaseModelTest<StatusMessage, StatusMessage_Should.Params>
+    public class StatusMessage_Should : BaseModelTest<StatusOnly, StatusMessage_Should.Params>
     {
         public class Params : ParamList
         {
-            public override IEnumerable<ModelTestParam<StatusMessage>> GetList()
+            public override IEnumerable<ModelTestParam<StatusOnly>> GetList()
                 => new ParamBuilder(@"{""status"": ""ok""}")
                    .AddTestsFor(m => m.Status)
                    .ToArray();
@@ -22,11 +22,11 @@ namespace NetOpnApi.Tests.Models
         {
         }
 
-        protected override void Compare(StatusMessage expected, StatusMessage actual)
+        protected override void Compare(StatusOnly expected, StatusOnly actual)
         {
             Assert.Equal(expected.Status, actual.Status);
         }
 
-        protected override StatusMessage Expected => new StatusMessage() {Status = "ok"};
+        protected override StatusOnly Expected => new StatusOnly() {Status = "ok"};
     }
 }

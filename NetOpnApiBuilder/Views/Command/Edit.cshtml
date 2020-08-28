@@ -1,4 +1,5 @@
 ﻿@using NetOpnApiBuilder.ViewModels
+@using NetOpnApiBuilder.Extensions
 @model ApiCommand
 @inject ObjectTypeList ObjectTypes
 @inject ApiDataTypeList DataTypes
@@ -95,20 +96,99 @@
 </div>
 <br>
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-lg-6">
         <div class="card bg-light">
             <div class="card-header bg-primary text-white">
                 URL Parameters
             </div>
-            
+            <table class="card-body table">
+                <thead>
+                <tr>
+                    <th>Position</th>
+                    <th>CLR Name</th>
+                    <th>Data Type</th>
+                    <th>Required</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var p in Model.UrlParams.OrderBy(x => x.Order))
+                {
+                    <tr id="up@(p.ID)}">
+                        <td>@p.Order</td>
+                        <td>@p.ClrName</td>
+                        <td><span title="@p.DataType.ToName()">@p.DataType.ToShortName()</span></td>
+                        <td>@(p.AllowNull ? "N" : "Y")</td>
+                        <td>
+                            @Url.EditButton(p.ID, "UrlParameter")
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="5" class="text-center">
+                        @if (Model.UrlParams.Any())
+                        {
+                            <text>@Model.UrlParams.Count parameter@(Model.UrlParams.Count == 1 ? "" : "s")</text>
+                        }
+                        else
+                        {
+                            <text>This command does not have any URL parameters.</text>
+                        }
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-lg-6">
         <div class="card bg-light">
             <div class="card-header bg-primary text-white">
                 Query Parameters
             </div>
-            
+            <table class="card-body table">
+                <thead>
+                <tr>
+                    <th>CLR Name</th>
+                    <th>Data Type</th>
+                    <th>Required</th>
+                    <th>
+                        @Url.AddButton("QueryParameter", values: new {commandId = Model.ID})
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var p in Model.QueryParams.OrderBy(x => x.ApiName))
+                {
+                    <tr id="qp@(p.ID)}">
+                        <td>@p.ClrName</td>
+                        <td><span title="@p.DataType.ToName()">@p.DataType.ToShortName()</span></td>
+                        <td>@(p.AllowNull ? "N" : "Y")</td>
+                        <td>
+                            @Url.EditButton(p.ID, "QueryParameter")
+                            @Url.RemoveButton(p.ID, "QueryParameter")
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="4" class="text-center">
+                        @if (Model.QueryParams.Any())
+                        {
+                            <text>
+                                @Model.QueryParams.Count parameter@(Model.QueryParams.Count == 1 ? "" : "s")
+                                @Url.AddButton("QueryParameter", values: new {commandId = Model.ID})
+                            </text>
+                        }
+                        else
+                        {
+                            <text>
+                                This command does not have any query parameters.
+                                @Url.AddButton("QueryParameter", values: new {commandId = Model.ID})
+                            </text>
+                        }
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using NetOpnApiBuilder.Enums;
 
@@ -9,12 +10,12 @@ namespace NetOpnApiBuilder.Extensions
         private static readonly Regex NonSafeChars = new Regex(@"[^a-zA-Z0-9_]+");
         private static readonly Regex WordSplitter = new Regex(@"(?:^[A-Z_]*|[A-Z_]+)[a-z0-9]*");
 
-        public static bool IsSafeClrName(this string self)
+        public static bool IsSafeClrName(this string self, bool allowDots = false, bool allowDashes = false)
         {
-            return IsSafeClrName(self, out _);
+            return IsSafeClrName(self, out _, allowDots, allowDashes);
         }
 
-        public static bool IsSafeClrName(this string self, out string reason)
+        public static bool IsSafeClrName(this string self, out string reason, bool allowDots = false, bool allowDashes=false)
         {
             if (string.IsNullOrEmpty(self))
             {
@@ -22,8 +23,12 @@ namespace NetOpnApiBuilder.Extensions
                 return false;
             }
 
+            var safeSelf = self;
+            if (allowDots) safeSelf   = safeSelf.Replace('.', '_');
+            if (allowDashes) safeSelf = safeSelf.Replace('-', '_');
+
             // can't have unsafe characters.
-            if (NonSafeChars.IsMatch(self))
+            if (NonSafeChars.IsMatch(safeSelf))
             {
                 reason = "contains unsafe characters";
                 return false;
@@ -34,6 +39,18 @@ namespace NetOpnApiBuilder.Extensions
             if (ch == '_')
             {
                 reason = "starts with underscore";
+                return false;
+            }
+
+            if (ch == '.')
+            {
+                reason = "starts with dot";
+                return false;
+            }
+
+            if (ch == '-')
+            {
+                reason = "starts with dash";
                 return false;
             }
 
@@ -48,6 +65,18 @@ namespace NetOpnApiBuilder.Extensions
             if (ch == '_')
             {
                 reason = "ends with underscore";
+                return false;
+            }
+
+            if (ch == '.')
+            {
+                reason = "ends with dot";
+                return false;
+            }
+
+            if (ch == '-')
+            {
+                reason = "ends with dash";
                 return false;
             }
 
@@ -97,7 +126,32 @@ namespace NetOpnApiBuilder.Extensions
 
         public static string ToName(this ApiDataType self, bool nullable = false, bool titleCase = false)
         {
-            return (nullable ? titleCase ? "Nullable" : "nullable" : "") + self.ToString().ToSpacedName(titleCase);
+            return (nullable ? titleCase ? "Nullable " : "nullable " : "") + self.ToString().ToSpacedName(titleCase);
+        }
+
+        public static string ToShortName(this ApiDataType self, bool nullable = false)
+        {
+            var baseType = (self & ApiDataType.Object).ToName(false, false).Split(' ')[0];
+
+            if ((self & ApiDataType.ArrayOfStrings) == ApiDataType.ArrayOfStrings)
+            {
+                return baseType +
+                       (nullable
+                           ? "[]?"
+                           : "[]");
+            }
+
+            if ((self & ApiDataType.DictionaryOfStrings) == ApiDataType.DictionaryOfStrings)
+            {
+                return baseType +
+                       (nullable
+                           ? "{}?"
+                           : "{}");
+            }
+
+            return nullable
+                       ? (baseType + "?")
+                       : baseType;
         }
     }
 }

@@ -11,9 +11,9 @@ namespace NetOpnApi.Commands.Core.System
     /// WARNING: Rebooting the device will make it unavailable for a short while.
     ///          There is a chance the device will not boot back up if there are hardware issues.
     /// </remarks>
-    public class Reboot : BaseCommand, ICommandWithResponse<StatusMessage>
+    public class Reboot : BaseCommand, ICommandWithResponse<StatusOnly>
     {
         /// <inheritdoc />
-        public StatusMessage Response { get; set; }
+        public StatusOnly Response { get; set; }
     }
 }

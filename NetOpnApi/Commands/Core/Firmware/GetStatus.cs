@@ -8,10 +8,10 @@ namespace NetOpnApi.Commands.Core.Firmware
     /// <remarks>
     /// GET: /api/core/firmware/running
     /// </remarks>
-    public class GetStatus : BaseCommand, ICommandWithResponse<StatusMessage>
+    public class GetStatus : BaseCommand, ICommandWithResponse<StatusOnly>
     {
         /// <inheritdoc />
-        public StatusMessage Response { get; set; }
+        public StatusOnly Response { get; set; }
 
         public GetStatus()
             : base("running")

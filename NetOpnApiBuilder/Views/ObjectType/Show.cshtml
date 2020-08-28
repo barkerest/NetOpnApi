@@ -36,7 +36,7 @@
             <tr id="prop@(prop.ID)">
                 <td>@prop.ApiName</td>
                 <td>@prop.ClrName</td>
-                <td class="text-center">@(prop.DataType.ToName(nullable: prop.CanBeNull))</td>
+                <td class="text-center"><span title="@prop.DataType.ToName(prop.CanBeNull)">@(prop.DataType.ToShortName(prop.CanBeNull))</span></td>
                 <td class="text-right">
                     @Url.EditButton(prop.ID, "ObjectProperty")
                     @Url.RemoveButton(prop.ID, "ObjectProperty")

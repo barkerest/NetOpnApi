@@ -107,6 +107,9 @@ namespace NetOpnApiBuilder.Controllers
             model.ResponseBodyObjectTypeID = responseBodyObjectTypeId;
             model.PostBodyDataType         = postBodyDataType;
             model.PostBodyObjectTypeID     = postBodyObjectTypeId;
+            // clear these flags as well.
+            model.CommandChanged           = false;
+            model.NewCommand               = false;
 
             if (!TryValidateModel(model))
             {

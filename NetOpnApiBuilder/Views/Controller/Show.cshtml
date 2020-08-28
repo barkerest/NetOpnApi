@@ -32,7 +32,17 @@
         @foreach (var cmd in Model.Commands.OrderBy(x => x.ApiName))
         {
             <tr id="cmd@(cmd.ID)">
-                <td>@cmd.ApiName</td>
+                <td>
+                    @if (cmd.NewCommand)
+                    {
+                        @:@ApiCommand.NewMarker
+                    }
+                    else if (cmd.CommandChanged)
+                    {
+                        @:@ApiCommand.ChangeMarker
+                    }
+                    @cmd.ApiName
+                </td>
                 <td>@cmd.ClrName</td>
                 <td>@(cmd.UsePost ? "POST" : "GET")</td>
                 <td class="text-center">@(cmd.Skip ? "N" : "Y")</td>

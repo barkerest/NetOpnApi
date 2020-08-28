@@ -5,7 +5,7 @@ namespace NetOpnApi.Models
     /// <summary>
     /// A simple status message.
     /// </summary>
-    public class StatusMessage
+    public class StatusOnly
     {
         /// <summary>
         /// The status from the request.

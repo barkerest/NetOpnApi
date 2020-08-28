@@ -9,13 +9,13 @@ namespace NetOpnApi.Commands.Core.Firmware
     /// <remarks>
     /// POST: /api/core/firmware/setfirmwareconfig
     /// </remarks>
-    public class SetConfig : BaseCommand, ICommandWithResponseAndParameterSet<StatusMessage, SetFirmwareConfigParameterSet>
+    public class SetConfig : BaseCommand, ICommandWithResponseAndParameterSet<StatusOnly, SetFirmwareConfigParameterSet>
     {
         /// <inheritdoc />
         public override bool UsePost { get; } = true;
 
         /// <inheritdoc />
-        public StatusMessage Response { get; set; }
+        public StatusOnly Response { get; set; }
 
         /// <inheritdoc />
         public SetFirmwareConfigParameterSet ParameterSet { get; } = new SetFirmwareConfigParameterSet();

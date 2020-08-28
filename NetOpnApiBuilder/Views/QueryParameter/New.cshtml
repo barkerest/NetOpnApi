@@ -1,0 +1,48 @@
+﻿@using NetOpnApiBuilder.ViewModels
+@model ApiQueryParam
+@inject QueryApiDataTypeList DataTypes
+
+@{
+    ViewBag.Title = "Query Parameter for " + Model.Command;
+    Layout = "_Layout";
+}
+
+<div class="col-md-6">
+    <div class="card bg-light">
+        <div class="card-header text-white bg-primary">
+            Query Parameter for @Model.Command
+        </div>
+        <div class="card-body">
+            <form asp-action="Create" asp-route-commandId="@Model.Command.ID"  method="post">
+                <div class="form-group">
+                    <label>API Name</label>
+                    <input asp-for="ApiName" type="text" class="form-control"/>
+                    <span class="text-danger" asp-validation-for="ApiName"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="ClrName">CLR Name</label>
+                    <input type="text" asp-for="ClrName" class="form-control" />
+                    <span class="text-danger" asp-validation-for="ClrName"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="DataType">Data Type</label>
+                    <select class="form-control" asp-for="DataType" asp-items="@DataTypes.ListItems">
+                        
+                    </select>
+                    <span class="text-danger" asp-validation-for="DataType"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AllowNull">Required</label>
+                    <select class="form-control" asp-for="AllowNull">
+                        <option value="false">Yes</option>
+                        <option value="true">No</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary" type="submit" title="Create">Create</button>
+                &nbsp;&nbsp;
+                <a asp-action="Edit" asp-controller="Command" asp-route-id="@Model.CommandID" class="btn btn-light" title="Cancel">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>

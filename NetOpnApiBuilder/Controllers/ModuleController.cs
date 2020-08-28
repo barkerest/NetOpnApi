@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,10 @@ namespace NetOpnApiBuilder.Controllers
         public async Task<IActionResult> Index()
         {
             var model = await _db.ApiModules.Include(x => x.Source).ToArrayAsync();
+            foreach (var item in model)
+            {
+                item.HasCommandChanges = await _db.ApiCommands.AnyAsync(x => (x.CommandChanged == true || x.NewCommand == true) && (x.Controller.ModuleID == item.ID));
+            }
             return View(model);
         }
 
@@ -37,6 +42,11 @@ namespace NetOpnApiBuilder.Controllers
             {
                 this.AddFlashMessage("The specified module ID was invalid.", AlertType.Danger);
                 return RedirectToAction("Index");
+            }
+
+            foreach (var item in model.Controllers)
+            {
+                item.HasCommandChanges = await _db.ApiCommands.AnyAsync(x => (x.CommandChanged == true || x.NewCommand == true) && x.ControllerID == item.ID);
             }
 
             return View(model);

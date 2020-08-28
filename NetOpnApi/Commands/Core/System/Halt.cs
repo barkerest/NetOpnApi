@@ -10,9 +10,9 @@ namespace NetOpnApi.Commands.Core.System
     /// 
     /// WARNING: Halting the device will cause it to no longer be available.
     /// </remarks>
-    public class Halt : BaseCommand, ICommandWithResponse<StatusMessage>
+    public class Halt : BaseCommand, ICommandWithResponse<StatusOnly>
     {
         /// <inheritdoc />
-        public StatusMessage Response { get; set; }
+        public StatusOnly Response { get; set; }
     }
 }
