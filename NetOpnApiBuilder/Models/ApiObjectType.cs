@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NetOpnApiBuilder.Attributes;
 using NetOpnApiBuilder.Enums;
@@ -31,7 +32,7 @@ namespace NetOpnApiBuilder.Models
 
         public override string ToString() => Name;
 
-        private void AddPropValueToSample(StringBuilder builder, ApiObjectProperty prop, int level, BuilderDb db, bool prefixIndent = false)
+        private void AddPropValueToSample(StringBuilder builder, ApiObjectProperty prop, int level, IReadOnlyList<ApiObjectType> types, bool prefixIndent = false)
         {
             var indent = new string(' ', (level + 1) * 2);
             
@@ -64,14 +65,14 @@ namespace NetOpnApiBuilder.Models
                     builder.Append("\"123e4567-e89b-12d3-a456-426614174000\"");
                     break;
                 case ApiDataType.Object:
-                    var type = db.ApiObjectTypes.FirstOrDefault(x => x.ID == prop.DataTypeObjectTypeID);
+                    var type = types.FirstOrDefault(x => x.ID == prop.DataTypeObjectTypeID);
                     if (type is null)
                     {
                         builder.Append("????");
                     }
                     else
                     {
-                        type.AddToSample(builder, level + 1, db);
+                        type.AddToSample(builder, level + 1, types);
                     }
                     break;
                 default:
@@ -79,7 +80,7 @@ namespace NetOpnApiBuilder.Models
             }
         }
         
-        private void AddToSample(StringBuilder builder, int level, BuilderDb db, bool topLevel = false)
+        private void AddToSample(StringBuilder builder, int level, IReadOnlyList<ApiObjectType> types, bool topLevel = false)
         {
             if (level > 4)
             {
@@ -115,13 +116,13 @@ namespace NetOpnApiBuilder.Models
                 if ((prop.DataType & ApiDataType.ArrayOfStrings) == ApiDataType.ArrayOfStrings)
                 {
                     builder.Append("[\n");
-                    AddPropValueToSample(builder, prop, level + 1, db, true);
+                    AddPropValueToSample(builder, prop, level + 1, types, true);
                     if (topLevel)
                     {
                         builder.Append(",\n");
-                        AddPropValueToSample(builder, prop, level + 1, db, true);
+                        AddPropValueToSample(builder, prop, level + 1, types, true);
                         builder.Append(",\n");
-                        AddPropValueToSample(builder, prop, level + 1, db, true);
+                        AddPropValueToSample(builder, prop, level + 1, types, true);
                     }
                     builder.Append("\n").Append(indent).Append("]");
                 }
@@ -129,21 +130,21 @@ namespace NetOpnApiBuilder.Models
                 {
                     builder.Append("{\n");
                     builder.Append(indent).Append("  \"item1\" = ");
-                    AddPropValueToSample(builder, prop, level + 2, db);
+                    AddPropValueToSample(builder, prop, level + 2, types);
                     if (topLevel)
                     {
                         builder.Append(",\n");
                         builder.Append(indent).Append("  \"item2\" = ");
-                        AddPropValueToSample(builder, prop, level + 2, db);
+                        AddPropValueToSample(builder, prop, level + 2, types);
                         builder.Append(",\n");
                         builder.Append(indent).Append("  \"item3\" = ");
-                        AddPropValueToSample(builder, prop, level + 2, db);
+                        AddPropValueToSample(builder, prop, level + 2, types);
                     }
                     builder.Append("\n").Append(indent).Append("}");
                 }
                 else
                 {
-                    AddPropValueToSample(builder, prop, level + 1, db);
+                    AddPropValueToSample(builder, prop, level + 1, types);
                 }
             }
 
@@ -153,7 +154,8 @@ namespace NetOpnApiBuilder.Models
         public string GenerateSample(BuilderDb db)
         {
             var builder = new StringBuilder();
-            AddToSample(builder, 0, db, true);
+            var types   = db.ApiObjectTypes.Include(x => x.Properties).ToArray();
+            AddToSample(builder, 0, types, true);
             return builder.ToString();
         }
 
