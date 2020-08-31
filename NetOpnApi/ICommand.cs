@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
@@ -62,26 +63,38 @@ namespace NetOpnApi
         public TResponse Response { get; set; }
     }
 
-    /// <summary>
-    /// The interface for an API command with a parameter set.
-    /// </summary>
-    /// <typeparam name="TParameterSet"></typeparam>
-    public interface ICommandWithParameterSet<TParameterSet> : ICommand
-        where TParameterSet : IParameterSet
+    public interface ICommandWithParameterSet : ICommand
     {
         /// <summary>
-        /// Get the parameter set.
+        /// Get a list of parameters to add to the request URL.
         /// </summary>
-        public TParameterSet ParameterSet { get; }
+        /// <returns></returns>
+        public IReadOnlyList<string> GetUrlParameters();
+
+        /// <summary>
+        /// Get a list of key/value parameters to add to the request URL.
+        /// </summary>
+        /// <returns></returns>
+        public IReadOnlyList<KeyValuePair<string, string>> GetQueryParameters();
+        
+        /// <summary>
+        /// Get an object to pass as the request payload. 
+        /// </summary>
+        /// <returns></returns>
+        public object GetRequestPayload();
+
+        /// <summary>
+        /// Get the data type of the object to pass as the request payload (for serialization).
+        /// </summary>
+        /// <returns></returns>
+        public Type GetRequestPayloadDataType();
     }
 
     /// <summary>
     /// The interface for an API command with a response and parameter set.
     /// </summary>
     /// <typeparam name="TResponse"></typeparam>
-    /// <typeparam name="TParameterSet"></typeparam>
-    public interface ICommandWithResponseAndParameterSet<TResponse, TParameterSet> : ICommandWithResponse<TResponse>, ICommandWithParameterSet<TParameterSet>
-        where TParameterSet : IParameterSet
+    public interface ICommandWithResponseAndParameterSet<TResponse> : ICommandWithResponse<TResponse>, ICommandWithParameterSet
     {
     }
 }

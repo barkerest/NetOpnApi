@@ -28,7 +28,7 @@ namespace NetOpnApi.Tests.Commands.Core.Firmware
 
         protected override void SetParameters(string mirror)
         {
-            Command.ParameterSet.Mirror = mirror;
+            Command.Values.Mirror = mirror;
         }
 
         protected override void CheckResponse(string mirror)

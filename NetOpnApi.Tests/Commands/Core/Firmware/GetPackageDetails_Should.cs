@@ -13,7 +13,7 @@ namespace NetOpnApi.Tests.Commands.Core.Firmware
 
         protected override void SetParameters()
         {
-            Command.ParameterSet.PackageName = "ca_root_nss";
+            Command.PackageName = "ca_root_nss";
         }
 
         protected override void CheckResponse()

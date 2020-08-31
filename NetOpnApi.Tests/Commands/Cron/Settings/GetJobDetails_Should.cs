@@ -30,7 +30,7 @@ namespace NetOpnApi.Tests.Commands.Cron.Settings
 
         protected override void SetParameters(Guid? args)
         {
-            Command.ParameterSet.JobId = args;
+            Command.JobId = args;
         }
 
         protected override void CheckResponse(Guid? args)

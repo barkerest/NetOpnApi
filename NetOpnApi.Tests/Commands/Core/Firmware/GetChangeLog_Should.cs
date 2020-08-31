@@ -34,13 +34,13 @@ namespace NetOpnApi.Tests.Commands.Core.Firmware
         {
             if (version is null)
             {
-                Command.ParameterSet.Update  = true;
-                Command.ParameterSet.Version = "20.1";    // a valid version, so if sent instead of update will cause the response check to fail.
+                Command.Update  = true;
+                Command.Version = "20.1";    // a valid version, so if sent instead of update will cause the response check to fail.
             }
             else
             {
-                Command.ParameterSet.Update  = false;
-                Command.ParameterSet.Version = version;
+                Command.Update  = false;
+                Command.Version = version;
             }
         }
 

@@ -15,7 +15,7 @@ namespace NetOpnApi.Tests.Commands.Core.Firmware
         protected override void SetParameters()
         {
             // only upgrade the package repository, should be quite a bit faster.
-            Command.ParameterSet.UpgradeType = UpgradeType.PackageRepository;
+            Command.UpgradeType = UpgradeType.PackageRepository;
         }
     }
 }

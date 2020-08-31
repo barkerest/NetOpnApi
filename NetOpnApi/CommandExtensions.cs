@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -28,19 +27,13 @@ namespace NetOpnApi
 
         static CommandExtensions()
         {
-            var validatedHandler = new TimeoutHandler()
+            var validatedHandler = new HttpClientHandler();
+
+            var nonValidatedHandler = new HttpClientHandler()
             {
-                InnerHandler = new HttpClientHandler()
+                ServerCertificateCustomValidationCallback = (message, certificate, chain, error) => true
             };
-            
-            var nonValidatedHandler = new TimeoutHandler()
-            {
-                InnerHandler = new HttpClientHandler()
-                {
-                    ServerCertificateCustomValidationCallback = (message, certificate, chain, error) => true    
-                }
-            };
-            
+
             ValidatedClient    = new HttpClient(validatedHandler);
             NonValidatedClient = new HttpClient(nonValidatedHandler);
         }
@@ -117,60 +110,22 @@ namespace NetOpnApi
 
         #endregion
 
-        #region Generic Parameter Set Helpers
-
-        /// <summary>
-        /// Determine if the command supports a parameter set.
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        public static bool SupportsParameterSet(this ICommand command)
-            => command?.GetType().ImplementsGeneric(typeof(ICommandWithParameterSet<>)) ?? false;
-
-        /// <summary>
-        /// Get the data type of the parameter set.
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        public static Type GetParameterSetType(this ICommand command)
-            => command?.GetType().GetGenericArg(typeof(ICommandWithParameterSet<>));
-
-        /// <summary>
-        /// Get the parameter set.
-        /// </summary>
-        /// <param name="command"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        public static IParameterSet GetParameterSet(this ICommand command)
-        {
-            if (!command.SupportsParameterSet()) throw new ArgumentException("Command does not support a request value.");
-
-            var prop = command.GetType().GetProperty("ParameterSet", BindingFlags.Instance | BindingFlags.Public);
-            if (prop is null) throw new ArgumentException("Command does not implement \"ParameterSet\" property publicly.");
-
-            return (IParameterSet) prop.GetValue(command);
-        }
-
-        #endregion
-
         #region Create POST Content
 
-        private static StringContent CreatePostContent<T>(this ICommandWithParameterSet<T> self)
-            where T : IParameterSet
+        private static StringContent CreatePostContent(this ICommandWithParameterSet self)
         {
-            var obj  = self?.ParameterSet?.GetRequestPayload();
-            var type = self?.ParameterSet?.GetRequestPayloadDataType();
+            var obj  = self?.GetRequestPayload();
+            var type = self?.GetRequestPayloadDataType();
 
             if (obj == null) return null;
-            
+
             var body = JsonSerializer.Serialize(obj, type);
             return new StringContent(body) {Headers = {ContentType = new MediaTypeHeaderValue("application/json")}};
         }
 
         private static StringContent CreatePostContent(this ICommand self)
         {
-            if (self.SupportsParameterSet() &&
-                self.GetParameterSet() is IParameterSet set)
+            if (self is ICommandWithParameterSet set)
             {
                 var obj = set.GetRequestPayload();
                 if (obj == null) return null;
@@ -179,6 +134,7 @@ namespace NetOpnApi
                 var body = JsonSerializer.Serialize(obj, type);
                 return new StringContent(body) {Headers = {ContentType = new MediaTypeHeaderValue("application/json")}};
             }
+
             return null;
         }
 
@@ -189,14 +145,14 @@ namespace NetOpnApi
         private static readonly JsonElement NullJsonObject  = JsonDocument.Parse("null").RootElement;
         private static readonly JsonElement EmptyJsonObject = JsonDocument.Parse("{}").RootElement;
         private static readonly JsonElement EmptyJsonArray  = JsonDocument.Parse("[]").RootElement;
-        
+
         private static JsonElement GetResponseRootElement(this ICommand self, JsonDocument jsonDocument)
         {
             var root = jsonDocument.RootElement;
 
             // null returned from API, return null.
             if (root.ValueKind == JsonValueKind.Null) return NullJsonObject;
-            
+
             // empty array returned from API where root element is named, return null.
             if (root.ValueKind == JsonValueKind.Array &&
                 root.GetArrayLength() == 0)
@@ -223,7 +179,8 @@ namespace NetOpnApi
                 {
                     throw new NetOpnApiInvalidResponseException(
                         ErrorCode.InvalidResponseRootObject,
-                        "The json response does not contain an object.");
+                        "The json response does not contain an object."
+                    );
                 }
             }
 
@@ -250,7 +207,7 @@ namespace NetOpnApi
                     $"The root element property named {self.ResponseRootElementName} is not an {self.ResponseRootElementValueKind}."
                 );
             }
-            
+
             // root element found.
             return root;
         }
@@ -259,13 +216,11 @@ namespace NetOpnApi
 
         #region Create Request URL
 
-        private static void AppendCommandParametersToUrl<T>(this ICommandWithParameterSet<T> self, StringBuilder builder)
-            where T : IParameterSet
+        private static void AppendCommandParametersToUrl(this ICommandWithParameterSet self, StringBuilder builder)
         {
             if (self is null) return;
-            if (self.ParameterSet is null) return;
 
-            var parameters = self.ParameterSet.GetUrlParameters();
+            var parameters = self.GetUrlParameters();
             if (parameters != null &&
                 parameters.Count > 0)
             {
@@ -275,7 +230,7 @@ namespace NetOpnApi
                 }
             }
 
-            var query = self.ParameterSet.GetQueryParameters();
+            var query = self.GetQueryParameters();
             if (query != null &&
                 query.Count > 0)
             {
@@ -292,10 +247,7 @@ namespace NetOpnApi
         private static void AppendCommandParametersToUrl(this ICommand self, StringBuilder builder)
         {
             if (self is null) return;
-            if (!self.SupportsParameterSet()) return;
-
-            var set = self.GetParameterSet();
-            if (set is null) return;
+            if (!(self is ICommandWithParameterSet set)) return;
 
             var parameters = set.GetUrlParameters();
             if (parameters != null &&
@@ -348,8 +300,7 @@ namespace NetOpnApi
             return sb;
         }
 
-        private static Uri CreateRequestUrl<T>(this ICommandWithParameterSet<T> self)
-            where T : IParameterSet
+        private static Uri CreateRequestUrl(this ICommandWithParameterSet self)
         {
             var sb = self.CreateRequestUrlCommon();
 
@@ -398,8 +349,7 @@ namespace NetOpnApi
             return request;
         }
 
-        private static HttpRequestMessage CreateRequest<T>(this ICommandWithParameterSet<T> self, IDeviceConfig cfg)
-            where T : IParameterSet
+        private static HttpRequestMessage CreateRequest(this ICommandWithParameterSet self, IDeviceConfig cfg)
             => self.CommonCreateRequest(
                 self.CreateRequestUrl(),
                 cfg,
@@ -454,7 +404,7 @@ namespace NetOpnApi
             }
 
             var t = typeof(T);
-            
+
             try
             {
                 self.Logger?.LogDebug($"Deserializing {t} from JSON element.");
@@ -493,57 +443,6 @@ namespace NetOpnApi
         }
 
         #endregion
-
-        #region Request Timeouts
-
-        private const string TimeoutKey = "RequestTimeout";
-
-        private static void SetTimeout(this HttpRequestMessage self, TimeSpan? timeout)
-        {
-            self.Properties[TimeoutKey] = timeout;
-        }
-
-        private static TimeSpan? GetTimeout(this HttpRequestMessage self)
-        {
-            if (self.Properties.TryGetValue(TimeoutKey, out var value) &&
-                value is TimeSpan timeout)
-            {
-                return timeout;
-            }
-
-            return null;
-        }
-
-        private class TimeoutHandler : DelegatingHandler
-        {
-            private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(100);
-
-            protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                var                     timeout = request.GetTimeout() ?? DefaultTimeout;
-                CancellationTokenSource cts = null;
-                
-                if (timeout != Timeout.InfiniteTimeSpan)
-                {
-                    cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                    cts.CancelAfter(timeout);
-                }
-
-                using (cts)
-                {
-                    try
-                    {
-                        return await base.SendAsync(request, cts?.Token ?? cancellationToken);
-                    }
-                    catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-                    {
-                        throw new NetOpnApiTimeoutException(timeout);
-                    }
-                }
-            }
-        }
-
-        #endregion
         
         #region ExecuteCommand
 
@@ -556,8 +455,11 @@ namespace NetOpnApi
             {
                 using (var request = createRequest(cfg))
                 {
-                    request.SetTimeout(TimeSpan.FromSeconds(timeout));
-                    using (var response = client.SendAsync(request).Result)
+                    var responseTask = client.SendAsync(request);
+                    responseTask.Wait(TimeSpan.FromSeconds(timeout));
+                    if (!responseTask.IsCompleted) throw new NetOpnApiTimeoutException();
+
+                    using (var response = responseTask.Result)
                     {
                         self.Logger?.LogDebug($"Response Code: {(int) response.StatusCode} ({response.StatusCode})");
 
@@ -671,7 +573,7 @@ namespace NetOpnApi
         /// <exception cref="NetOpnApiNotAuthorizedException">The configured API key does not have sufficient access.</exception>
         /// <exception cref="NetOpnApiNotImplementedException">The command is not implemented on the device.</exception>
         /// <exception cref="NetOpnApiInvalidResponseException">The command returns an invalid response.</exception>
-        public static void Execute(this ICommand self, int timeout=100)
+        public static void Execute(this ICommand self, int timeout = 100)
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
@@ -689,7 +591,7 @@ namespace NetOpnApi
         /// <exception cref="NetOpnApiNotAuthorizedException">The configured API key does not have sufficient access.</exception>
         /// <exception cref="NetOpnApiNotImplementedException">The command is not implemented on the device.</exception>
         /// <exception cref="NetOpnApiInvalidResponseException">The command returns an invalid response.</exception>
-        public static void Execute<TResponse>(this ICommandWithResponse<TResponse> self, int timeout=100)
+        public static void Execute<TResponse>(this ICommandWithResponse<TResponse> self, int timeout = 100)
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
@@ -707,7 +609,7 @@ namespace NetOpnApi
         /// <exception cref="NetOpnApiNotAuthorizedException">The configured API key does not have sufficient access.</exception>
         /// <exception cref="NetOpnApiNotImplementedException">The command is not implemented on the device.</exception>
         /// <exception cref="NetOpnApiInvalidResponseException">The command returns an invalid response.</exception>
-        public static void Execute<TParameterSet>(this ICommandWithParameterSet<TParameterSet> self, int timeout=100) where TParameterSet : IParameterSet
+        public static void Execute(this ICommandWithParameterSet self, int timeout = 100)
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
@@ -725,8 +627,7 @@ namespace NetOpnApi
         /// <exception cref="NetOpnApiNotAuthorizedException">The configured API key does not have sufficient access.</exception>
         /// <exception cref="NetOpnApiNotImplementedException">The command is not implemented on the device.</exception>
         /// <exception cref="NetOpnApiInvalidResponseException">The command returns an invalid response.</exception>
-        public static void Execute<TResponse, TParameterSet>(this ICommandWithResponseAndParameterSet<TResponse, TParameterSet> self, int timeout=100)
-            where TParameterSet : IParameterSet
+        public static void Execute<TResponse>(this ICommandWithResponseAndParameterSet<TResponse> self, int timeout = 100)
             => ExecuteCommand(
                 self,
                 self.CreateRequest,
@@ -746,7 +647,7 @@ namespace NetOpnApi
         /// <param name="errorCode">Returns the error code if command execution fails.</param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public static bool TryExecute(this ICommand self, out ErrorCode errorCode, int timeout=100)
+        public static bool TryExecute(this ICommand self, out ErrorCode errorCode, int timeout = 100)
         {
             errorCode = ErrorCode.NoError;
 
@@ -769,7 +670,7 @@ namespace NetOpnApi
         /// <param name="errorCode">Returns the error code if command execution fails.</param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public static bool TryExecute<TResponse>(this ICommandWithResponse<TResponse> self, out ErrorCode errorCode, int timeout=100)
+        public static bool TryExecute<TResponse>(this ICommandWithResponse<TResponse> self, out ErrorCode errorCode, int timeout = 100)
         {
             errorCode = ErrorCode.NoError;
 
@@ -792,8 +693,7 @@ namespace NetOpnApi
         /// <param name="errorCode">Returns the error code if command execution fails.</param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public static bool TryExecute<TParameterSet>(this ICommandWithParameterSet<TParameterSet> self, out ErrorCode errorCode, int timeout=100)
-            where TParameterSet : IParameterSet
+        public static bool TryExecute(this ICommandWithParameterSet self, out ErrorCode errorCode, int timeout = 100)
         {
             errorCode = ErrorCode.NoError;
 
@@ -816,8 +716,7 @@ namespace NetOpnApi
         /// <param name="errorCode">Returns the error code if command execution fails.</param>
         /// <param name="timeout"></param>
         /// <returns></returns>
-        public static bool TryExecute<TResponse, TParameterSet>(this ICommandWithResponseAndParameterSet<TResponse, TParameterSet> self, out ErrorCode errorCode, int timeout=100)
-            where TParameterSet : IParameterSet
+        public static bool TryExecute<TResponse>(this ICommandWithResponseAndParameterSet<TResponse> self, out ErrorCode errorCode, int timeout = 100)
         {
             errorCode = ErrorCode.NoError;
 
@@ -843,7 +742,7 @@ namespace NetOpnApi
         /// <param name="self"></param>
         /// <param name="perRequestTimeout"></param>
         /// <returns></returns>
-        public static StatusWithUuidAndLog ExecuteAndWait(this ICommandWithResponse<StatusWithUuid> self, int perRequestTimeout=10)
+        public static StatusWithUuidAndLog ExecuteAndWait(this ICommandWithResponse<StatusWithUuid> self, int perRequestTimeout = 10)
         {
             self.Execute(perRequestTimeout);
             if (self.Response?.Status != "ok")
@@ -851,16 +750,16 @@ namespace NetOpnApi
                 return new StatusWithUuidAndLog()
                 {
                     Status = self.Response?.Status,
-                    Uuid = self.Response?.Uuid ?? Guid.Empty
+                    Uuid   = self.Response?.Uuid ?? Guid.Empty
                 };
             }
 
             var ret = new StatusWithUuidAndLog()
             {
                 Status = "running",
-                Uuid = self.Response.Uuid
+                Uuid   = self.Response.Uuid
             };
-            
+
             var progressCommand = new Commands.Core.Firmware.GetUpgradeProgress()
             {
                 Config = self.Config,
@@ -880,16 +779,16 @@ namespace NetOpnApi
                         ret.Status = progressCommand.Response.Status;
                         ret.Log    = progressCommand.Response.Log;
                         return ret;
-                    
+
                     case "error":
                         ret.Status = "error";
                         ret.Log    = "There is no command running.";
                         return ret;
-                    
+
                     case "running":
                         Thread.Sleep(250);
                         break;
-                    
+
                     default:
                         throw new NetOpnApiInvalidResponseException(ErrorCode.InvalidStatus, $"The status \"{progressCommand.Response.Status}\" is not valid.");
                 }

@@ -57,7 +57,7 @@ namespace NetOpnApi.Tests.Commands.Core.Menu
 
         protected override void SetParameters(Param args)
         {
-            Command.ParameterSet.SearchTerm = args.Term;
+            Command.SearchTerm = args.Term;
         }
 
         protected override void CheckResponse(Param args)

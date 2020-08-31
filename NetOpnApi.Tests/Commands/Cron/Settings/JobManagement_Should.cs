@@ -45,15 +45,15 @@ namespace NetOpnApi.Tests.Commands.Cron.Settings
             var initialJobs = _searchCmd.Response.Rows ?? new JobSearchEntry[0];
 
             this.LogDebug("Getting default job settings...");
-            _getCmd.ParameterSet.JobId = null;
+            _getCmd.JobId = null;
             _getCmd.Execute();
             var defaults = _getCmd.Response;
 
             this.LogDebug("Creating new job...");
-            _addCmd.ParameterSet.FillFrom(defaults);
-            _addCmd.ParameterSet.Command     = defaults.Commands.First(x => x.Key.Contains("changelog", StringComparison.OrdinalIgnoreCase)).Key;
-            _addCmd.ParameterSet.Description = "Update changelog at midnight..";
-            _addCmd.ParameterSet.Enabled     = true;
+            _addCmd.Values.FillFrom(defaults);
+            _addCmd.Values.Command     = defaults.Commands.First(x => x.Key.Contains("changelog", StringComparison.OrdinalIgnoreCase)).Key;
+            _addCmd.Values.Description = "Update changelog at midnight..";
+            _addCmd.Values.Enabled     = true;
             _addCmd.Execute();
             
             Assert.Equal("saved", _addCmd.Response.Result);
@@ -65,41 +65,41 @@ namespace NetOpnApi.Tests.Commands.Cron.Settings
             Assert.True(newJobs.Length > initialJobs.Length);
             
             this.LogDebug("Toggling job...");
-            _toggleCmd.ParameterSet.JobId   = jobId;
-            _toggleCmd.ParameterSet.Enabled = null;
+            _toggleCmd.JobId   = jobId;
+            _toggleCmd.Enabled = null;
             _toggleCmd.Execute();
             
             Assert.Equal("disabled", _toggleCmd.Response.Result, ignoreCase: true);
             _toggleCmd.Execute();
             Assert.Equal("enabled", _toggleCmd.Response.Result, ignoreCase: true);
 
-            _toggleCmd.ParameterSet.Enabled = true;
+            _toggleCmd.Enabled = true;
             _toggleCmd.Execute();
             Assert.Equal("enabled", _toggleCmd.Response.Result, ignoreCase: true);
             _toggleCmd.Execute();
             Assert.Equal("enabled", _toggleCmd.Response.Result, ignoreCase: true);
 
-            _toggleCmd.ParameterSet.Enabled = false;
+            _toggleCmd.Enabled = false;
             _toggleCmd.Execute();
             Assert.Equal("disabled", _toggleCmd.Response.Result, ignoreCase: true);
             _toggleCmd.Execute();
             Assert.Equal("disabled", _toggleCmd.Response.Result, ignoreCase: true);
 
             this.LogDebug("Getting job details...");
-            _getCmd.ParameterSet.JobId = jobId;
+            _getCmd.JobId = jobId;
             _getCmd.Execute();
             var details = _getCmd.Response;
 
             this.LogDebug("Updating job...");
-            _updateCmd.ParameterSet.JobId = jobId;
-            _updateCmd.ParameterSet.FillFrom(details);
-            _updateCmd.ParameterSet.Enabled     = true;
-            _updateCmd.ParameterSet.Description = "Update changelog at midnight.";
+            _updateCmd.JobId = jobId;
+            _updateCmd.Values.FillFrom(details);
+            _updateCmd.Values.Enabled     = true;
+            _updateCmd.Values.Description = "Update changelog at midnight.";
             _updateCmd.Execute();
             Assert.Equal("saved", _updateCmd.Response.Result);
 
             this.LogDebug("Deleting job...");
-            _deleteCmd.ParameterSet.JobId = jobId;
+            _deleteCmd.JobId = jobId;
             _deleteCmd.Execute();
             Assert.Equal("deleted", _deleteCmd.Response.Result);
 

@@ -1,4 +1,6 @@
-﻿using NetOpnApi.Models;
+﻿using System;
+using System.Collections.Generic;
+using NetOpnApi.Models;
 using NetOpnApi.Models.Core.Firmware;
 
 namespace NetOpnApi.Commands.Core.Firmware
@@ -9,7 +11,7 @@ namespace NetOpnApi.Commands.Core.Firmware
     /// <remarks>
     /// POST: /api/core/firmware/setfirmwareconfig
     /// </remarks>
-    public class SetConfig : BaseCommand, ICommandWithResponseAndParameterSet<StatusOnly, SetFirmwareConfigParameterSet>
+    public class SetConfig : BaseCommand, ICommandWithResponseAndParameterSet<StatusOnly>
     {
         /// <inheritdoc />
         public override bool UsePost { get; } = true;
@@ -17,9 +19,19 @@ namespace NetOpnApi.Commands.Core.Firmware
         /// <inheritdoc />
         public StatusOnly Response { get; set; }
 
-        /// <inheritdoc />
-        public SetFirmwareConfigParameterSet ParameterSet { get; } = new SetFirmwareConfigParameterSet();
+        /// <summary>
+        /// The values being set.
+        /// </summary>
+        public Config Values { get; } = new Config();
+        
+        IReadOnlyList<string> ICommandWithParameterSet.GetUrlParameters() => null;
 
+        IReadOnlyList<KeyValuePair<string, string>> ICommandWithParameterSet.GetQueryParameters() => null;
+
+        object ICommandWithParameterSet.GetRequestPayload() => Values;
+        
+        Type ICommandWithParameterSet.GetRequestPayloadDataType() => typeof(Config);
+        
         public SetConfig()
             : base("setfirmwareconfig")
         {

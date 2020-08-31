@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
 using NetOpnApi.Models.Cron.Settings;
 
 namespace NetOpnApi.Commands.Cron.Settings
@@ -9,14 +11,26 @@ namespace NetOpnApi.Commands.Cron.Settings
     /// <remarks>
     /// GET: /api/cron/settings/getjob/$jobid
     /// </remarks>
-    public class GetJobDetails : BaseCommand, ICommandWithResponseAndParameterSet<JobDetails, GetJobDetailsParameterSet>
+    public class GetJobDetails : BaseCommand, ICommandWithResponseAndParameterSet<JobDetails>
     {
         /// <inheritdoc />
         public JobDetails                Response     { get; set; }
         
-        /// <inheritdoc />
-        public GetJobDetailsParameterSet ParameterSet { get; } = new GetJobDetailsParameterSet();
+        
+        /// <summary>
+        /// The ID of the job to retrieve (or null for default job settings).
+        /// </summary>
+        public Guid? JobId { get; set; }
 
+        IReadOnlyList<string> ICommandWithParameterSet.GetUrlParameters()
+            => JobId is null ? null : new[] {JobId.ToString()};
+
+        IReadOnlyList<KeyValuePair<string, string>> ICommandWithParameterSet.GetQueryParameters() => null;
+
+        object ICommandWithParameterSet.GetRequestPayload() => null;
+
+        Type ICommandWithParameterSet.GetRequestPayloadDataType() => null;
+        
         /// <inheritdoc />
         public override string ResponseRootElementName { get; } = "job";
 

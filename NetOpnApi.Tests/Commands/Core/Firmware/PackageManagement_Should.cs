@@ -25,7 +25,7 @@ namespace NetOpnApi.Tests.Commands.Core.Firmware
         IDisposable ILogger.BeginScope<TState>(TState state) => null;
 
         private void TestAction<TCommand>() 
-            where TCommand : class, ICommandWithResponseAndParameterSet<StatusWithUuid, NetOpnApi.Models.Core.Firmware.PackageParameterSet>, new()
+            where TCommand : class, ICommandWithResponseAndParameterSet<StatusWithUuid>, new()
         {
             _output.WriteLine($"Testing {typeof(TCommand)} command.");
             var command = new TCommand()
@@ -33,8 +33,10 @@ namespace NetOpnApi.Tests.Commands.Core.Firmware
                 Config = OpnSenseDevice.Instance,
                 Logger = this
             };
-            command.ParameterSet.PackageName = TestPackageName;
-
+            
+            // command.PackageName = TestPackageName
+            typeof(TCommand).GetProperty("PackageName")!.SetValue(command, TestPackageName);
+            
             var result = command.ExecuteAndWait();
 
             Assert.NotNull(result);

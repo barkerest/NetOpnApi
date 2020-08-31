@@ -31,7 +31,7 @@ namespace NetOpnApi.Tests.Commands.Diagnostics.Dns
 
         protected override void SetParameters((string address, string name) args)
         {
-            Command.ParameterSet.IpAddress = args.address;
+            Command.IpAddress = args.address;
         }
 
         protected override void CheckResponse((string address, string name) args)
