@@ -98,6 +98,12 @@ namespace NetOpnApiBuilder.Models
         public ApiObjectType PostBodyObjectType { get; set; }
         
         /// <summary>
+        /// The name of the property used to hold the post body, or blank if the post body will be submitted as is.
+        /// </summary>
+        [StringLength(100)]
+        public string PostBodyPropertyName { get; set; }
+        
+        /// <summary>
         /// The data type for the response.
         /// </summary>
         public ApiDataType? ResponseBodyDataType { get; set; }
@@ -109,6 +115,12 @@ namespace NetOpnApiBuilder.Models
         /// The object type definition for the response.
         /// </summary>
         public ApiObjectType ResponseBodyObjectType { get; set; }
+        
+        /// <summary>
+        /// The name of the property used to hold the response body, or blank if the entire response is used.
+        /// </summary>
+        [StringLength(100)]
+        public string ResponseBodyPropertyName { get; set; }
         
         /// <summary>
         /// The source version this command was loaded from.

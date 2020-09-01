@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace NetOpnApiBuilder.Migrations
 {
-    public partial class CreateDatabase : Migration
+    public class CreateDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -143,7 +143,9 @@ namespace NetOpnApiBuilder.Migrations
                     ResponseBodyDataType = table.Column<int>(nullable: true),
                     ResponseBodyObjectTypeID = table.Column<int>(nullable: true),
                     SourceVersion = table.Column<string>(nullable: true),
-                    Skip = table.Column<bool>(nullable: false)
+                    Skip = table.Column<bool>(nullable: false),
+                    PostBodyPropertyName = table.Column<string>(maxLength:100),
+                    ResponseBodyPropertyName = table.Column<string>(maxLength:100)
                 },
                 constraints: table =>
                 {

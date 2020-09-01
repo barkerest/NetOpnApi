@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using NetOpnApiBuilder.Enums;
 using NetOpnApiBuilder.Extensions;
 using NetOpnApiBuilder.Models;
+using NetOpnApiBuilder.ViewModels;
 
 namespace NetOpnApiBuilder.Controllers
 {
@@ -128,6 +129,54 @@ namespace NetOpnApiBuilder.Controllers
             }
             
             return View("Edit", model);
+        }
+
+        [HttpGet("{id}/test")]
+        public async Task<IActionResult> Test(int id)
+        {
+            var model = await _db.ApiCommands
+                                 .Include(x => x.Controller)
+                                 .ThenInclude(x => x.Module)
+                                 .ThenInclude(x => x.Source)
+                                 .Include(x => x.PostBodyObjectType)
+                                 .Include(x => x.ResponseBodyObjectType)
+                                 .Include(x => x.QueryParams)
+                                 .Include(x => x.UrlParams)
+                                 .FirstOrDefaultAsync(x => x.ID == id);
+
+            if (model is null)
+            {
+                this.AddFlashMessage("The specified command ID was invalid.", AlertType.Danger);
+                return RedirectToParent(null);
+            }
+
+            return View(new TestCommandModel(model));
+        }
+
+        [HttpPost("{id}/test")]
+        public async Task<IActionResult> PerformTest(int id)
+        {
+            var cmd = await _db.ApiCommands
+                                 .Include(x => x.Controller)
+                                 .ThenInclude(x => x.Module)
+                                 .ThenInclude(x => x.Source)
+                                 .Include(x => x.PostBodyObjectType)
+                                 .Include(x => x.ResponseBodyObjectType)
+                                 .Include(x => x.QueryParams)
+                                 .Include(x => x.UrlParams)
+                                 .FirstOrDefaultAsync(x => x.ID == id);
+
+            if (cmd is null)
+            {
+                this.AddFlashMessage("The specified command ID was invalid.", AlertType.Danger);
+                return RedirectToParent(null);
+            }
+            
+            var model = new TestCommandModel(cmd);
+            
+            // TODO: Process test.
+
+            return View("Test", model);
         }
     }
 }

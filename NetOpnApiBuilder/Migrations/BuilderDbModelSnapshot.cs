@@ -54,11 +54,19 @@ namespace NetOpnApiBuilder.Migrations
                     b.Property<int?>("PostBodyObjectTypeID")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("PostBodyPropertyName")
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(100);
+
                     b.Property<int?>("ResponseBodyDataType")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ResponseBodyObjectTypeID")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ResponseBodyPropertyName")
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(100);
 
                     b.Property<string>("Signature")
                         .IsRequired()
