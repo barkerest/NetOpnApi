@@ -159,7 +159,9 @@ namespace NetOpnApi
             {
                 if (string.IsNullOrEmpty(self.ResponseRootElementName))
                 {
-                    return self.ResponseRootElementValueKind == JsonValueKind.Object ? EmptyJsonObject : EmptyJsonArray;
+                    return self.ResponseRootElementValueKind == JsonValueKind.Object ? EmptyJsonObject
+                           : self.ResponseRootElementValueKind == JsonValueKind.Array ? EmptyJsonArray
+                           : NullJsonObject;
                 }
 
                 return NullJsonObject;
@@ -184,6 +186,12 @@ namespace NetOpnApi
                 }
             }
 
+            // no requirement on the root element kind.
+            if (self.ResponseRootElementValueKind == JsonValueKind.Null)
+            {
+                return root;
+            }
+            
             if (root.ValueKind != self.ResponseRootElementValueKind)
             {
                 // the root element contains an empty array where an object is expected, return an empty object.

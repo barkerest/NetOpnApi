@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NetOpnApi;
+using NetOpnApi.Errors;
 using NetOpnApiBuilder.Enums;
 using NetOpnApiBuilder.Extensions;
 using NetOpnApiBuilder.Models;
@@ -173,9 +176,64 @@ namespace NetOpnApiBuilder.Controllers
             }
             
             var model = new TestCommandModel(cmd);
-            
-            // TODO: Process test.
 
+            if (Request.Form.ContainsKey("JsonBody"))
+            {
+                model.JsonBody = Request.Form["JsonBody"].ToString();
+            }
+            
+            foreach (var param in model.Params)
+            {
+                param.Value = Request.Form.ContainsKey(param.FormName) ? Request.Form[param.FormName].ToString() : "";
+            }
+
+            if (!TryValidateModel(model))
+            {
+                model.TestRun = false;
+            }
+            else
+            {
+                var action = new CustomCommand(cmd)
+                {
+                    Config = await _db.GetTestDeviceAsync(),
+                    Logger = _logger
+                };
+
+                if (model.UseJsonBody)
+                {
+                    action.SetPostBody(model.JsonBody);
+                }
+
+                foreach (var param in model.Params)
+                {
+                    if (string.IsNullOrEmpty(param.Value)) continue;
+                    
+                    if (param.IsUrlParam)
+                    {
+                        action.SetUrlParameter(param.ClrName, param.Value);
+                    }
+                    else
+                    {
+                        action.SetQueryParameter(param.ClrName, param.Value);
+                    }
+                }
+
+                model.TestRun = true;
+
+                try
+                {
+                    action.Execute();
+                    model.TestError    = null;
+                    model.TestResponse = JsonSerializer.Serialize(action.Response, new JsonSerializerOptions() {WriteIndented = true});
+
+                }
+                catch (NetOpnApiException e)
+                {
+                    model.TestResponse = null;
+                    model.TestError    = $"{e.Code}:\n{e.Message}";
+                }
+            }
+            
             return View("Test", model);
         }
     }

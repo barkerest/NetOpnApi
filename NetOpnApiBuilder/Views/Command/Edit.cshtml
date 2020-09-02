@@ -74,6 +74,8 @@
                     </div>
                     <button type="submit" class="btn btn-primary" title="Update">Update</button>
                     &nbsp;&nbsp;
+                    <a asp-action="Test" asp-route-id="@Model.ID" class="btn btn-info" title="Test">Test</a>
+                    &nbsp;&nbsp;
                     <a asp-action="Show" asp-controller="Controller" asp-route-id="@Model.ControllerID" asp-fragment="cmd@(Model.ID)" class="btn btn-light" title="Cancel">Cancel</a>
                 </form>
             </div>

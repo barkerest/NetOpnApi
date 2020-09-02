@@ -15,11 +15,12 @@ namespace NetOpnApiBuilder.ViewModels
         private readonly Dictionary<string, string> _urlParams;
         private readonly Dictionary<string, string> _queryMap;
         private readonly Dictionary<string, string> _queryParams;
+        private          JsonElement?               _postBody;
 
         public CustomCommand(ApiCommand cmd)
         {
-            Module     = cmd.Controller.Module.ApiName;
-            Controller = cmd.Controller.ApiName;
+            Module     = cmd.Controller.Module.ApiName.ToLower();
+            Controller = cmd.Controller.ApiName.ToLower();
             Command    = cmd.ApiName;
             UsePost    = cmd.UsePost;
 
@@ -68,6 +69,40 @@ namespace NetOpnApiBuilder.ViewModels
         public JsonValueKind ResponseRootElementValueKind { get; }
         public JsonElement   Response                     { get; set; }
 
+        public void SetUrlParameter(string clrName, string value)
+        {
+            if (string.IsNullOrEmpty(clrName)) throw new ArgumentException("cannot be blank", nameof(clrName));
+            if (!_urlParams.ContainsKey(clrName)) throw new ArgumentException("not a valid CLR name", nameof(clrName));
+            _urlParams[clrName] = value;
+        }
+
+        public void SetQueryParameter(string clrName, string value)
+        {
+            if (string.IsNullOrEmpty(clrName)) throw new ArgumentException("cannot be blank", nameof(clrName));
+            if (!_queryParams.ContainsKey(clrName)) throw new ArgumentException("not a valid CLR name", nameof(clrName));
+            _queryParams[clrName] = value;
+        }
+
+        public void SetPostBody(string json)
+        {
+            if (string.IsNullOrEmpty(json))
+            {
+                _postBody = null;
+            }
+            else
+            {
+                try
+                {
+                    _postBody = JsonDocument.Parse(json).RootElement;
+                }
+                catch (JsonException)
+                {
+                    _postBody = null;
+                    throw new ArgumentException("must be valid json", nameof(json));
+                }
+            }
+        }
+        
         public IReadOnlyList<string> GetUrlParameters()
         {
             if (_urlKeys is null) return null;
@@ -93,12 +128,12 @@ namespace NetOpnApiBuilder.ViewModels
 
         public object GetRequestPayload()
         {
-            throw new NotImplementedException();
+            return _postBody;
         }
 
         public Type GetRequestPayloadDataType()
         {
-            throw new NotImplementedException();
+            return _postBody?.GetType();
         }
     }
 }

@@ -5,19 +5,61 @@
     Layout = "_Layout";
 }
 
-<form >
+<form asp-action="PerformTest" asp-route-id="@Model.Command.ID" method="post">
     <div class="row">
         <div class="col-md-6">
             <div class="card bg-light">
                 <div class="card-header text-white bg-primary">
-                    Test Command:
+                    Test Command: @Model.Command
                 </div>
                 <div class="card-body">
-                
+                    @foreach (var param in Model.Params)
+                    {
+                        <div class="form-group">
+                            <label for="@param.FormName">@param.ClrName (@(param.DataType)@(param.Required ? ", required" : ""))</label>
+                            <input type="text" id="@param.FormName" name="@param.FormName" value="@param.Value" class="form-control"/>
+                            <span class="text-danger">@param.ErrorMessage</span>
+                        </div>
+                    }
+                    @if (Model.UseJsonBody)
+                    {
+                        <div class="form-group">
+                            <label asp-for="JsonBody">Post Object</label>
+                            <textarea asp-for="JsonBody" class="form-control" rows="6"></textarea>
+                            <span class="text-danger" asp-validation-for="JsonBody"></span>
+                        </div>
+                    }
+
+                    <button type="submit" class="btn btn-info" title="Test">Test</button>
+                    &nbsp;&nbsp;
+                    <a asp-action="Edit" asp-route-id="@Model.Command.ID" class="btn btn-light" title="Cancel">Cancel</a>
                 </div>
             </div>
         </div>
-        
-        
+        @if (Model.TestRun)
+        {
+            <div class="col-md-6">
+                <div class="card bg-light">
+                    @if (string.IsNullOrEmpty(Model.TestError))
+                    {
+                        <div class="card-header bg-info text-white">
+                            Success
+                        </div>
+                        <div class="card-body">
+                            <pre>@Model.TestResponse</pre>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card-header bg-warning text-white">
+                            Failed
+                        </div>
+                        <div class="card-body">
+                            <pre>@Model.TestError</pre>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     </div>
 </form>
