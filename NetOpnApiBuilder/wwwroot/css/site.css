@@ -89,3 +89,22 @@ body {
     margin-left: 0px;
 }
 
+input[type="checkbox"] {
+    position: relative;
+    top: 2px;
+    margin-left: 2px;
+}
+
+.max-y-500 {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.mirror {
+    display: block;
+    transform: scaleX(-1);
+    -moz-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    filter: flipH();
+}

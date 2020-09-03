@@ -1,22 +1,24 @@
-﻿@model NetOpnApiBuilder.ViewModels.TestCommandModel
+﻿@using NetOpnApiBuilder.Extensions
+@model NetOpnApiBuilder.ViewModels.TestCommandModel
 
 @{
     ViewBag.Title = "Test Command";
     Layout = "_Layout";
 }
 
-<form asp-action="PerformTest" asp-route-id="@Model.Command.ID" method="post">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card bg-light">
-                <div class="card-header text-white bg-primary">
-                    Test Command: @Model.Command
-                </div>
-                <div class="card-body">
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-header text-white bg-primary">
+                Test Command: @Model.Command
+            </div>
+            <div class="card-body">
+                <form asp-action="PerformTest" asp-route-id="@Model.Command.ID" method="post">
                     @foreach (var param in Model.Params)
                     {
                         <div class="form-group">
-                            <label for="@param.FormName">@param.ClrName (@(param.DataType)@(param.Required ? ", required" : ""))</label>
+                            <label for="@param.FormName">@param.ClrName (@(param.DataType.ToName(titleCase: false))@(param.Required ? ", required" : ""))</label>
                             <input type="text" id="@param.FormName" name="@param.FormName" value="@param.Value" class="form-control"/>
                             <span class="text-danger">@param.ErrorMessage</span>
                         </div>
@@ -33,33 +35,41 @@
                     <button type="submit" class="btn btn-info" title="Test">Test</button>
                     &nbsp;&nbsp;
                     <a asp-action="Edit" asp-route-id="@Model.Command.ID" class="btn btn-light" title="Cancel">Cancel</a>
-                </div>
+                </form>
             </div>
         </div>
-        @if (Model.TestRun)
-        {
-            <div class="col-md-6">
-                <div class="card bg-light">
-                    @if (string.IsNullOrEmpty(Model.TestError))
-                    {
-                        <div class="card-header bg-info text-white">
-                            Success
-                        </div>
-                        <div class="card-body">
-                            <pre>@Model.TestResponse</pre>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="card-header bg-warning text-white">
-                            Failed
-                        </div>
-                        <div class="card-body">
-                            <pre>@Model.TestError</pre>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
     </div>
-</form>
+    @if (Model.TestRun)
+    {
+        <div class="col-md-6">
+            <div class="card bg-light">
+                @if (string.IsNullOrEmpty(Model.TestError))
+                {
+                    <div class="card-header bg-info text-white">
+                        Success
+                    </div>
+                    <div class="card-body">
+                        <form asp-controller="ObjectType" asp-action="FromJson" method="post" target="_blank">
+                            <div class="form-group">
+                                <textarea name="json" id="testJson" readonly="readonly" class="form-control" rows="6">@Model.TestResponse</textarea>
+                            </div>
+
+                            <input type="hidden" name="typeName" value="@(Model.Command.Controller.Module.ClrName).@(Model.Command.Controller.ClrName).@(Model.Command.ClrName)Result" />
+                            <input type="hidden" name="objectTypeId" value="@Model.Command.ResponseBodyObjectTypeID" />
+                            <button type="submit" class="btn btn-primary" title="@(Model.Command.ResponseBodyObjectTypeID.HasValue ? "Update" : "Create") Type">@(Model.Command.ResponseBodyObjectTypeID.HasValue ? "Update" : "Create") Type</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="card-header bg-warning text-white">
+                        Failed
+                    </div>
+                    <div class="card-body">
+                        <pre>@Model.TestError</pre>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

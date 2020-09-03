@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using NetOpnApiBuilder.Enums;
 using NetOpnApiBuilder.Extensions;
@@ -34,7 +37,7 @@ namespace NetOpnApiBuilder.Controllers
 
             return RedirectToAction("Index", null, fragment: $"obj{model.ID}");
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -74,7 +77,7 @@ namespace NetOpnApiBuilder.Controllers
                 return View("New", model);
             }
 
-            return RedirectToParent(model);
+            return RedirectToAction("Show", new {id = model.ID});
         }
 
         [HttpGet("{id}")]
@@ -90,7 +93,7 @@ namespace NetOpnApiBuilder.Controllers
             }
 
             model.Sample = model.GenerateSample(_db);
-            
+
             return View(model);
         }
 
@@ -127,7 +130,7 @@ namespace NetOpnApiBuilder.Controllers
             }
 
             _db.Update(model);
-            
+
             try
             {
                 await _db.SaveChangesAsync();
@@ -146,7 +149,7 @@ namespace NetOpnApiBuilder.Controllers
         {
             var item = await _db.ApiObjectTypes
                                 .FirstOrDefaultAsync(x => x.ID == id);
-            
+
             if (item is null)
             {
                 this.AddFlashMessage("The specified object type ID was invalid.", AlertType.Danger);
@@ -170,21 +173,22 @@ namespace NetOpnApiBuilder.Controllers
                 {
                     this.AddFlashMessage("Failed to update the database.", AlertType.Danger);
                 }
+
                 return RedirectToParent(item);
             }
-            
+
             var model = new RemoveObjectTypeModel()
             {
-                ObjectType = item, 
+                ObjectType = item,
                 OtherObjectTypes = await _db.ApiObjectTypes
                                             .Where(x => x.ID != id)
                                             .OrderBy(x => x.Name)
                                             .ToArrayAsync()
             };
-            
+
             return View(model);
         }
-        
+
         [HttpPost("{id}/remove")]
         public async Task<IActionResult> Delete(int id, int? replaceWithId)
         {
@@ -202,7 +206,7 @@ namespace NetOpnApiBuilder.Controllers
                 this.AddFlashMessage("You must select a replacement type before this type can be removed.", AlertType.Warning);
                 var model = new RemoveObjectTypeModel()
                 {
-                    ObjectType = item, 
+                    ObjectType = item,
                     OtherObjectTypes = await _db.ApiObjectTypes
                                                 .Where(x => x.ID != id)
                                                 .OrderBy(x => x.Name)
@@ -211,7 +215,7 @@ namespace NetOpnApiBuilder.Controllers
 
                 return View("Remove", model);
             }
-            
+
             var otherItem = await _db.ApiObjectTypes
                                      .FirstOrDefaultAsync(x => x.ID == replaceWithId);
             if (otherItem is null)
@@ -223,10 +227,10 @@ namespace NetOpnApiBuilder.Controllers
             if (id == replaceWithId)
             {
                 this.AddFlashMessage("Replacement must not be the object type being removed.", AlertType.Warning);
-                
+
                 var model = new RemoveObjectTypeModel()
                 {
-                    ObjectType = item, 
+                    ObjectType = item,
                     OtherObjectTypes = await _db.ApiObjectTypes
                                                 .Where(x => x.ID != id)
                                                 .OrderBy(x => x.Name)
@@ -257,6 +261,172 @@ namespace NetOpnApiBuilder.Controllers
             }
 
             return RedirectToParent(null);
+        }
+
+        private async Task<int> GenerateFromJson(JsonElement json, string typeName, int? objectTypeId)
+        {
+            if (json.ValueKind != JsonValueKind.Object &&
+                json.ValueKind != JsonValueKind.Array)
+            {
+                throw new ApplicationException("Object types can only be imported from JSON objects or JSON object arrays.");
+            }
+
+            Dictionary<string, JsonElement> properties;
+            if (json.ValueKind == JsonValueKind.Array)
+            {
+                if (json.GetArrayLength() == 0)
+                {
+                    throw new ApplicationException("Object types cannot be imported from an empty array.");
+                }
+
+                var children = json.EnumerateArray().ToArray();
+
+                if (children.Any(x => x.ValueKind != JsonValueKind.Object))
+                {
+                    throw new ApplicationException("Object types cannot be imported from arrays that contain anything other than objects.");
+                }
+
+                var allProps = children.SelectMany(x => x.EnumerateObject().Select(y => y.Name)).Distinct().ToArray();
+
+                properties = allProps
+                             .Select(
+                                 x => new KeyValuePair<string, JsonElement>(
+                                     x,
+                                     children.First(y => y.TryGetProperty(x, out _)).GetProperty(x)
+                                 )
+                             )
+                             .ToDictionary(x => x.Key, x => x.Value);
+            }
+            else
+            {
+                properties = json.EnumerateObject().ToDictionary(x => x.Name, x => x.Value);
+            }
+
+            ApiObjectType self;
+            if (objectTypeId.HasValue)
+            {
+                self = await _db.ApiObjectTypes
+                                .Include(x => x.Properties)
+                                .ThenInclude(x => x.DataTypeObjectType)
+                                .FirstOrDefaultAsync(x => x.ID == objectTypeId);
+
+                if (self is null)
+                {
+                    throw new ApplicationException("The provided object type ID is invalid.");
+                }
+
+                _logger.LogDebug($"Updating existing type {self}.");
+                if (!typeName.StartsWith("?"))
+                {
+                    if (!string.Equals(self.Name, typeName))
+                    {
+                        _logger.LogDebug($" > changing type name to {typeName}");
+                        self.Name = typeName;
+                    }
+                }
+
+                self.ImportSample = JsonSerializer.Serialize(json, new JsonSerializerOptions() {WriteIndented = true});
+
+                _db.Update(self);
+                await _db.SaveChangesAsync();
+            }
+            else
+            {
+                _logger.LogDebug($"Creating new type {typeName}.");
+                self = new ApiObjectType()
+                {
+                    Name         = typeName.TrimStart('?'),
+                    Properties   = new List<ApiObjectProperty>(),
+                    ImportSample = JsonSerializer.Serialize(json, new JsonSerializerOptions() {WriteIndented = true})
+                };
+                _db.Add(self);
+                await _db.SaveChangesAsync();
+            }
+
+            foreach (var (apiName, jsonValue) in properties)
+            {
+                var prop = self.Properties.FirstOrDefault(x => string.Equals(apiName, x.ApiName, StringComparison.OrdinalIgnoreCase));
+                if (prop is null)
+                {
+                    _logger.LogDebug($" > creating property: {apiName}");
+                    prop = new ApiObjectProperty()
+                    {
+                        ObjectTypeID = self.ID,
+                        ApiName      = apiName,
+                        ClrName      = apiName.ToSafeClrName(),
+                        ImportSample = JsonSerializer.Serialize(jsonValue, new JsonSerializerOptions(){WriteIndented = true})
+                    };
+                }
+                else
+                {
+                    if (!string.Equals(apiName, prop.ApiName, StringComparison.Ordinal))
+                    {
+                        _logger.LogDebug($" > updating property name: {apiName}");
+                        prop.ApiName = apiName;
+                    }
+
+                    prop.ImportSample = JsonSerializer.Serialize(jsonValue, new JsonSerializerOptions() {WriteIndented = true});
+                }
+
+                if (prop.ID == default)
+                {
+                    _db.Add(prop);
+                }
+                else
+                {
+                    _db.Update(prop);
+                }
+            }
+            
+            await _db.SaveChangesAsync();
+
+            return self.ID;
+        }
+
+        [HttpPost("from-json")]
+        public async Task<IActionResult> FromJson(string json, string typeName, int? objectTypeId)
+        {
+            var element = JsonDocument.Parse(json).RootElement;
+
+            try
+            {
+                var newId = await GenerateFromJson(element, typeName, objectTypeId);
+                return RedirectToAction("Show", new {id = newId});
+            }
+            catch (ApplicationException e)
+            {
+                this.AddFlashMessage(e.Message, AlertType.Danger);
+                return RedirectToAction("Index");
+            }
+        }
+
+        [HttpPost("import")]
+        public async Task<IActionResult> ImportFromJson([FromBody] ImportFromJsonModel model)
+        {
+            var element = JsonDocument.Parse(model.Json).RootElement;
+
+            try
+            {
+                var newId = await GenerateFromJson(element, model.TypeName, model.ObjectTypeId);
+                var type  = await _db.ApiObjectTypes.FirstOrDefaultAsync(x => x.ID == newId);
+                return Json(
+                    new
+                    {
+                        status       = "ok",
+                        objectTypeId = newId,
+                        isNew        = !model.ObjectTypeId.HasValue,
+                        typeName     = type.Name
+                    }
+                );
+            }
+            catch (ApplicationException e)
+            {
+                return Json(new
+                {
+                    status = "failed",
+                    error = e.Message
+                });
+            }
         }
     }
 }

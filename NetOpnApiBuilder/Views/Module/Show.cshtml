@@ -35,6 +35,9 @@
                     @if (ctlr.HasCommandChanges)
                     {
                         @:@ApiCommand.ChangeMarker
+                    } else if (ctlr.HasCommandsMissingData)
+                    {
+                        @:@ApiCommand.AlertMarker
                     }
                     @ctlr.ApiName
                 </a></td>

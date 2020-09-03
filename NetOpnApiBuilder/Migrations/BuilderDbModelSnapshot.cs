@@ -45,6 +45,12 @@ namespace NetOpnApiBuilder.Migrations
                     b.Property<int>("ControllerID")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("HasNoPostBody")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("HasNoResponseBody")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("NewCommand")
                         .HasColumnType("INTEGER");
 
@@ -178,6 +184,9 @@ namespace NetOpnApiBuilder.Migrations
                     b.Property<int?>("DataTypeObjectTypeID")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ImportSample")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ObjectTypeID")
                         .HasColumnType("INTEGER");
 
@@ -196,6 +205,9 @@ namespace NetOpnApiBuilder.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ImportSample")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()

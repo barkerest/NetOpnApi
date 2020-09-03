@@ -11,9 +11,11 @@ namespace NetOpnApiBuilder.Models
 {
     public class ApiCommand : IValidatableObject
     {
-        public static readonly IHtmlContent NewMarker = new HtmlString("<span title=\"New in API\">&#x2726;</span>");
+        public static readonly IHtmlContent NewMarker = new HtmlString("<span title=\"New in API\">&#x2757;</span>");
         
-        public static readonly IHtmlContent ChangeMarker = new HtmlString("<span title=\"Changes in API\">&#x2727;</span>");
+        public static readonly IHtmlContent ChangeMarker = new HtmlString("<span title=\"Changes in API\">&#x2755;</span>");
+        
+        public static readonly IHtmlContent AlertMarker = new HtmlString("<span title=\"Possibly Missing Information\">&#x2754;</span>");
         
         [Key]
         public int ID { get; set; }
@@ -132,6 +134,22 @@ namespace NetOpnApiBuilder.Models
         /// </summary>
         public bool Skip { get; set; }
         
+        /// <summary>
+        /// True if there should be no POST body.
+        /// </summary>
+        public bool HasNoPostBody { get; set; }
+        
+        /// <summary>
+        /// True if there should be no return value.
+        /// </summary>
+        public bool HasNoResponseBody { get; set; }
+
+        /// <summary>
+        /// True if there are missing values.
+        /// </summary>
+        public bool HasMissingData => (UsePost && !PostBodyDataType.HasValue && !HasNoPostBody)
+                                      || (!ResponseBodyDataType.HasValue && !HasNoResponseBody);
+        
         public override string ToString()
         {
             var name = string.IsNullOrEmpty(ClrName) ? ApiName : ClrName;
@@ -211,6 +229,22 @@ namespace NetOpnApiBuilder.Models
                     {
                         yield return new ValidationResult("must be null when data type does not specify an object", new[] {nameof(ResponseBodyObjectTypeID), nameof(ResponseBodyObjectType)});
                     }
+                }
+            }
+
+            if (HasNoPostBody)
+            {
+                if (PostBodyDataType.HasValue)
+                {
+                    yield return new ValidationResult("must be null when 'Has No Post Body' is selected", new[]{nameof(PostBodyDataType)});
+                }
+            }
+
+            if (HasNoResponseBody)
+            {
+                if (ResponseBodyDataType.HasValue)
+                {
+                    yield return new ValidationResult("must be null when 'Has No Response Body' is selected", new []{nameof(ResponseBodyDataType)});
                 }
             }
         }

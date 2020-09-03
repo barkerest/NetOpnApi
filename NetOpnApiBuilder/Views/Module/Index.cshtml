@@ -35,6 +35,9 @@
                         @if (mod.HasCommandChanges)
                         {
                             @:@ApiCommand.ChangeMarker
+                        }else if (mod.HasCommandsMissingData)
+                        {
+                            @:@ApiCommand.AlertMarker
                         }
                         @mod.ApiName
                     </a>

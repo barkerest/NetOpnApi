@@ -54,6 +54,11 @@ namespace NetOpnApiBuilder.Models
         /// True if the CLR property can be null.
         /// </summary>
         public bool CanBeNull { get; set; }
+        
+        /// <summary>
+        /// Sample JSON used by the from-json action to update this model.
+        /// </summary>
+        public string ImportSample { get; set; }
 
         public override string ToString()
             => string.IsNullOrEmpty(ClrName) ? ApiName : ClrName;

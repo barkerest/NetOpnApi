@@ -26,7 +26,8 @@ namespace NetOpnApiBuilder.Controllers
             var model = await _db.ApiModules.Include(x => x.Source).ToArrayAsync();
             foreach (var item in model)
             {
-                item.HasCommandChanges = await _db.ApiCommands.AnyAsync(x => (x.CommandChanged == true || x.NewCommand == true) && (x.Controller.ModuleID == item.ID));
+                item.HasCommandChanges      = await _db.ApiCommands.NewOrChangedInApi().AnyAsync(x => x.Controller.ModuleID == item.ID);
+                item.HasCommandsMissingData = await _db.ApiCommands.MissingSettings().AnyAsync(x => x.Controller.ModuleID == item.ID);
             }
             return View(model);
         }
@@ -46,7 +47,8 @@ namespace NetOpnApiBuilder.Controllers
 
             foreach (var item in model.Controllers)
             {
-                item.HasCommandChanges = await _db.ApiCommands.AnyAsync(x => (x.CommandChanged == true || x.NewCommand == true) && x.ControllerID == item.ID);
+                item.HasCommandChanges      = await _db.ApiCommands.NewOrChangedInApi().AnyAsync(x => x.ControllerID == item.ID);
+                item.HasCommandsMissingData = await _db.ApiCommands.MissingSettings().AnyAsync(x => x.ControllerID == item.ID);
             }
 
             return View(model);

@@ -52,6 +52,13 @@ namespace NetOpnApiBuilder.Models
         [NotMapped]
         public bool HasCommandChanges { get; set; }
         
+        /// <summary>
+        /// True if there are any commands with missing settings.
+        /// </summary>
+        [NotMapped]
+        public bool HasCommandsMissingData { get; set; }
+
+        
         public override string ToString()
         {
             var name = string.IsNullOrEmpty(ClrName) ? ApiName : ClrName;

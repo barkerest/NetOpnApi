@@ -24,21 +24,11 @@ namespace NetOpnApiBuilder.ViewModels
             Command    = cmd.ApiName;
             UsePost    = cmd.UsePost;
 
-            if (cmd.ResponseBodyDataType.HasValue &&
-                (cmd.ResponseBodyDataType.Value & ApiDataType.ArrayOfStrings) == ApiDataType.ArrayOfStrings)
-            {
-                ResponseRootElementValueKind = JsonValueKind.Array;
-            }
-            else
-            {
-                ResponseRootElementValueKind = JsonValueKind.Object;
-            }
-
             ResponseRootElementName = cmd.ResponseBodyPropertyName;
 
             if (cmd.UrlParams.Any())
             {
-                _urlKeys   = cmd.UrlParams.Select(x => x.ClrName).ToArray();
+                _urlKeys   = cmd.UrlParams.OrderBy(x => x.Order).Select(x => x.ClrName).ToArray();
                 _urlParams = cmd.UrlParams.ToDictionary(x => x.ClrName, _ => (string) null);
             }
             else
@@ -66,7 +56,7 @@ namespace NetOpnApiBuilder.ViewModels
         public ILogger       Logger                       { get; set; }
         public bool          UsePost                      { get; }
         public string        ResponseRootElementName      { get; }
-        public JsonValueKind ResponseRootElementValueKind { get; }
+        public JsonValueKind ResponseRootElementValueKind { get; } = JsonValueKind.Null;
         public JsonElement   Response                     { get; set; }
 
         public void SetUrlParameter(string clrName, string value)

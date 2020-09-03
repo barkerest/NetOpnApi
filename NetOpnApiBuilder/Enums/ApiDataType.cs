@@ -28,6 +28,8 @@ namespace NetOpnApiBuilder.Enums
         ArrayOfDoubles           = 20,
         ArrayOfDateTimes         = 21,
         ArrayOfGuids             = 22,
-        ArrayOfObjects           = 23
+        ArrayOfObjects           = 23,
+        BooleanAsInteger         = 33,
+        BooleanAsString          = 65
     }
 }

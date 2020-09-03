@@ -59,5 +59,18 @@
 </pre>
             </div>
         </div>
+        @if (!string.IsNullOrEmpty(Model.ImportSample))
+        {
+            <div class="card bg-light">
+                <div class="card-header text-white bg-primary">
+                    Sample JSON from API
+                </div>
+                <div class="card-body">
+                    <pre style="max-height: 500px; overflow-y: auto;">
+@Model.ImportSample
+</pre>
+                </div>
+            </div>
+        }
     </div>
 </div>

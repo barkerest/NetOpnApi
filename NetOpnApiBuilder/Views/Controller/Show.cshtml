@@ -41,6 +41,10 @@
                     {
                         @:@ApiCommand.ChangeMarker
                     }
+                    else if (cmd.HasMissingData)
+                    {
+                        @:@ApiCommand.AlertMarker
+                    }
                     @cmd.ApiName
                 </td>
                 <td>@cmd.ClrName</td>

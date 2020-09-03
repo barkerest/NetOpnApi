@@ -30,6 +30,12 @@ namespace NetOpnApiBuilder.Models
         /// </summary>
         public IList<ApiObjectProperty> Properties { get; set; }
 
+        
+        /// <summary>
+        /// Sample JSON used by the from-json action to update this model.
+        /// </summary>
+        public string ImportSample { get; set; }
+        
         public override string ToString() => Name;
 
         private void AddPropValueToSample(StringBuilder builder, ApiObjectProperty prop, int level, IReadOnlyList<ApiObjectType> types, bool prefixIndent = false)
@@ -47,7 +53,18 @@ namespace NetOpnApiBuilder.Models
                     builder.Append("\"abcd\"");
                     break;
                 case ApiDataType.Boolean:
-                    builder.Append("true");
+                    if ((prop.DataType & ApiDataType.BooleanAsInteger) == ApiDataType.BooleanAsInteger)
+                    {
+                        builder.Append("1");
+                    }
+                    else if ((prop.DataType & ApiDataType.BooleanAsString) == ApiDataType.BooleanAsString)
+                    {
+                        builder.Append("\"yes\"");
+                    }
+                    else
+                    {
+                        builder.Append("true");    
+                    }
                     break;
                 case ApiDataType.Integer:
                     builder.Append("1234");
@@ -92,27 +109,19 @@ namespace NetOpnApiBuilder.Models
             
             builder.Append("{\n");
 
-            bool? first = null;
+            bool first = true;
             foreach (var prop in Properties.OrderBy(x => x.ID))
             {
-                if (first.HasValue)
+                if (first)
                 {
-                    if (first.Value)
-                    {
-                        first = false;
-                        builder.Append("\n");
-                    }
-                    else
-                    {
-                        builder.Append(",\n");
-                    }
+                    first = false;
                 }
                 else
                 {
-                    first = true;
+                    builder.Append(",\n");
                 }
                 builder.Append(indent);
-                builder.Append('"').Append(prop.ApiName).Append("\" = ");
+                builder.Append('"').Append(prop.ApiName).Append("\": ");
                 if ((prop.DataType & ApiDataType.ArrayOfStrings) == ApiDataType.ArrayOfStrings)
                 {
                     builder.Append("[\n");
@@ -129,15 +138,15 @@ namespace NetOpnApiBuilder.Models
                 else if ((prop.DataType & ApiDataType.DictionaryOfStrings) == ApiDataType.DictionaryOfStrings)
                 {
                     builder.Append("{\n");
-                    builder.Append(indent).Append("  \"item1\" = ");
+                    builder.Append(indent).Append("  \"item1\": ");
                     AddPropValueToSample(builder, prop, level + 2, types);
                     if (topLevel)
                     {
                         builder.Append(",\n");
-                        builder.Append(indent).Append("  \"item2\" = ");
+                        builder.Append(indent).Append("  \"item2\": ");
                         AddPropValueToSample(builder, prop, level + 2, types);
                         builder.Append(",\n");
-                        builder.Append(indent).Append("  \"item3\" = ");
+                        builder.Append(indent).Append("  \"item3\": ");
                         AddPropValueToSample(builder, prop, level + 2, types);
                     }
                     builder.Append("\n").Append(indent).Append("}");

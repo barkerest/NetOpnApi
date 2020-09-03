@@ -8,7 +8,7 @@
     Layout = "_Layout";
 }
 
-<div clsas="row">
+<div class="row">
     <div class="col-md-6">
         <div class="card bg-light">
             <div class="card-header text-white bg-primary">
@@ -18,24 +18,31 @@
                 <form asp-action="Update" asp-route-id="@Model.ID" method="post">
                     <div class="form-group">
                         <label asp-for="ApiName">API Name</label>
-                        <input asp-for="ApiName" type="text" class="form-control" />
+                        <input asp-for="ApiName" type="text" class="form-control"/>
                         <span class="text-danger" asp-validation-for="ApiName"></span>
                     </div>
                     <div class="form-group">
                         <label asp-for="ClrName">CLR Name</label>
-                        <input asp-for="ClrName" type="text" class="form-control" />
+                        <input id="clrName" asp-for="ClrName" type="text" class="form-control"/>
                         <span class="text-danger" asp-validation-for="ClrName"></span>
                     </div>
                     <div class="form-group">
                         <label asp-for="DataType">Data Type</label>
                         <select asp-for="DataType" asp-items="@DataTypes.ListItems" class="form-control">
-                            
+
                         </select>
                         <span class="text-danger" asp-validation-for="DataType"></span>
                     </div>
                     <div class="form-group">
+                        @if (!string.IsNullOrEmpty(Model.ImportSample) &&
+                             (Model.ImportSample.StartsWith("[") || Model.ImportSample.StartsWith("{")))
+                        {
+                            <div class="float-right">
+                                <a id="importFromSample" href="javascript:doImportFromSampled()" class="mirror" title="Import from sample">&#x27AF;</a>
+                            </div>
+                        }
                         <label asp-for="DataTypeObjectTypeID">Object Type <small>(for object data types)</small></label>
-                        <select asp-for="DataTypeObjectTypeID" asp-items="ObjectTypes.SelectItems" class="form-control">
+                        <select id="dataTypeObjectTypeId" asp-for="DataTypeObjectTypeID" asp-items="ObjectTypes.SelectItems" class="form-control">
                             <option value="">-</option>
                         </select>
                         <span asp-validation-for="DataTypeObjectTypeID" class="text-danger"></span>
@@ -54,4 +61,72 @@
             </div>
         </div>
     </div>
+    @if (!string.IsNullOrEmpty(Model.ImportSample))
+    {
+        <div class="col-md-6">
+            <div class="card bg-light">
+                <div class="card-header bg-info text-white">
+                    Sample JSON Value
+                </div>
+                <div class="card-body">
+                    <pre id="sampleJson" class="max-y-500">@Model.ImportSample</pre>
+                </div>
+            </div>
+        </div>
+    }
 </div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+    //<![CDATA[
+    
+    const importUrl = '@(Url.Action("ImportFromJson", controller: "ObjectType"))';
+    const typeName = '@(Model.ObjectType.Name)';
+    const editUrl = '@Url.Action("Show", controller: "ObjectType", new {id=999})';
+    
+    function doImportFromSampled()
+    {
+        let currentId = $('#dataTypeObjectTypeId').val();
+        currentId = currentId ? parseInt(currentId) : null;
+        let data = {
+            json: $('#sampleJson').text(),
+            typeName: typeName + $('#clrName').val(),
+            objectTypeId: currentId
+        };
+        $.ajax({
+            url: importUrl,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'ok')
+                {
+                    let select = $('#dataTypeObjectTypeId');
+                    let id = response.objectTypeId.toString();
+                    if (response.isNew)
+                    {
+                        select.append($('<option></option>').attr('value', id).text(response.typeName));
+                    }
+                    else
+                    {
+                        let option = select.find('option[value=' + id + ']');
+                        option.text(response.typeName);
+                    }
+                    select.val(id);
+                    
+                    let url = editUrl.replace('999', id);
+                    window.open(url, '_blank');
+                }
+                else
+                {
+                    alert(response.error);
+                }
+            }
+        });    
+    }
+    
+    //]]>
+    </script>
+}

@@ -162,7 +162,6 @@ namespace NetOpnApiBuilder.Controllers
             {
                 await _db.SaveChangesAsync();
                 this.AddFlashMessage($"Property {model} has been removed.", AlertType.Success);
-                model = null;
             }
             catch (DbUpdateException)
             {

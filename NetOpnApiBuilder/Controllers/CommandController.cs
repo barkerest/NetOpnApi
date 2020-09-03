@@ -86,7 +86,17 @@ namespace NetOpnApiBuilder.Controllers
         }
 
         [HttpPost("{id}/edit")]
-        public async Task<IActionResult> Update(int id, string clrName, bool skip, bool usePost, int? postBodyObjectTypeId, int? responseBodyObjectTypeId, ApiDataType? postBodyDataType, ApiDataType? responseBodyDataType)
+        public async Task<IActionResult> Update(
+            int id, 
+            string clrName,
+            bool skip,
+            bool usePost,
+            int? postBodyObjectTypeId,
+            int? responseBodyObjectTypeId,
+            ApiDataType? postBodyDataType,
+            ApiDataType? responseBodyDataType,
+            bool hasNoPostBody,
+            bool hasNoResponseBody)
         {
             var model = await _db.ApiCommands
                                  .Include(x => x.Controller)
@@ -111,6 +121,8 @@ namespace NetOpnApiBuilder.Controllers
             model.ResponseBodyObjectTypeID = responseBodyObjectTypeId;
             model.PostBodyDataType         = postBodyDataType;
             model.PostBodyObjectTypeID     = postBodyObjectTypeId;
+            model.HasNoPostBody            = hasNoPostBody;
+            model.HasNoResponseBody        = hasNoResponseBody;
             // clear these flags as well.
             model.CommandChanged           = false;
             model.NewCommand               = false;
@@ -137,7 +149,7 @@ namespace NetOpnApiBuilder.Controllers
         [HttpGet("{id}/test")]
         public async Task<IActionResult> Test(int id)
         {
-            var model = await _db.ApiCommands
+            var cmd = await _db.ApiCommands
                                  .Include(x => x.Controller)
                                  .ThenInclude(x => x.Module)
                                  .ThenInclude(x => x.Source)
@@ -147,13 +159,21 @@ namespace NetOpnApiBuilder.Controllers
                                  .Include(x => x.UrlParams)
                                  .FirstOrDefaultAsync(x => x.ID == id);
 
-            if (model is null)
+            if (cmd is null)
             {
                 this.AddFlashMessage("The specified command ID was invalid.", AlertType.Danger);
                 return RedirectToParent(null);
             }
 
-            return View(new TestCommandModel(model));
+            var model = new TestCommandModel(cmd);
+
+            if (cmd.PostBodyObjectType != null &&
+                model.UseJsonBody)
+            {
+                model.JsonBody = cmd.PostBodyObjectType.GenerateSample(_db);
+            }
+            
+            return View(model);
         }
 
         [HttpPost("{id}/test")]
