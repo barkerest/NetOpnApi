@@ -175,7 +175,6 @@ namespace NetOpnApiBuilder.Controllers
             try
             {
                 await _db.SaveChangesAsync();
-                model = null;
             }
             catch (DbUpdateException)
             {

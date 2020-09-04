@@ -145,6 +145,41 @@ namespace NetOpnApiBuilder.Controllers
             return RedirectToParent(model);
         }
 
+        [HttpGet("{id}/set-type/{dataType}")]
+        public async Task<IActionResult> SetType(int id, ApiDataType dataType)
+        {
+            var model = await _db.ApiObjectProperties
+                                 .Include(x => x.ObjectType)
+                                 .FirstOrDefaultAsync(x => x.ID == id);
+
+            if (model is null)
+            {
+                this.AddFlashMessage("The specified property ID was invalid.", AlertType.Danger);
+                return RedirectToParent(null);
+            }
+
+            model.DataType = dataType;
+            
+            if (!TryValidateModel(model))
+            {
+                return View("Edit", model);
+            }
+
+            _db.Update(model);
+            
+            try
+            {
+                await _db.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                this.AddFlashMessage("Failed to update the database.", AlertType.Danger);
+                return View("Edit", model);
+            }
+
+            return RedirectToParent(model);
+        }
+
         [HttpGet("{id}/remove")]
         public async Task<IActionResult> Remove(int id)
         {

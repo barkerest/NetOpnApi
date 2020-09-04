@@ -1,4 +1,5 @@
 ﻿@using NetOpnApiBuilder.Extensions
+@using NetOpnApiBuilder.Enums
 @model ApiObjectType
 
 @{
@@ -39,7 +40,38 @@
                         <td>@prop.ClrName</td>
                         <td class="text-center"><span title="@prop.DataType.ToName(prop.CanBeNull)">@(prop.DataType.ToShortName(prop.CanBeNull))</span></td>
                         <td class="text-right">
-                            @Url.EditButton(prop.ID, "ObjectProperty")
+                            @if (prop.DataType == ApiDataType.String &&
+                                 long.TryParse(prop.ImportSample, out _))
+                            {
+                                <div class="btn-group">
+                                    @Url.EditButton(prop.ID, "ObjectProperty")
+                                    <button type="button" class="btn btn-primary btn-sm dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" asp-controller="ObjectProperty" asp-action="SetType" asp-route-id="@prop.ID" asp-route-dataType="Integer" title="Change to Integer">&gt; Integer</a>
+                                        <a class="dropdown-item" asp-controller="ObjectProperty" asp-action="SetType" asp-route-id="@prop.ID" asp-route-dataType="LongInteger" title="Change to Integer">&gt; Long</a>
+                                        <a class="dropdown-item" asp-controller="ObjectProperty" asp-action="SetType" asp-route-id="@prop.ID" asp-route-dataType="Double" title="Change to Integer">&gt; Double</a>
+                                    </div>
+                                </div>
+                            }
+                            else if (prop.DataType == ApiDataType.String &&
+                                     double.TryParse(prop.ImportSample, out _))
+                            {
+                                <div class="btn-group">
+                                    @Url.EditButton(prop.ID, "ObjectProperty")
+                                    <button type="button" class="btn btn-primary btn-sm dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a asp-controller="ObjectProperty" asp-action="SetType" asp-route-id="@prop.ID" asp-route-dataType="Double" title="Change to Integer">&gt; Double</a>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                @:@Url.EditButton(prop.ID, "ObjectProperty")
+                            }
                             @Url.RemoveButton(prop.ID, "ObjectProperty")
                         </td>
                     </tr>

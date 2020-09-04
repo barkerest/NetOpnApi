@@ -13,7 +13,7 @@ namespace NetOpnApiBuilder.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                               .Annotation("Sqlite:Autoincrement", true),
-                    Name         = table.Column<string>(maxLength: 100, nullable: false),
+                    Name         = table.Column<string>(maxLength: 1000, nullable: false),
                     ImportSample = table.Column<string>(nullable: true)
                 },
                 constraints: table => { table.PrimaryKey("PK_ApiObjectTypes", x => x.ID); }

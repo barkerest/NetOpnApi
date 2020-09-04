@@ -212,7 +212,7 @@ namespace NetOpnApiBuilder.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT")
-                        .HasMaxLength(100);
+                        .HasMaxLength(1000);
 
                     b.HasKey("ID");
 
