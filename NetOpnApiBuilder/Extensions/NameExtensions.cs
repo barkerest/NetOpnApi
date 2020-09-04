@@ -89,7 +89,7 @@ namespace NetOpnApiBuilder.Extensions
             if (string.IsNullOrWhiteSpace(self)) return "";
             self = self.Trim();
             self = NonSafeChars.Replace(self, "_");
-            return string.Join(
+            var ret = string.Join(
                 "",
                 WordSplitter
                     .Matches(self)
@@ -101,6 +101,15 @@ namespace NetOpnApiBuilder.Extensions
                                 : (x.Substring(0, 1).ToUpper() + x.Substring(1).ToLower())
                     )
             );
+
+            // make sure the returned value does not begin with a number or underscore.
+            if (ret.Length > 0 &&
+                ((ret[0] >= '0' && ret[0] <= '9') || ret[0] == '_'))
+            {
+                ret = "p_" + ret;
+            }
+            
+            return ret;
         }
 
         public static string ToSpacedName(this string self, bool titleCase = true)

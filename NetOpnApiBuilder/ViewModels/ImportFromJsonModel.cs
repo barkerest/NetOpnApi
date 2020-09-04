@@ -5,5 +5,6 @@
         public string Json         { get; set; }
         public string TypeName     { get; set; }
         public int?   ObjectTypeId { get; set; }
+        public bool   IsDictionary { get; set; }
     }
 }

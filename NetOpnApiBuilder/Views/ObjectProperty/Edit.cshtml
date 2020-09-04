@@ -28,7 +28,7 @@
                     </div>
                     <div class="form-group">
                         <label asp-for="DataType">Data Type</label>
-                        <select asp-for="DataType" asp-items="@DataTypes.ListItems" class="form-control">
+                        <select id="dataType" asp-for="DataType" asp-items="@DataTypes.ListItems" class="form-control">
 
                         </select>
                         <span class="text-danger" asp-validation-for="DataType"></span>
@@ -88,12 +88,16 @@
     function doImportFromSampled()
     {
         let currentId = $('#dataTypeObjectTypeId').val();
+        let dataType = $('#dataType').find(':selected').text().toLowerCase();
+        
         currentId = currentId ? parseInt(currentId) : null;
         let data = {
             json: $('#sampleJson').text(),
             typeName: typeName + $('#clrName').val(),
-            objectTypeId: currentId
+            objectTypeId: currentId,
+            isDictionary: dataType.startsWith('dictionary')
         };
+        
         $.ajax({
             url: importUrl,
             method: 'POST',

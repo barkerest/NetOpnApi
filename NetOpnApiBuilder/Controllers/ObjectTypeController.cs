@@ -263,8 +263,19 @@ namespace NetOpnApiBuilder.Controllers
             return RedirectToParent(null);
         }
 
-        private async Task<int> GenerateFromJson(JsonElement json, string typeName, int? objectTypeId)
+        private async Task<int> GenerateFromJson(ImportFromJsonModel model)
         {
+            JsonElement json;
+
+            try
+            {
+                json = JsonDocument.Parse(model.Json).RootElement;
+            }
+            catch (JsonException e)
+            {
+                throw new ApplicationException("JSON text is invalid.\n" + e.Message);
+            }
+            
             if (json.ValueKind != JsonValueKind.Object &&
                 json.ValueKind != JsonValueKind.Array)
             {
@@ -272,14 +283,16 @@ namespace NetOpnApiBuilder.Controllers
             }
 
             Dictionary<string, JsonElement> properties;
-            if (json.ValueKind == JsonValueKind.Array)
+            if (json.ValueKind == JsonValueKind.Array || model.IsDictionary)
             {
-                if (json.GetArrayLength() == 0)
+                var children = json.ValueKind == JsonValueKind.Array
+                                   ? json.EnumerateArray().ToArray()
+                                   : json.EnumerateObject().Select(x => x.Value).ToArray();
+                
+                if (children.Length == 0)
                 {
                     throw new ApplicationException("Object types cannot be imported from an empty array.");
                 }
-
-                var children = json.EnumerateArray().ToArray();
 
                 if (children.Any(x => x.ValueKind != JsonValueKind.Object))
                 {
@@ -303,12 +316,12 @@ namespace NetOpnApiBuilder.Controllers
             }
 
             ApiObjectType self;
-            if (objectTypeId.HasValue)
+            if (model.ObjectTypeId.HasValue)
             {
                 self = await _db.ApiObjectTypes
                                 .Include(x => x.Properties)
                                 .ThenInclude(x => x.DataTypeObjectType)
-                                .FirstOrDefaultAsync(x => x.ID == objectTypeId);
+                                .FirstOrDefaultAsync(x => x.ID == model.ObjectTypeId);
 
                 if (self is null)
                 {
@@ -316,7 +329,7 @@ namespace NetOpnApiBuilder.Controllers
                 }
 
                 _logger.LogDebug($"Updating existing type {self}.");
-                if (!typeName.StartsWith("?"))
+                if (!model.TypeName.StartsWith("?"))
                 {
                     var cmdRefCnt = await _db.ApiCommands.CountAsync(x => x.PostBodyObjectTypeID == self.ID)
                                     + await _db.ApiCommands.CountAsync(x => x.ResponseBodyObjectTypeID == self.ID);
@@ -324,10 +337,10 @@ namespace NetOpnApiBuilder.Controllers
 
                     if (cmdRefCnt <= 1 &&
                         propRefCnt <= 1 &&
-                        !string.Equals(self.Name, typeName))
+                        !string.Equals(self.Name, model.TypeName))
                     {
-                        _logger.LogDebug($" > changing type name to {typeName}");
-                        self.Name = typeName;
+                        _logger.LogDebug($" > changing type name to {model.TypeName}");
+                        self.Name = model.TypeName;
                     }
                 }
 
@@ -338,13 +351,13 @@ namespace NetOpnApiBuilder.Controllers
             }
             else
             {
-                _logger.LogDebug($"Creating new type {typeName}.");
                 self = new ApiObjectType()
                 {
-                    Name         = typeName.TrimStart('?'),
+                    Name         = model.TypeName.TrimStart('?'),
                     Properties   = new List<ApiObjectProperty>(),
                     ImportSample = JsonSerializer.Serialize(json, new JsonSerializerOptions() {WriteIndented = true})
                 };
+                _logger.LogDebug($"Creating new type {self.Name}.");
                 _db.Add(self);
                 await _db.SaveChangesAsync();
             }
@@ -390,13 +403,11 @@ namespace NetOpnApiBuilder.Controllers
         }
 
         [HttpPost("from-json")]
-        public async Task<IActionResult> FromJson(string json, string typeName, int? objectTypeId)
+        public async Task<IActionResult> FromJson(ImportFromJsonModel model)
         {
-            var element = JsonDocument.Parse(json).RootElement;
-
             try
             {
-                var newId = await GenerateFromJson(element, typeName, objectTypeId);
+                var newId = await GenerateFromJson(model);
                 return RedirectToAction("Show", new {id = newId});
             }
             catch (ApplicationException e)
@@ -409,11 +420,9 @@ namespace NetOpnApiBuilder.Controllers
         [HttpPost("import")]
         public async Task<IActionResult> ImportFromJson([FromBody] ImportFromJsonModel model)
         {
-            var element = JsonDocument.Parse(model.Json).RootElement;
-
             try
             {
-                var newId = await GenerateFromJson(element, model.TypeName, model.ObjectTypeId);
+                var newId = await GenerateFromJson(model);
                 var type  = await _db.ApiObjectTypes.FirstOrDefaultAsync(x => x.ID == newId);
                 return Json(
                     new

@@ -70,7 +70,7 @@ namespace NetOpnApiBuilder.Models
                     builder.Append("1234");
                     break;
                 case ApiDataType.LongInteger:
-                    builder.Append("\"9876543210123456789\"");
+                    builder.Append("9876543210123456789");
                     break;
                 case ApiDataType.Double:
                     builder.Append("1234.56");

@@ -155,7 +155,8 @@ namespace NetOpnApi
 
             // empty array returned from API where root element is named, return null.
             if (root.ValueKind == JsonValueKind.Array &&
-                root.GetArrayLength() == 0)
+                root.GetArrayLength() == 0 &&
+                !string.IsNullOrEmpty(self.ResponseRootElementName))
             {
                 if (string.IsNullOrEmpty(self.ResponseRootElementName))
                 {
