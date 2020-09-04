@@ -318,7 +318,13 @@ namespace NetOpnApiBuilder.Controllers
                 _logger.LogDebug($"Updating existing type {self}.");
                 if (!typeName.StartsWith("?"))
                 {
-                    if (!string.Equals(self.Name, typeName))
+                    var cmdRefCnt = await _db.ApiCommands.CountAsync(x => x.PostBodyObjectTypeID == self.ID)
+                                    + await _db.ApiCommands.CountAsync(x => x.ResponseBodyObjectTypeID == self.ID);
+                    var propRefCnt = await _db.ApiObjectProperties.CountAsync(x => x.DataTypeObjectTypeID == self.ID);
+
+                    if (cmdRefCnt <= 1 &&
+                        propRefCnt <= 1 &&
+                        !string.Equals(self.Name, typeName))
                     {
                         _logger.LogDebug($" > changing type name to {typeName}");
                         self.Name = typeName;
@@ -354,7 +360,7 @@ namespace NetOpnApiBuilder.Controllers
                         ObjectTypeID = self.ID,
                         ApiName      = apiName,
                         ClrName      = apiName.ToSafeClrName(),
-                        ImportSample = JsonSerializer.Serialize(jsonValue, new JsonSerializerOptions(){WriteIndented = true})
+                        ImportSample = JsonSerializer.Serialize(jsonValue, new JsonSerializerOptions() {WriteIndented = true})
                     };
                 }
                 else
@@ -377,7 +383,7 @@ namespace NetOpnApiBuilder.Controllers
                     _db.Update(prop);
                 }
             }
-            
+
             await _db.SaveChangesAsync();
 
             return self.ID;
@@ -421,11 +427,13 @@ namespace NetOpnApiBuilder.Controllers
             }
             catch (ApplicationException e)
             {
-                return Json(new
-                {
-                    status = "failed",
-                    error = e.Message
-                });
+                return Json(
+                    new
+                    {
+                        status = "failed",
+                        error  = e.Message
+                    }
+                );
             }
         }
     }
