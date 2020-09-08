@@ -30,6 +30,18 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card bg-light">
+            <div class="card-header text-white bg-info" id="export_header">
+                Export Status
+            </div>
+            <div class="card-body" id="export_status">
+                Checking export status...
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts
 {
@@ -40,6 +52,7 @@
     const repoSync = '@(Url.ActionLink("Sync", "Repo"))';
     const repoInit = '@(Url.ActionLink("Init", "Repo"))';
     const deviceCheck = '@(Url.ActionLink("DeviceReady"))';
+    const exportCheck = '@(Url.ActionLink("ExportStatus"))';
     
     function setHeaderColor(header, bgColor, textColor='white')
     {
@@ -224,6 +237,11 @@
                 window.setTimeout(checkDeviceStatus, 500);
             },
         })
+    }
+    
+    function checkExportReady()
+    {
+        
     }
     
     $(function(){
