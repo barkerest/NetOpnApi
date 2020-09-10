@@ -31,7 +31,7 @@
 </div>
 
 <div class="row">
-    <div class="col-sm-12">
+    <div class="col-xl-8 offset-xl-2 col-lg-10 offset-lg-1 col-md-12">
         <div class="card bg-light">
             <div class="card-header text-white bg-info" id="export_header">
                 Export Status
@@ -239,14 +239,30 @@
         })
     }
     
-    function checkExportReady()
+    function checkExportStatus()
     {
-        
+        $.ajax({
+            url: exportCheck,
+            method: 'GET',
+            dataType: 'json',
+            success: function(data) 
+            {
+                let header = $('#export_header');
+                let status = $('#export_status');
+                
+                setHeaderColor(header, data.ready ? 'success' : 'warning');
+                let body = '<span>' + escapeHTML(data.message).replaceAll("\n", "<br>\n") + '</span>';
+                setStatusContent(status, $(body));
+                
+                window.setTimeout(checkExportStatus, 1000);
+            }
+        });
     }
     
     $(function(){
         checkDeviceStatus();
         checkRepoStatus();
+        checkExportStatus();
     });
     
     //]]>
